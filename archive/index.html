@@ -1,0 +1,103 @@
+---
+layout: default
+title: Archive
+---
+
+<style>
+  :root {
+    --black: #0d0c0c;
+    --paper: #f2f0eb;
+    --dim: #9a958b;
+    --blood: #5b1417;
+  }
+
+  body {
+    min-height: 100vh;
+    margin: 0;
+    background: var(--black);
+    color: var(--paper);
+    font-family: Georgia, "Times New Roman", serif;
+  }
+
+  .site-header,
+  .site-footer {
+    display: none;
+  }
+
+  .page-content,
+  .wrapper {
+    max-width: none;
+    padding: 0;
+  }
+
+  .archive-room {
+    min-height: 100vh;
+    padding: 76px clamp(24px, 9vw, 128px);
+  }
+
+  h1 {
+    margin: 0 0 44px;
+    font-size: clamp(34px, 5vw, 64px);
+    font-weight: 400;
+  }
+
+  .archive-list {
+    display: grid;
+    gap: 18px;
+    width: min(100%, 620px);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .archive-list a {
+    display: grid;
+    grid-template-columns: 112px minmax(0, 1fr);
+    gap: 18px;
+    color: var(--paper);
+    text-decoration: none;
+    border-top: 1px solid rgba(242, 240, 235, 0.16);
+    padding-top: 18px;
+  }
+
+  .archive-list time {
+    color: var(--dim);
+    font-size: 12px;
+    letter-spacing: 0.08em;
+  }
+
+  .archive-list span {
+    transition: color 220ms ease, transform 220ms ease;
+  }
+
+  .archive-list a:hover span,
+  .archive-list a:focus-visible span {
+    color: #fffaf0;
+    transform: translateX(6px);
+  }
+
+  .back {
+    display: inline-block;
+    margin-top: 52px;
+    color: var(--dim);
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    text-decoration: none;
+    text-transform: uppercase;
+  }
+</style>
+
+<main class="archive-room">
+  <h1>Archive</h1>
+  <ul class="archive-list">
+    {% for post in site.posts %}
+      <li>
+        <a href="{{ post.url | relative_url }}">
+          <time datetime="{{ post.date | date_to_xmlschema }}">{{ post.date | date: "%Y-%m-%d" }}</time>
+          <span>{{ post.title }}</span>
+        </a>
+      </li>
+    {% endfor %}
+  </ul>
+  <a class="back" href="{{ '/blog/' | relative_url }}">Back</a>
+</main>

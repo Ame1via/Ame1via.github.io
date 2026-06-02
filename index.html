@@ -21,7 +21,9 @@
         body {
             margin: 0;
             min-height: 100vh;
-            background: var(--black);
+            background:
+                radial-gradient(circle at 50% 50%, rgba(91, 20, 23, 0.12), transparent 34%),
+                var(--black);
             color: var(--white);
             font-family: Georgia, "Times New Roman", serif;
         }
@@ -44,9 +46,17 @@
             color: var(--dim);
             font-size: 28px;
             line-height: 1;
+            cursor: default;
+            user-select: none;
+            transition: color 220ms ease, transform 220ms ease;
         }
 
-        a {
+        .mark:hover {
+            color: var(--white);
+            transform: translateY(-1px);
+        }
+
+        .gate {
             position: relative;
             display: inline-block;
             color: var(--white);
@@ -58,10 +68,30 @@
             transition: color 220ms ease, border-color 220ms ease, transform 220ms ease;
         }
 
-        a:hover {
+        .gate:hover {
             color: var(--dim);
             border-color: var(--dim);
             transform: translateY(-2px);
+        }
+
+        .gate::after {
+            content: "";
+            position: absolute;
+            left: 50%;
+            bottom: -7px;
+            width: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(242, 240, 235, 0.82), transparent);
+            box-shadow: 0 0 16px rgba(91, 20, 23, 0.92);
+            transform: translateX(-50%);
+            transition: width 280ms ease, opacity 280ms ease;
+            opacity: 0;
+        }
+
+        .gate:hover::after,
+        .gate:focus-visible::after {
+            width: 150%;
+            opacity: 1;
         }
 
         .hint {
@@ -80,8 +110,8 @@
             transition: opacity 260ms ease, transform 260ms ease;
         }
 
-        a:hover .hint,
-        a:focus-visible .hint {
+        .gate:hover .hint,
+        .gate:focus-visible .hint {
             opacity: 1;
             transform: translate(-50%, 0);
         }
@@ -97,6 +127,8 @@
             transition: opacity 240ms ease, transform 240ms ease;
         }
 
+        main:has(.gate:hover) + .agent-widget,
+        main:has(.gate:focus-visible) + .agent-widget,
         .agent-widget:hover,
         .agent-widget:focus-within {
             opacity: 0.96;
@@ -116,14 +148,84 @@
             opacity: 0;
         }
 
+        .agent-widget .run-left,
+        .agent-widget .run-right {
+            opacity: 0;
+        }
+
+        body.door-open .agent-widget .idle,
+        .agent-widget.is-waving .idle,
+        main:has(.gate:hover) + .agent-widget .idle,
+        main:has(.gate:focus-visible) + .agent-widget .idle,
         .agent-widget:hover .idle,
         .agent-widget:focus-within .idle {
             opacity: 0;
         }
 
+        body.door-open .agent-widget .wave,
+        .agent-widget.is-waving .wave,
+        main:has(.gate:hover) + .agent-widget .wave,
+        main:has(.gate:focus-visible) + .agent-widget .wave,
         .agent-widget:hover .wave,
         .agent-widget:focus-within .wave {
             opacity: 1;
+        }
+
+        .agent-widget.agent-patrol-left {
+            animation: patrol-left 8.2s linear both;
+        }
+
+        .agent-widget.agent-patrol-right {
+            animation: patrol-right 8.2s linear both;
+        }
+
+        .agent-widget.agent-patrol-left .idle,
+        .agent-widget.agent-patrol-right .idle,
+        .agent-widget.agent-patrol-left .wave,
+        .agent-widget.agent-patrol-right .wave {
+            opacity: 0;
+        }
+
+        .agent-widget.agent-patrol-left .run-left,
+        .agent-widget.agent-patrol-right .run-right {
+            opacity: 1;
+        }
+
+        @keyframes patrol-left {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(calc(-100vw + 132px)); }
+        }
+
+        @keyframes patrol-right {
+            0% { transform: translateX(calc(-100vw + 132px)); }
+            100% { transform: translateX(0); }
+        }
+
+        .hidden-door {
+            position: fixed;
+            left: 50%;
+            bottom: 24px;
+            transform: translate(-50%, 8px);
+            color: var(--dim);
+            font-size: 12px;
+            letter-spacing: 0.08em;
+            text-decoration: none;
+            text-transform: uppercase;
+            border-bottom: 1px solid rgba(91, 20, 23, 0.72);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 260ms ease, transform 260ms ease, color 220ms ease;
+        }
+
+        body.door-open .hidden-door {
+            opacity: 0.86;
+            pointer-events: auto;
+            transform: translate(-50%, 0);
+        }
+
+        .hidden-door:hover,
+        .hidden-door:focus-visible {
+            color: var(--white);
         }
 
         @media (max-width: 600px) {
@@ -149,8 +251,8 @@
 <body>
 <main>
     <div class="room">
-        <p class="mark">&dagger;</p>
-        <a href="/blog/">
+        <p class="mark" aria-label="Hidden mark">&dagger;</p>
+        <a class="gate" href="/blog/">
             Fragments
             <span class="hint">Short writings, kept quiet.</span>
         </a>
@@ -159,6 +261,10 @@
 <figure class="agent-widget" aria-label="Nun Agent">
     <img class="idle" src="/assets/nun-agent/nun-agent-idle.gif" alt="Nun Agent">
     <img class="wave" src="/assets/nun-agent/nun-agent-waving.gif" alt="">
+    <img class="run-left" src="/assets/nun-agent/nun-agent-running-left.gif" alt="">
+    <img class="run-right" src="/assets/nun-agent/nun-agent-running-right.gif" alt="">
 </figure>
+<a class="hidden-door" href="/hidden/">Room</a>
+<script src="/assets/site-interactions.js"></script>
 </body>
 </html>

@@ -1,5 +1,5 @@
 import { createServer } from "node:http";
-import { copyFileSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { copyFileSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, extname, join } from "node:path";
 
 const root = process.cwd();
@@ -32,6 +32,8 @@ function parsePost(file) {
   const frontmatter = match ? match[1] : "";
   const body = (match ? match[2] : raw).trim();
   const title = frontmatter.match(/^title:\s*"?([^"\n]+)"?/m)?.[1] || file;
+  const symbol = frontmatter.match(/^symbol:\s*"?([^"\n]+)"?/m)?.[1] || "ashes";
+  const accent = frontmatter.match(/^accent:\s*"?([^"\n]+)"?/m)?.[1] || "#5b1417";
   const date = file.match(/(\d{4})-(\d{2})-(\d{2})/)?.slice(1).join("-") || "";
   const slug = file.replace(/^_posts\\?\/?/, "").replace(/^\d{4}-\d{2}-\d{2}-/, "").replace(/\.md$/, "");
   const url = `/${date.replaceAll("-", "/")}/${slug}.html`;
@@ -40,7 +42,7 @@ function parsePost(file) {
     .map((paragraph) => `<p>${paragraph.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;")}</p>`)
     .join("\n");
 
-  return { title, date, url, body, html };
+  return { title, symbol, accent, date, url, body, html };
 }
 
 function page(title, content) {
@@ -57,11 +59,27 @@ ${content}
 </html>`;
 }
 
+function renderLayout(template, post) {
+  return template
+    .replaceAll("{{ page.title }}", post.title)
+    .replaceAll("{{ site.title }}", "Fragments")
+    .replaceAll('{{ page.accent | default: "#5b1417" }}', post.accent)
+    .replaceAll("{{ page.date | date_to_xmlschema }}", post.date)
+    .replaceAll('{{ page.date | date: "%Y-%m-%d" }}', post.date)
+    .replaceAll("{{ content }}", post.html)
+    .replaceAll("{{ '/blog/' | relative_url }}", "/blog/");
+}
+
+function stripFrontMatter(template) {
+  return template.replace(/^---\n[\s\S]*?\n---\n/, "");
+}
+
 function renderFragments(template, posts) {
   const items = posts
     .map((post) => `
         <li class="fragment-item">
           <a class="fragment-link" href="${post.url}">
+            <span class="fragment-symbol">${post.symbol}</span>
             <span class="fragment-name">${post.title}</span>
             <time class="fragment-date" datetime="${post.date}">${post.date}</time>
             <span class="fragment-excerpt">${post.body.replaceAll("<", "&lt;").slice(0, 160)}</span>
@@ -73,7 +91,24 @@ function renderFragments(template, posts) {
     .replace(/^---\n[\s\S]*?\n---\n/, "")
     .replace(/{% for post in site\.posts %}[\s\S]*?{% endfor %}/, items)
     .replaceAll("{{ '/' | relative_url }}", "/")
+    .replaceAll("{{ '/archive/' | relative_url }}", "/archive/")
     .replaceAll("{{ post.url | relative_url }}", "#");
+}
+
+function renderArchive(template, posts) {
+  const items = posts
+    .map((post) => `
+      <li>
+        <a href="${post.url}">
+          <time datetime="${post.date}">${post.date}</time>
+          <span>${post.title}</span>
+        </a>
+      </li>`)
+    .join("\n");
+
+  return stripFrontMatter(template)
+    .replace(/{% for post in site\.posts %}[\s\S]*?{% endfor %}/, items)
+    .replaceAll("{{ '/blog/' | relative_url }}", "/blog/");
 }
 
 function build() {
@@ -85,25 +120,24 @@ function build() {
   copy("assets/fussli-fragments-bg.png");
   copy("assets/nun-agent/nun-agent-idle.gif");
   copy("assets/nun-agent/nun-agent-waving.gif");
+  copy("assets/nun-agent/nun-agent-running-left.gif");
+  copy("assets/nun-agent/nun-agent-running-right.gif");
+  copy("assets/site-interactions.js");
   write("index.html", read("index.html"));
+  write("hidden/index.html", read("hidden/index.html"));
+  write("404.html", read("404.html"));
 
-  const posts = ["_posts/2026-02-28-d2.md", "_posts/2026-02-27-day1.md"].map(parsePost);
+  const posts = readdirSync(join(root, "_posts"))
+    .filter((file) => file.endsWith(".md"))
+    .sort()
+    .reverse()
+    .map((file) => parsePost(`_posts/${file}`));
   write("blog/index.html", page("Fragments", renderFragments(read("blog/index.html"), posts)));
+  write("archive/index.html", page("Archive", renderArchive(read("archive/index.html"), posts)));
+  const postLayout = read("_layouts/post.html");
 
   for (const post of posts) {
-    write(
-      post.url.replace(/^\//, ""),
-      page(
-        post.title,
-        `<main style="min-height:100vh;padding:64px 24px;background:#0d0c0c;color:#f2f0eb;font-family:Georgia,'Times New Roman',serif;">
-  <article style="max-width:680px;margin:0 auto;line-height:1.8;">
-    <h1 style="font-weight:400;">${post.title}</h1>
-    ${post.html}
-    <p><a style="color:#9a958b;" href="/blog/">Back</a></p>
-  </article>
-</main>`
-      )
-    );
+    write(post.url.replace(/^\//, ""), renderLayout(postLayout, post));
   }
 }
 
@@ -117,7 +151,14 @@ function serveFile(requestPath, response) {
     return;
   }
 
-  const type = extname(filePath) === ".png" ? "image/png" : "text/html; charset=utf-8";
+  const types = {
+    ".gif": "image/gif",
+    ".html": "text/html; charset=utf-8",
+    ".js": "text/javascript; charset=utf-8",
+    ".png": "image/png",
+    ".webp": "image/webp",
+  };
+  const type = types[extname(filePath)] || "application/octet-stream";
   response.writeHead(200, { "Content-Type": type });
   response.end(readFileSync(filePath));
 }
