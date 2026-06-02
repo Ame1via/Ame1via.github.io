@@ -2,6 +2,8 @@
   const agent = document.querySelector(".agent-widget");
   const mark = document.querySelector(".mark");
   const readEnd = document.querySelector(".read-end");
+  const fragmentItems = Array.from(document.querySelectorAll(".fragment-item[data-fragment-index]"));
+  const axisLinks = Array.from(document.querySelectorAll(".axis-link[data-fragment-index]"));
   let taps = 0;
   let tapTimer;
   let direction = "left";
@@ -60,5 +62,52 @@
     );
 
     observer.observe(readEnd);
+  }
+
+  if (fragmentItems.length && axisLinks.length) {
+    const room = document.querySelector(".fragments-room");
+    const setActiveAxis = (index) => {
+      axisLinks.forEach((link) => {
+        link.classList.toggle("is-active", link.dataset.fragmentIndex === index);
+      });
+    };
+
+    const setFragmentGlow = (item) => {
+      if (!room) return;
+      room.style.setProperty("--glow-x", `${item.dataset.glowX || 74}%`);
+      room.style.setProperty("--glow-y", `${item.dataset.glowY || 34}%`);
+      room.style.setProperty("--moon-x", `${item.dataset.moonX || 22}%`);
+      room.style.setProperty("--moon-y", `${item.dataset.moonY || 20}%`);
+      room.classList.add("has-fragment-glow");
+    };
+
+    fragmentItems.forEach((item) => {
+      item.addEventListener("mouseenter", () => {
+        setActiveAxis(item.dataset.fragmentIndex);
+        setFragmentGlow(item);
+      });
+      item.addEventListener("focusin", () => {
+        setActiveAxis(item.dataset.fragmentIndex);
+        setFragmentGlow(item);
+      });
+    });
+
+    if ("IntersectionObserver" in window) {
+      const observer = new IntersectionObserver(
+        (entries) => {
+          const visible = entries
+            .filter((entry) => entry.isIntersecting)
+            .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+
+          if (visible) {
+            setActiveAxis(visible.target.dataset.fragmentIndex);
+            setFragmentGlow(visible.target);
+          }
+        },
+        { threshold: [0.35, 0.55, 0.75] }
+      );
+
+      fragmentItems.forEach((item) => observer.observe(item));
+    }
   }
 })();

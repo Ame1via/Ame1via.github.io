@@ -61,6 +61,82 @@ title: Fragments
     width: min(100%, 720px);
   }
 
+  .fragment-axis {
+    position: fixed;
+    top: 18vh;
+    right: clamp(18px, 4vw, 58px);
+    bottom: 18vh;
+    z-index: 2;
+    display: grid;
+    align-items: center;
+    pointer-events: none;
+  }
+
+  .fragment-axis::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    width: 1px;
+    background: linear-gradient(180deg, transparent, rgba(91, 20, 23, 0.42), transparent);
+    transform: translateX(-50%);
+  }
+
+  .axis-list {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    gap: 18px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .axis-link {
+    position: relative;
+    display: block;
+    width: 13px;
+    height: 13px;
+    border: 1px solid rgba(242, 240, 235, 0.18);
+    border-radius: 50%;
+    background: rgba(13, 12, 12, 0.82);
+    opacity: 0.48;
+    pointer-events: auto;
+    transition: opacity 220ms ease, border-color 220ms ease, background 220ms ease, transform 220ms ease;
+  }
+
+  .axis-link::after {
+    content: attr(data-date);
+    position: absolute;
+    right: 22px;
+    top: 50%;
+    color: var(--dim);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    white-space: nowrap;
+    opacity: 0;
+    transform: translate(8px, -50%);
+    transition: opacity 220ms ease, transform 220ms ease;
+  }
+
+  .axis-link:hover,
+  .axis-link:focus-visible,
+  .axis-link.is-active {
+    border-color: rgba(242, 240, 235, 0.74);
+    background: rgba(91, 20, 23, 0.82);
+    box-shadow: 0 0 18px rgba(91, 20, 23, 0.52);
+    opacity: 1;
+    transform: scale(1.08);
+  }
+
+  .axis-link:hover::after,
+  .axis-link:focus-visible::after,
+  .axis-link.is-active::after {
+    opacity: 0.86;
+    transform: translate(0, -50%);
+  }
+
   .fragments-title {
     margin: 0 0 42px;
     font-size: clamp(34px, 5vw, 64px);
@@ -183,21 +259,7 @@ title: Fragments
     transform: translateX(0);
   }
 
-  .fragments-room:has(.fragment-item:nth-child(1) .fragment-link:hover),
-  .fragments-room:has(.fragment-item:nth-child(1) .fragment-link:focus-visible) {
-    --glow-x: 78%;
-    --glow-y: 32%;
-    --moon-x: 19%;
-    --moon-y: 20%;
-    --glow-opacity: 1;
-  }
-
-  .fragments-room:has(.fragment-item:nth-child(2) .fragment-link:hover),
-  .fragments-room:has(.fragment-item:nth-child(2) .fragment-link:focus-visible) {
-    --glow-x: 62%;
-    --glow-y: 72%;
-    --moon-x: 28%;
-    --moon-y: 18%;
+  .fragments-room.has-fragment-glow {
     --glow-opacity: 1;
   }
 
@@ -332,12 +394,20 @@ title: Fragments
 
     <ul class="fragment-list">
       {% for post in site.posts %}
-        <li class="fragment-item">
-          <a class="fragment-link" href="{{ post.url | relative_url }}">
+        <li
+          class="fragment-item"
+          id="fragment-{{ forloop.index }}"
+          data-fragment-index="{{ forloop.index }}"
+          data-glow-x="{{ post.glow_x | default: 74 }}"
+          data-glow-y="{{ post.glow_y | default: 34 }}"
+          data-moon-x="{{ post.moon_x | default: 22 }}"
+          data-moon-y="{{ post.moon_y | default: 20 }}"
+        >
+          <a class="fragment-link" href="{{ post.url | relative_url }}" data-fragment-index="{{ forloop.index }}">
             <span class="fragment-symbol">{{ post.symbol | default: "ashes" }}</span>
             <span class="fragment-name">{{ post.title }}</span>
             <time class="fragment-date" datetime="{{ post.date | date_to_xmlschema }}">{{ post.date | date: "%Y-%m-%d" }}</time>
-            <span class="fragment-excerpt">{{ post.excerpt | strip_html | truncate: 160 }}</span>
+            <span class="fragment-excerpt">{{ post.excerpt | strip_html | truncate: 72 }}</span>
           </a>
         </li>
       {% endfor %}
@@ -346,6 +416,16 @@ title: Fragments
     <a class="return-link" href="{{ '/' | relative_url }}">Back</a>
     <a class="return-link" href="{{ '/archive/' | relative_url }}">Archive</a>
   </section>
+
+  <nav class="fragment-axis" aria-label="Fragments axis">
+    <ol class="axis-list">
+      {% for post in site.posts %}
+        <li>
+          <a class="axis-link" href="#fragment-{{ forloop.index }}" data-fragment-index="{{ forloop.index }}" data-date="{{ post.date | date: "%Y-%m-%d" }}" aria-label="{{ post.title }}"></a>
+        </li>
+      {% endfor %}
+    </ol>
+  </nav>
 </main>
 
 <figure class="agent-widget" aria-label="Nun Agent">

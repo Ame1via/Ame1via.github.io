@@ -34,15 +34,44 @@ function parsePost(file) {
   const title = frontmatter.match(/^title:\s*"?([^"\n]+)"?/m)?.[1] || file;
   const symbol = frontmatter.match(/^symbol:\s*"?([^"\n]+)"?/m)?.[1] || "ashes";
   const accent = frontmatter.match(/^accent:\s*"?([^"\n]+)"?/m)?.[1] || "#5b1417";
+  const glowX = frontmatter.match(/^glow_x:\s*"?([^"\n]+)"?/m)?.[1] || "74";
+  const glowY = frontmatter.match(/^glow_y:\s*"?([^"\n]+)"?/m)?.[1] || "34";
+  const moonX = frontmatter.match(/^moon_x:\s*"?([^"\n]+)"?/m)?.[1] || "22";
+  const moonY = frontmatter.match(/^moon_y:\s*"?([^"\n]+)"?/m)?.[1] || "20";
   const date = file.match(/(\d{4})-(\d{2})-(\d{2})/)?.slice(1).join("-") || "";
   const slug = file.replace(/^_posts\\?\/?/, "").replace(/^\d{4}-\d{2}-\d{2}-/, "").replace(/\.md$/, "");
   const url = `/${date.replaceAll("-", "/")}/${slug}.html`;
   const html = body
-    .split(/\n{2,}/)
-    .map((paragraph) => `<p>${paragraph.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;")}</p>`)
+    .split(/(```[\s\S]*?```)/)
+    .map((block) => {
+      if (block.startsWith("```")) {
+        const code = block.replace(/^```\n?/, "").replace(/\n?```$/, "");
+        return `<pre><code>${escapeHtml(code)}</code></pre>`;
+      }
+
+      return block
+        .trim()
+        .split(/\n{2,}/)
+        .filter(Boolean)
+        .map((paragraph) => `<p>${escapeHtml(paragraph)}</p>`)
+        .join("\n");
+    })
     .join("\n");
 
-  return { title, symbol, accent, date, url, body, html };
+  return { title, symbol, accent, glowX, glowY, moonX, moonY, date, url, body, html };
+}
+
+function escapeHtml(text) {
+  return text.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
+}
+
+function excerpt(body) {
+  return body
+    .replace(/```[\s\S]*?```/g, "")
+    .split(/\n{2,}/)
+    .map((part) => part.replace(/^>\s*/, "").trim())
+    .find(Boolean)
+    ?.slice(0, 72) || "";
 }
 
 function page(title, content) {
@@ -76,20 +105,27 @@ function stripFrontMatter(template) {
 
 function renderFragments(template, posts) {
   const items = posts
-    .map((post) => `
-        <li class="fragment-item">
-          <a class="fragment-link" href="${post.url}">
+    .map((post, index) => `
+        <li class="fragment-item" id="fragment-${index + 1}" data-fragment-index="${index + 1}" data-glow-x="${post.glowX}" data-glow-y="${post.glowY}" data-moon-x="${post.moonX}" data-moon-y="${post.moonY}">
+          <a class="fragment-link" href="${post.url}" data-fragment-index="${index + 1}">
             <span class="fragment-symbol">${post.symbol}</span>
             <span class="fragment-name">${post.title}</span>
             <time class="fragment-date" datetime="${post.date}">${post.date}</time>
-            <span class="fragment-excerpt">${post.body.replaceAll("<", "&lt;").slice(0, 160)}</span>
+            <span class="fragment-excerpt">${escapeHtml(excerpt(post.body))}</span>
           </a>
+        </li>`)
+    .join("\n");
+  const axisItems = posts
+    .map((post, index) => `
+        <li>
+          <a class="axis-link" href="#fragment-${index + 1}" data-fragment-index="${index + 1}" data-date="${post.date}" aria-label="${post.title}"></a>
         </li>`)
     .join("\n");
 
   return template
     .replace(/^---\n[\s\S]*?\n---\n/, "")
     .replace(/{% for post in site\.posts %}[\s\S]*?{% endfor %}/, items)
+    .replace(/<ol class="axis-list">[\s\S]*?<\/ol>/, `<ol class="axis-list">${axisItems}\n    </ol>`)
     .replaceAll("{{ '/' | relative_url }}", "/")
     .replaceAll("{{ '/archive/' | relative_url }}", "/archive/")
     .replaceAll("{{ post.url | relative_url }}", "#");

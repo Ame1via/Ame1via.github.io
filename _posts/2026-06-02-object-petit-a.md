@@ -3,6 +3,10 @@ layout: post
 title: "object petit a"
 symbol: "lack"
 accent: "#6f1720"
+glow_x: 78
+glow_y: 32
+moon_x: 19
+moon_y: 20
 ---
 
 把和自己一样的人类客体化，并在此之上诞生了许多形式的消费形式。
