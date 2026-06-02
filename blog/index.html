@@ -1,17 +1,17 @@
 ---
 layout: default
-title: Blog
+title: Fragments
 ---
 
-<h1>Blog</h1>
+<h1>Fragments</h1>
 
 <ul>
   {% for post in site.posts %}
     <li>
       <a href="{{ post.url }}">{{ post.title }}</a>
-      <small> — {{ post.date | date: "%Y-%m-%d" }}</small>
+      <small> - {{ post.date | date: "%Y-%m-%d" }}</small>
     </li>
   {% endfor %}
 </ul>
 
-<p><a href="/">Back to Home</a></p>
+<p><a href="/">Back</a></p>
