@@ -1,3 +1,7 @@
 title: Fragments
 description: "A quiet personal site for fragments."
 theme: minima
+exclude:
+  - PROJECT.md
+  - CODEX_CONTEXT.md
+  - blog1.html

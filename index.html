@@ -47,16 +47,43 @@
         }
 
         a {
+            position: relative;
+            display: inline-block;
             color: var(--white);
             text-decoration: none;
             border-bottom: 1px solid var(--red);
             font-size: 16px;
             letter-spacing: 0.08em;
             text-transform: uppercase;
+            transition: color 220ms ease, border-color 220ms ease, transform 220ms ease;
         }
 
         a:hover {
             color: var(--dim);
+            border-color: var(--dim);
+            transform: translateY(-2px);
+        }
+
+        .hint {
+            position: absolute;
+            left: 50%;
+            top: calc(100% + 18px);
+            width: min(72vw, 260px);
+            transform: translate(-50%, 8px);
+            color: var(--dim);
+            font-size: 13px;
+            line-height: 1.7;
+            letter-spacing: 0;
+            text-transform: none;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 260ms ease, transform 260ms ease;
+        }
+
+        a:hover .hint,
+        a:focus-visible .hint {
+            opacity: 1;
+            transform: translate(-50%, 0);
         }
 
         @media (max-width: 600px) {
@@ -76,7 +103,10 @@
 <main>
     <div class="room">
         <p class="mark">&dagger;</p>
-        <a href="/blog/">Fragments</a>
+        <a href="/blog/">
+            Fragments
+            <span class="hint">Short writings, kept quiet.</span>
+        </a>
     </div>
 </main>
 </body>

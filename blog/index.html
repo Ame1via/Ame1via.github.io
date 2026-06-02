@@ -3,15 +3,190 @@ layout: default
 title: Fragments
 ---
 
-<h1>Fragments</h1>
+<style>
+  :root {
+    --ink: #0d0c0c;
+    --paper: #f2f0eb;
+    --dim: #9a958b;
+    --blood: #5b1417;
+  }
 
-<ul>
-  {% for post in site.posts %}
-    <li>
-      <a href="{{ post.url }}">{{ post.title }}</a>
-      <small> - {{ post.date | date: "%Y-%m-%d" }}</small>
-    </li>
-  {% endfor %}
-</ul>
+  body {
+    min-height: 100vh;
+    background:
+      linear-gradient(90deg, rgba(13, 12, 12, 0.54), rgba(13, 12, 12, 0.82) 44%, rgba(13, 12, 12, 0.48)),
+      linear-gradient(180deg, rgba(13, 12, 12, 0.20), rgba(13, 12, 12, 0.92)),
+      url("/assets/fussli-fragments-bg.png") center / cover fixed;
+    color: var(--paper);
+    font-family: Georgia, "Times New Roman", serif;
+  }
 
-<p><a href="/">Back</a></p>
+  .site-header,
+  .site-footer {
+    display: none;
+  }
+
+  .page-content {
+    padding: 0;
+  }
+
+  .wrapper {
+    max-width: none;
+    padding: 0;
+  }
+
+  .fragments-room {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    padding: 56px clamp(24px, 8vw, 112px);
+  }
+
+  .fragments-inner {
+    width: min(100%, 720px);
+  }
+
+  .fragments-title {
+    margin: 0 0 42px;
+    font-size: clamp(34px, 5vw, 64px);
+    font-weight: 400;
+    letter-spacing: 0;
+  }
+
+  .fragment-list {
+    display: grid;
+    gap: 10px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .fragment-item {
+    border-top: 1px solid rgba(242, 240, 235, 0.18);
+  }
+
+  .fragment-link {
+    position: relative;
+    z-index: 0;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 20px;
+    align-items: baseline;
+    min-height: 72px;
+    padding: 20px 0 18px;
+    color: var(--paper);
+    text-decoration: none;
+  }
+
+  .fragment-link::before {
+    content: "";
+    position: absolute;
+    inset: 8px -18px;
+    z-index: -1;
+    background: rgba(13, 12, 12, 0.46);
+    border-left: 1px solid transparent;
+    opacity: 0;
+    transform: translateX(-8px);
+    transition: opacity 260ms ease, transform 260ms ease, border-color 260ms ease;
+  }
+
+  .fragment-link:hover::before,
+  .fragment-link:focus-visible::before {
+    border-color: rgba(91, 20, 23, 0.92);
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  .fragment-name {
+    position: relative;
+    font-size: clamp(20px, 2.4vw, 30px);
+    line-height: 1.15;
+    transition: color 220ms ease, transform 220ms ease;
+  }
+
+  .fragment-date {
+    position: relative;
+    color: var(--dim);
+    font-size: 12px;
+    letter-spacing: 0.08em;
+  }
+
+  .fragment-excerpt {
+    position: relative;
+    grid-column: 1 / -1;
+    max-width: 520px;
+    max-height: 0;
+    overflow: hidden;
+    color: var(--dim);
+    font-size: 15px;
+    line-height: 1.7;
+    opacity: 0;
+    transform: translateY(-6px);
+    transition: max-height 300ms ease, opacity 260ms ease, transform 260ms ease;
+  }
+
+  .fragment-link:hover .fragment-name,
+  .fragment-link:focus-visible .fragment-name {
+    color: #fffaf0;
+    transform: translateX(8px);
+  }
+
+  .fragment-link:hover .fragment-excerpt,
+  .fragment-link:focus-visible .fragment-excerpt {
+    max-height: 120px;
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .return-link {
+    display: inline-block;
+    margin-top: 48px;
+    color: var(--dim);
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    text-decoration: none;
+    text-transform: uppercase;
+    transition: color 220ms ease;
+  }
+
+  .return-link:hover,
+  .return-link:focus-visible {
+    color: var(--paper);
+  }
+
+  @media (max-width: 640px) {
+    body {
+      background-attachment: scroll;
+    }
+
+    .fragments-room {
+      align-items: flex-start;
+      padding-top: 88px;
+    }
+
+    .fragment-link {
+      grid-template-columns: 1fr;
+      gap: 8px;
+    }
+  }
+</style>
+
+<main class="fragments-room">
+  <section class="fragments-inner" aria-label="Fragments">
+    <h1 class="fragments-title">Fragments</h1>
+
+    <ul class="fragment-list">
+      {% for post in site.posts %}
+        <li class="fragment-item">
+          <a class="fragment-link" href="{{ post.url | relative_url }}">
+            <span class="fragment-name">{{ post.title }}</span>
+            <time class="fragment-date" datetime="{{ post.date | date_to_xmlschema }}">{{ post.date | date: "%Y-%m-%d" }}</time>
+            <span class="fragment-excerpt">{{ post.excerpt | strip_html | truncate: 160 }}</span>
+          </a>
+        </li>
+      {% endfor %}
+    </ul>
+
+    <a class="return-link" href="{{ '/' | relative_url }}">Back</a>
+  </section>
+</main>
