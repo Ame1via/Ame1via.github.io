@@ -154,6 +154,46 @@ title: Fragments
     color: var(--paper);
   }
 
+  .agent-widget {
+    position: fixed;
+    right: 26px;
+    bottom: 22px;
+    width: 82px;
+    height: 90px;
+    margin: 0;
+    opacity: 0.72;
+    transition: opacity 240ms ease, transform 240ms ease;
+  }
+
+  .agent-widget:hover,
+  .agent-widget:focus-within {
+    opacity: 0.96;
+    transform: translateY(-4px);
+  }
+
+  .agent-widget img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    transition: opacity 180ms ease;
+  }
+
+  .agent-widget .wave {
+    opacity: 0;
+  }
+
+  .agent-widget:hover .idle,
+  .agent-widget:focus-within .idle {
+    opacity: 0;
+  }
+
+  .agent-widget:hover .wave,
+  .agent-widget:focus-within .wave {
+    opacity: 1;
+  }
+
   @media (max-width: 640px) {
     body {
       background-attachment: scroll;
@@ -167,6 +207,13 @@ title: Fragments
     .fragment-link {
       grid-template-columns: 1fr;
       gap: 8px;
+    }
+
+    .agent-widget {
+      right: 16px;
+      bottom: 14px;
+      width: 64px;
+      height: 70px;
     }
   }
 </style>
@@ -190,3 +237,8 @@ title: Fragments
     <a class="return-link" href="{{ '/' | relative_url }}">Back</a>
   </section>
 </main>
+
+<figure class="agent-widget" aria-label="Nun Agent">
+  <img class="idle" src="/assets/nun-agent/nun-agent-idle.gif" alt="Nun Agent">
+  <img class="wave" src="/assets/nun-agent/nun-agent-waving.gif" alt="">
+</figure>

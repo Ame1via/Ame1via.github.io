@@ -80,8 +80,11 @@ function build() {
   rmSync(out, { recursive: true, force: true });
   ensureDir(out);
   ensureDir(join(out, "assets"));
+  ensureDir(join(out, "assets", "nun-agent"));
 
   copy("assets/fussli-fragments-bg.png");
+  copy("assets/nun-agent/nun-agent-idle.gif");
+  copy("assets/nun-agent/nun-agent-waving.gif");
   write("index.html", read("index.html"));
 
   const posts = ["_posts/2026-02-28-d2.md", "_posts/2026-02-27-day1.md"].map(parsePost);
