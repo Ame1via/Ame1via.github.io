@@ -159,7 +159,6 @@
 
         cellAgent.addEventListener("click", () => {
           document.body.classList.add("waterfall-active");
-          showCellScene("waterfall");
           window.clearTimeout(activeTimer);
           activeTimer = window.setTimeout(() => {
             document.body.classList.remove("waterfall-active");
