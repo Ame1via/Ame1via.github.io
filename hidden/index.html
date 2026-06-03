@@ -34,8 +34,8 @@
       padding: 28px;
     }
 
-    .desk {
-      width: min(100%, 620px);
+    .stage {
+      width: min(100%, 720px);
       text-align: center;
     }
 
@@ -49,10 +49,7 @@
       letter-spacing: 0.04em;
     }
 
-    .note {
-      margin: 0;
-    }
-
+    .speaker-link,
     .defaire-link {
       position: relative;
       display: inline-block;
@@ -63,6 +60,35 @@
       font: inherit;
       letter-spacing: inherit;
       transition: color 220ms ease;
+    }
+
+    .speaker-link {
+      cursor: default;
+    }
+
+    .speaker-current,
+    .speaker-hover {
+      display: inline-block;
+      transition: opacity 240ms ease, transform 260ms ease;
+    }
+
+    .speaker-hover {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      transform: translateY(6px);
+    }
+
+    .speaker-link:hover .speaker-current,
+    .speaker-link:focus-visible .speaker-current {
+      opacity: 0;
+      transform: translateY(-6px);
+    }
+
+    .speaker-link:hover .speaker-hover,
+    .speaker-link:focus-visible .speaker-hover {
+      opacity: 1;
+      transform: translateY(0);
     }
 
     .defaire-link::before {
@@ -99,11 +125,6 @@
       transition: transform 260ms ease, color 220ms ease;
     }
 
-    .defaire-link:hover,
-    .defaire-link:focus-visible {
-      color: var(--paper);
-    }
-
     .defaire-link:hover::before,
     .defaire-link:focus-visible::before {
       opacity: 0.84;
@@ -128,7 +149,54 @@
       transform: translate(2px, 1px);
     }
 
-    a {
+    .stage-agent {
+      position: fixed;
+      right: 26px;
+      bottom: 22px;
+      width: 82px;
+      height: 90px;
+      border: 0;
+      padding: 0;
+      background: transparent;
+      opacity: 0.72;
+      cursor: pointer;
+      transition: opacity 240ms ease, transform 240ms ease, filter 240ms ease;
+    }
+
+    .stage-agent:hover,
+    .stage-agent:focus-visible,
+    body.speaker-shift .stage-agent {
+      opacity: 0.96;
+      transform: translateY(-4px);
+      filter: drop-shadow(0 0 18px rgba(91, 20, 23, 0.42));
+    }
+
+    .stage-agent img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      transition: opacity 180ms ease;
+    }
+
+    .stage-agent .wave {
+      opacity: 0;
+    }
+
+    .stage-agent:hover .idle,
+    .stage-agent:focus-visible .idle,
+    body.speaker-shift .stage-agent .idle {
+      opacity: 0;
+    }
+
+    .stage-agent:hover .wave,
+    .stage-agent:focus-visible .wave,
+    body.speaker-shift .stage-agent .wave {
+      opacity: 1;
+    }
+
+    .back-link {
       color: var(--paper);
       font-size: 13px;
       letter-spacing: 0.08em;
@@ -138,22 +206,47 @@
       transition: color 220ms ease, border-color 220ms ease;
     }
 
-    a:hover,
-    a:focus-visible {
+    .back-link:hover,
+    .back-link:focus-visible {
       color: var(--dim);
       border-color: var(--dim);
+    }
+
+    @media (max-width: 640px) {
+      .stage-agent {
+        right: 16px;
+        bottom: 14px;
+        width: 64px;
+        height: 70px;
+      }
     }
   </style>
 </head>
 
 <body>
   <main>
-    <div class="desk">
-      <div class="note">
-        <p>我们来<a class="defaire-link" href="/room/nun-agent/" aria-label="Enter Cell"><span class="defaire-char">解</span><span class="defaire-char">构</span></a>这一切吧</p>
-      </div>
-      <a href="/">Back</a>
+    <div class="stage">
+      <p>
+        <span class="speaker-link" tabindex="0">
+          <span class="speaker-current">我们</span>
+          <span class="speaker-hover">你</span>
+        </span>来<a class="defaire-link" href="/atlas/" aria-label="Enter Atlas"><span class="defaire-char">解</span><span class="defaire-char">构</span></a>这一切吧
+      </p>
+      <a class="back-link" href="/">Back</a>
     </div>
+
+    <button class="stage-agent" type="button" aria-label="Enter Cell" onclick="location.href='/room/nun-agent/'">
+      <img class="idle" src="/assets/nun-agent/nun-agent-idle.gif" alt="Nun Agent">
+      <img class="wave" src="/assets/nun-agent/nun-agent-waving.gif" alt="">
+    </button>
   </main>
+
+  <script>
+    const speaker = document.querySelector(".speaker-link");
+    speaker.addEventListener("mouseenter", () => document.body.classList.add("speaker-shift"));
+    speaker.addEventListener("mouseleave", () => document.body.classList.remove("speaker-shift"));
+    speaker.addEventListener("focus", () => document.body.classList.add("speaker-shift"));
+    speaker.addEventListener("blur", () => document.body.classList.remove("speaker-shift"));
+  </script>
 </body>
 </html>
