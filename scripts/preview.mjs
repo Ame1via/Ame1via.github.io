@@ -121,11 +121,16 @@ function renderFragments(template, posts) {
           <a class="axis-link" href="#fragment-${index + 1}" data-fragment-index="${index + 1}" data-date="${post.date}" aria-label="${post.title}"></a>
         </li>`)
     .join("\n");
+  const languageSources = posts
+    .map((post) => `
+      <span class="language-source">${escapeHtml(post.body.replace(/```[\s\S]*?```/g, ""))}</span>`)
+    .join("\n");
 
   return template
     .replace(/^---\n[\s\S]*?\n---\n/, "")
     .replace(/{% for post in site\.posts %}[\s\S]*?{% endfor %}/, items)
     .replace(/<ol class="axis-list">[\s\S]*?<\/ol>/, `<ol class="axis-list">${axisItems}\n    </ol>`)
+    .replace(/<div class="language-sources" aria-hidden="true">[\s\S]*?<\/div>/, `<div class="language-sources" aria-hidden="true">${languageSources}\n  </div>`)
     .replaceAll("{{ '/' | relative_url }}", "/")
     .replaceAll("{{ '/archive/' | relative_url }}", "/archive/")
     .replaceAll("{{ post.url | relative_url }}", "#");
@@ -154,20 +159,23 @@ function build() {
   ensureDir(join(out, "assets", "nun-agent"));
 
   copy("assets/fussli-fragments-bg.png");
+  copy("assets/nun-agent-room-bg.png");
   copy("assets/nun-agent/nun-agent-idle.gif");
   copy("assets/nun-agent/nun-agent-waving.gif");
   copy("assets/nun-agent/nun-agent-running-left.gif");
   copy("assets/nun-agent/nun-agent-running-right.gif");
   copy("assets/site-interactions.js");
-  write("index.html", read("index.html"));
-  write("hidden/index.html", read("hidden/index.html"));
-  write("404.html", read("404.html"));
 
   const posts = readdirSync(join(root, "_posts"))
     .filter((file) => file.endsWith(".md"))
     .sort()
     .reverse()
     .map((file) => parsePost(`_posts/${file}`));
+
+  write("index.html", read("index.html"));
+  write("hidden/index.html", read("hidden/index.html"));
+  write("room/nun-agent/index.html", renderNunAgentRoom(read("room/nun-agent/index.html"), posts));
+  write("404.html", read("404.html"));
   write("blog/index.html", page("Fragments", renderFragments(read("blog/index.html"), posts)));
   write("archive/index.html", page("Archive", renderArchive(read("archive/index.html"), posts)));
   const postLayout = read("_layouts/post.html");
@@ -175,6 +183,18 @@ function build() {
   for (const post of posts) {
     write(post.url.replace(/^\//, ""), renderLayout(postLayout, post));
   }
+}
+
+function renderNunAgentRoom(template, posts) {
+  const languageSources = posts
+    .map((post) => `
+        <span class="language-source">${escapeHtml(post.body.replace(/```[\s\S]*?```/g, ""))}</span>`)
+    .join("\n");
+
+  return stripFrontMatter(template).replace(
+    /<div class="language-sources" aria-hidden="true">[\s\S]*?<\/div>/,
+    `<div class="language-sources" aria-hidden="true">${languageSources}\n    </div>`
+  );
 }
 
 function serveFile(requestPath, response) {

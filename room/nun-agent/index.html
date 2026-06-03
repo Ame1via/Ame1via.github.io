@@ -1,0 +1,206 @@
+---
+---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Nun Agent Room - Ame1via</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    :root {
+      --black: #0d0c0c;
+      --paper: #f2f0eb;
+      --dim: #9a958b;
+      --blood: #5b1417;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      overflow: hidden;
+      background:
+        linear-gradient(90deg, rgba(13, 12, 12, 0.28), rgba(13, 12, 12, 0.62)),
+        linear-gradient(180deg, rgba(13, 12, 12, 0.18), rgba(13, 12, 12, 0.82)),
+        url("/assets/nun-agent-room-bg.png") center / cover;
+      color: var(--paper);
+      font-family: Georgia, "Times New Roman", serif;
+    }
+
+    .cell-room {
+      position: relative;
+      min-height: 100vh;
+      isolation: isolate;
+    }
+
+    .cell-back {
+      position: fixed;
+      left: 28px;
+      bottom: 24px;
+      z-index: 4;
+      color: var(--dim);
+      font-size: 13px;
+      letter-spacing: 0.08em;
+      text-decoration: none;
+      text-transform: uppercase;
+      border-bottom: 1px solid rgba(91, 20, 23, 0.72);
+      transition: color 220ms ease, border-color 220ms ease;
+    }
+
+    .cell-back:hover,
+    .cell-back:focus-visible {
+      color: var(--paper);
+      border-color: var(--paper);
+    }
+
+    .cell-agent {
+      position: fixed;
+      right: clamp(36px, 9vw, 128px);
+      bottom: clamp(42px, 9vh, 96px);
+      z-index: 3;
+      width: clamp(92px, 11vw, 138px);
+      height: clamp(100px, 12vw, 150px);
+      padding: 0;
+      border: 0;
+      background: transparent;
+      cursor: pointer;
+      opacity: 0.86;
+      transition: opacity 220ms ease, transform 240ms ease, filter 240ms ease;
+    }
+
+    .cell-agent:hover,
+    .cell-agent:focus-visible,
+    body.waterfall-active .cell-agent {
+      opacity: 1;
+      transform: translateY(-4px);
+      filter: drop-shadow(0 0 22px rgba(91, 20, 23, 0.46));
+    }
+
+    .cell-agent img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      transition: opacity 180ms ease;
+    }
+
+    .cell-agent .wave {
+      opacity: 0;
+    }
+
+    .cell-agent:hover .idle,
+    .cell-agent:focus-visible .idle,
+    body.waterfall-active .cell-agent .idle {
+      opacity: 0;
+    }
+
+    .cell-agent:hover .wave,
+    .cell-agent:focus-visible .wave,
+    body.waterfall-active .cell-agent .wave {
+      opacity: 1;
+    }
+
+    .language-waterfall {
+      position: fixed;
+      inset: 0;
+      z-index: 2;
+      overflow: hidden;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 420ms ease;
+      mask-image: linear-gradient(90deg, transparent, black 12%, black 92%, transparent);
+    }
+
+    body.waterfall-active .language-waterfall {
+      opacity: 1;
+    }
+
+    .language-drop {
+      position: absolute;
+      top: -16vh;
+      left: var(--drop-left, 62%);
+      max-width: min(32vw, 420px);
+      color: rgba(242, 240, 235, var(--drop-alpha, 0.18));
+      font-family: Georgia, "Yu Mincho", "Songti SC", serif;
+      font-size: var(--drop-size, 15px);
+      line-height: 1.7;
+      letter-spacing: 0.02em;
+      white-space: normal;
+      transform: rotate(var(--drop-rotate, -4deg));
+      animation: language-fall var(--drop-duration, 18s) linear var(--drop-delay, 0s) infinite;
+      text-shadow: 0 0 18px rgba(91, 20, 23, 0.32);
+    }
+
+    .language-sources {
+      display: none;
+    }
+
+    @keyframes language-fall {
+      0% {
+        opacity: 0;
+        transform: translate3d(0, -18vh, 0) rotate(var(--drop-rotate, -4deg));
+      }
+      14% {
+        opacity: 1;
+      }
+      78% {
+        opacity: 0.72;
+      }
+      100% {
+        opacity: 0;
+        transform: translate3d(var(--drop-drift, -42px), 128vh, 0) rotate(calc(var(--drop-rotate, -4deg) * -1));
+      }
+    }
+
+    @media (max-width: 640px) {
+      body {
+        background-position: 44% center;
+      }
+
+      .cell-agent {
+        right: 22px;
+        bottom: 58px;
+        width: 78px;
+        height: 86px;
+      }
+
+      .cell-back {
+        left: 20px;
+        bottom: 20px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .language-waterfall {
+        display: none;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="cell-room">
+    <div class="language-waterfall" aria-hidden="true"></div>
+    <div class="language-sources" aria-hidden="true">
+      {% for post in site.posts %}
+        <span class="language-source">{{ post.content | strip_html | normalize_whitespace | escape }}</span>
+      {% endfor %}
+    </div>
+
+    <button class="cell-agent" type="button" aria-label="Trigger language waterfall">
+      <img class="idle" src="/assets/nun-agent/nun-agent-idle.gif" alt="Nun Agent">
+      <img class="wave" src="/assets/nun-agent/nun-agent-waving.gif" alt="">
+    </button>
+
+    <a class="cell-back" href="/hidden/">Back</a>
+  </main>
+
+  <script src="/assets/site-interactions.js"></script>
+</body>
+</html>

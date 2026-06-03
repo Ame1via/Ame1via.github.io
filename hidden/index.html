@@ -53,6 +53,28 @@
       margin: 0;
     }
 
+    .cell-link {
+      display: inline-grid;
+      place-items: center;
+      width: 44px;
+      height: 44px;
+      margin-bottom: 28px;
+      border: 1px solid rgba(91, 20, 23, 0.72);
+      color: var(--dim);
+      font-size: 20px;
+      line-height: 1;
+      text-decoration: none;
+      transition: border-color 220ms ease, color 220ms ease, box-shadow 260ms ease, transform 260ms ease;
+    }
+
+    .cell-link:hover,
+    .cell-link:focus-visible {
+      border-color: rgba(242, 240, 235, 0.64);
+      color: var(--paper);
+      box-shadow: 0 0 28px rgba(91, 20, 23, 0.38);
+      transform: translateY(-2px);
+    }
+
     a {
       color: var(--paper);
       font-size: 13px;
@@ -77,6 +99,7 @@
       <div class="note">
         <p>我们来解构这一切吧</p>
       </div>
+      <a class="cell-link" href="/room/nun-agent/" aria-label="Enter Nun Agent room">†</a>
       <a href="/">Back</a>
     </div>
   </main>
