@@ -142,6 +142,8 @@ Keep these excluded from site output:
 
 - Atlas uses a retroconstructive method: fragments are written first, then decomposed into relations.
 - Current axes: `place`, `time`, `body`, `state`, `theory`.
+- Public Atlas should be medium-narrative and high-implication, with minimal explanatory text.
+- The primary Atlas visual should preserve a tree / branching diagram image.
 - Atlas maps only the expressible and arrangeable material.
 - `a / remainder` stays outside the map and should not become a visible character, mascot, or complete diagram node.
 - `ATLAS.md` is the internal maintenance table for fragment decomposition and must stay excluded from public output.
