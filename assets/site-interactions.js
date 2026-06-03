@@ -175,7 +175,6 @@
       shelf: `<span>lack</span><span>vertigo</span><span>rule</span><span>wine</span><span>remainder</span>`,
       window: `<b>language remains at the glass.</b>outside: unparsed`,
       desk: `<b>${escapeText(latestTitle || "fragment")}</b>${escapeText(latestExcerpt || "the latest fragment remains open.")}`,
-      waterfall: `<b>lingua / defaire</b>compiling the fragments`,
     };
 
     cellSceneOutput.innerHTML = scenes[scene] || "";
@@ -185,7 +184,7 @@
     sceneTimer = window.setTimeout(() => {
       cellSceneOutput.classList.remove("is-visible");
       document.body.classList.remove("window-lit");
-    }, scene === "waterfall" ? 5200 : 4200);
+    }, 4200);
   }
 
   function escapeText(text) {
