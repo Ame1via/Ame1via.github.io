@@ -121,16 +121,11 @@ function renderFragments(template, posts) {
           <a class="axis-link" href="#fragment-${index + 1}" data-fragment-index="${index + 1}" data-date="${post.date}" aria-label="${post.title}"></a>
         </li>`)
     .join("\n");
-  const languageSources = posts
-    .map((post) => `
-      <span class="language-source">${escapeHtml(post.body.replace(/```[\s\S]*?```/g, ""))}</span>`)
-    .join("\n");
 
   return template
     .replace(/^---\n[\s\S]*?\n---\n/, "")
     .replace(/{% for post in site\.posts %}[\s\S]*?{% endfor %}/, items)
     .replace(/<ol class="axis-list">[\s\S]*?<\/ol>/, `<ol class="axis-list">${axisItems}\n    </ol>`)
-    .replace(/<div class="language-sources" aria-hidden="true">[\s\S]*?<\/div>/, `<div class="language-sources" aria-hidden="true">${languageSources}\n  </div>`)
     .replaceAll("{{ '/' | relative_url }}", "/")
     .replaceAll("{{ '/archive/' | relative_url }}", "/archive/")
     .replaceAll("{{ post.url | relative_url }}", "#");
@@ -186,15 +181,11 @@ function build() {
 }
 
 function renderNunAgentRoom(template, posts) {
-  const languageSources = posts
-    .map((post) => `
-        <span class="language-source">${escapeHtml(post.body.replace(/```[\s\S]*?```/g, ""))}</span>`)
-    .join("\n");
+  const latest = posts[0] || { title: "", body: "" };
 
-  return stripFrontMatter(template).replace(
-    /<div class="language-sources" aria-hidden="true">[\s\S]*?<\/div>/,
-    `<div class="language-sources" aria-hidden="true">${languageSources}\n    </div>`
-  );
+  return stripFrontMatter(template)
+    .replace("{{ site.posts.first.title | escape }}", escapeHtml(latest.title))
+    .replace("{{ site.posts.first.excerpt | strip_html | normalize_whitespace | truncate: 84 | escape }}", escapeHtml(excerpt(latest.body)));
 }
 
 function serveFile(requestPath, response) {

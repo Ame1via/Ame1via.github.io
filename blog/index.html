@@ -63,52 +63,6 @@ title: Fragments
     width: min(100%, 720px);
   }
 
-  .language-waterfall {
-    position: fixed;
-    inset: 0;
-    z-index: 0;
-    overflow: hidden;
-    pointer-events: none;
-    mask-image: linear-gradient(90deg, transparent, black 18%, black 88%, transparent);
-  }
-
-  .language-drop {
-    position: absolute;
-    top: -16vh;
-    left: var(--drop-left, 74%);
-    max-width: min(28vw, 360px);
-    color: rgba(242, 240, 235, var(--drop-alpha, 0.16));
-    font-family: Georgia, "Yu Mincho", "Songti SC", serif;
-    font-size: var(--drop-size, 15px);
-    line-height: 1.7;
-    letter-spacing: 0.02em;
-    white-space: normal;
-    transform: rotate(var(--drop-rotate, -4deg));
-    animation: language-fall var(--drop-duration, 22s) linear var(--drop-delay, 0s) infinite;
-    text-shadow: 0 0 18px rgba(91, 20, 23, 0.22);
-  }
-
-  .language-sources {
-    display: none;
-  }
-
-  @keyframes language-fall {
-    0% {
-      opacity: 0;
-      transform: translate3d(0, -18vh, 0) rotate(var(--drop-rotate, -4deg));
-    }
-    14% {
-      opacity: 1;
-    }
-    78% {
-      opacity: 0.72;
-    }
-    100% {
-      opacity: 0;
-      transform: translate3d(var(--drop-drift, -42px), 128vh, 0) rotate(calc(var(--drop-rotate, -4deg) * -1));
-    }
-  }
-
   .fragment-axis {
     position: fixed;
     top: 18vh;
@@ -434,26 +388,10 @@ title: Fragments
       height: 70px;
     }
 
-    .language-waterfall {
-      display: none;
-    }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .language-waterfall {
-      display: none;
-    }
   }
 </style>
 
 <main class="fragments-room">
-  <div class="language-waterfall" aria-hidden="true"></div>
-  <div class="language-sources" aria-hidden="true">
-    {% for post in site.posts %}
-      <span class="language-source">{{ post.content | strip_html | normalize_whitespace | escape }}</span>
-    {% endfor %}
-  </div>
-
   <section class="fragments-inner" aria-label="Fragments">
     <h1 class="fragments-title">Fragments</h1>
 

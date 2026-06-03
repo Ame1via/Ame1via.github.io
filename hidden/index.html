@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>Room - Ame1via</title>
+  <title>Stage - Ame1via</title>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -53,26 +53,79 @@
       margin: 0;
     }
 
-    .cell-link {
-      display: inline-grid;
-      place-items: center;
-      width: 44px;
-      height: 44px;
-      margin-bottom: 28px;
-      border: 1px solid rgba(91, 20, 23, 0.72);
-      color: var(--dim);
-      font-size: 20px;
-      line-height: 1;
+    .defaire-link {
+      position: relative;
+      display: inline-block;
+      color: var(--paper);
       text-decoration: none;
-      transition: border-color 220ms ease, color 220ms ease, box-shadow 260ms ease, transform 260ms ease;
+      text-transform: none;
+      border: 0;
+      font: inherit;
+      letter-spacing: inherit;
+      transition: color 220ms ease;
     }
 
-    .cell-link:hover,
-    .cell-link:focus-visible {
-      border-color: rgba(242, 240, 235, 0.64);
+    .defaire-link::before {
+      content: "défaire";
+      position: absolute;
+      left: 50%;
+      bottom: calc(100% + 8px);
+      color: var(--dim);
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      opacity: 0;
+      transform: translate(-50%, 6px);
+      transition: opacity 240ms ease, transform 240ms ease;
+      pointer-events: none;
+    }
+
+    .defaire-link::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      bottom: -6px;
+      width: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(91, 20, 23, 0.92), transparent);
+      box-shadow: 0 0 18px rgba(91, 20, 23, 0.62);
+      transform: translateX(-50%);
+      transition: width 260ms ease, opacity 260ms ease;
+      opacity: 0;
+    }
+
+    .defaire-char {
+      display: inline-block;
+      transition: transform 260ms ease, color 220ms ease;
+    }
+
+    .defaire-link:hover,
+    .defaire-link:focus-visible {
       color: var(--paper);
-      box-shadow: 0 0 28px rgba(91, 20, 23, 0.38);
-      transform: translateY(-2px);
+    }
+
+    .defaire-link:hover::before,
+    .defaire-link:focus-visible::before {
+      opacity: 0.84;
+      transform: translate(-50%, 0);
+    }
+
+    .defaire-link:hover::after,
+    .defaire-link:focus-visible::after {
+      width: 112%;
+      opacity: 1;
+    }
+
+    .defaire-link:hover .defaire-char:first-child,
+    .defaire-link:focus-visible .defaire-char:first-child {
+      color: #fffaf0;
+      transform: translate(-2px, -1px);
+    }
+
+    .defaire-link:hover .defaire-char:last-child,
+    .defaire-link:focus-visible .defaire-char:last-child {
+      color: #fffaf0;
+      transform: translate(2px, 1px);
     }
 
     a {
@@ -97,9 +150,8 @@
   <main>
     <div class="desk">
       <div class="note">
-        <p>我们来解构这一切吧</p>
+        <p>我们来<a class="defaire-link" href="/room/nun-agent/" aria-label="Enter Cell"><span class="defaire-char">解</span><span class="defaire-char">构</span></a>这一切吧</p>
       </div>
-      <a class="cell-link" href="/room/nun-agent/" aria-label="Enter Nun Agent room">†</a>
       <a href="/">Back</a>
     </div>
   </main>

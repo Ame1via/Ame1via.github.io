@@ -32,6 +32,14 @@
       font-family: Georgia, "Times New Roman", serif;
     }
 
+    body.window-lit {
+      background:
+        radial-gradient(circle at 28% 30%, rgba(242, 240, 235, 0.18), transparent 24%),
+        linear-gradient(90deg, rgba(13, 12, 12, 0.22), rgba(13, 12, 12, 0.58)),
+        linear-gradient(180deg, rgba(13, 12, 12, 0.12), rgba(13, 12, 12, 0.78)),
+        url("/assets/nun-agent-room-bg.png") center / cover;
+    }
+
     .cell-room {
       position: relative;
       min-height: 100vh;
@@ -56,6 +64,58 @@
     .cell-back:focus-visible {
       color: var(--paper);
       border-color: var(--paper);
+    }
+
+    .cell-hotspot {
+      position: fixed;
+      z-index: 3;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      cursor: pointer;
+      opacity: 0;
+    }
+
+    .cell-hotspot::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border: 1px solid rgba(242, 240, 235, 0);
+      background: rgba(91, 20, 23, 0);
+      transition: border-color 220ms ease, background 220ms ease, box-shadow 260ms ease;
+    }
+
+    .cell-hotspot:hover,
+    .cell-hotspot:focus-visible {
+      opacity: 1;
+    }
+
+    .cell-hotspot:hover::after,
+    .cell-hotspot:focus-visible::after {
+      border-color: rgba(242, 240, 235, 0.12);
+      background: rgba(91, 20, 23, 0.04);
+      box-shadow: 0 0 28px rgba(91, 20, 23, 0.16);
+    }
+
+    .cell-hotspot[data-scene="shelf"] {
+      left: 4vw;
+      top: 12vh;
+      width: 19vw;
+      height: 38vh;
+    }
+
+    .cell-hotspot[data-scene="window"] {
+      left: 18vw;
+      top: 10vh;
+      width: 20vw;
+      height: 44vh;
+    }
+
+    .cell-hotspot[data-scene="desk"] {
+      left: 8vw;
+      bottom: 11vh;
+      width: 30vw;
+      height: 26vh;
     }
 
     .cell-agent {
@@ -141,6 +201,49 @@
       display: none;
     }
 
+    .scene-data {
+      display: none;
+    }
+
+    .cell-scene-output {
+      position: fixed;
+      left: clamp(28px, 9vw, 128px);
+      bottom: clamp(78px, 13vh, 140px);
+      z-index: 4;
+      max-width: min(68vw, 460px);
+      color: rgba(242, 240, 235, 0.82);
+      font-size: clamp(13px, 1.5vw, 18px);
+      line-height: 1.7;
+      letter-spacing: 0.03em;
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity 320ms ease, transform 320ms ease;
+      pointer-events: none;
+      text-shadow: 0 0 22px rgba(13, 12, 12, 0.92);
+    }
+
+    .cell-scene-output.is-visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .cell-scene-output b {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--paper);
+      font-weight: 400;
+      font-size: clamp(17px, 2vw, 26px);
+    }
+
+    .cell-scene-output span {
+      display: inline-block;
+      margin-right: 14px;
+      margin-bottom: 8px;
+      color: rgba(242, 240, 235, 0.74);
+      font-size: clamp(15px, 1.8vw, 22px);
+      letter-spacing: 0.08em;
+    }
+
     @keyframes language-fall {
       0% {
         opacity: 0;
@@ -174,6 +277,17 @@
         left: 20px;
         bottom: 20px;
       }
+
+      .cell-hotspot {
+        display: none;
+      }
+
+      .cell-scene-output {
+        left: 22px;
+        right: 22px;
+        bottom: 116px;
+        max-width: none;
+      }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -188,10 +302,22 @@
   <main class="cell-room">
     <div class="language-waterfall" aria-hidden="true"></div>
     <div class="language-sources" aria-hidden="true">
-      {% for post in site.posts %}
-        <span class="language-source">{{ post.content | strip_html | normalize_whitespace | escape }}</span>
-      {% endfor %}
+      <span class="language-source">lingua corpus regula vertigo nullum reliquum desiderium defaire cell stage fragmentum</span>
+      <span class="language-source">object a objet petit a a ∅ Ω MI ⇏ MU I mod 3 non mensura non dicitur</span>
+      <span class="language-source">the remainder the absent master language fails quietly do not name it</span>
+      <span class="language-source">献给自我 不需要符合尺度 眩晕是颠覆性的 语言不会抵达这里</span>
     </div>
+
+    <button class="cell-hotspot" type="button" data-scene="shelf" aria-label="Shelf scene"></button>
+    <button class="cell-hotspot" type="button" data-scene="window" aria-label="Window scene"></button>
+    <button class="cell-hotspot" type="button" data-scene="desk" aria-label="Desk scene"></button>
+
+    <div class="scene-data" aria-hidden="true">
+      <span data-latest-title>{{ site.posts.first.title | escape }}</span>
+      <span data-latest-excerpt>{{ site.posts.first.excerpt | strip_html | normalize_whitespace | truncate: 84 | escape }}</span>
+    </div>
+
+    <div class="cell-scene-output" aria-live="polite"></div>
 
     <button class="cell-agent" type="button" aria-label="Trigger language waterfall">
       <img class="idle" src="/assets/nun-agent/nun-agent-idle.gif" alt="Nun Agent">

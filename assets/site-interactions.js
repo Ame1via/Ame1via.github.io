@@ -7,9 +7,14 @@
   const waterfall = document.querySelector(".language-waterfall");
   const languageSources = Array.from(document.querySelectorAll(".language-source"));
   const cellAgent = document.querySelector(".cell-agent");
+  const cellSceneOutput = document.querySelector(".cell-scene-output");
+  const sceneTriggers = Array.from(document.querySelectorAll(".cell-hotspot[data-scene]"));
+  const latestTitle = document.querySelector("[data-latest-title]")?.textContent?.trim() || "";
+  const latestExcerpt = document.querySelector("[data-latest-excerpt]")?.textContent?.trim() || "";
   let taps = 0;
   let tapTimer;
   let direction = "left";
+  let sceneTimer;
 
   function pulseAgent(className, duration = 1600) {
     if (!agent) return;
@@ -154,6 +159,7 @@
 
         cellAgent.addEventListener("click", () => {
           document.body.classList.add("waterfall-active");
+          showCellScene("waterfall");
           window.clearTimeout(activeTimer);
           activeTimer = window.setTimeout(() => {
             document.body.classList.remove("waterfall-active");
@@ -162,4 +168,37 @@
       }
     }
   }
+
+  function showCellScene(scene) {
+    if (!cellSceneOutput) return;
+
+    const scenes = {
+      shelf: `<span>lack</span><span>vertigo</span><span>rule</span><span>wine</span><span>remainder</span>`,
+      window: `<b>language remains at the glass.</b>outside: unparsed`,
+      desk: `<b>${escapeText(latestTitle || "fragment")}</b>${escapeText(latestExcerpt || "the latest fragment remains open.")}`,
+      waterfall: `<b>lingua / defaire</b>compiling the fragments`,
+    };
+
+    cellSceneOutput.innerHTML = scenes[scene] || "";
+    cellSceneOutput.classList.add("is-visible");
+    document.body.classList.toggle("window-lit", scene === "window");
+    window.clearTimeout(sceneTimer);
+    sceneTimer = window.setTimeout(() => {
+      cellSceneOutput.classList.remove("is-visible");
+      document.body.classList.remove("window-lit");
+    }, scene === "waterfall" ? 5200 : 4200);
+  }
+
+  function escapeText(text) {
+    return text
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;");
+  }
+
+  sceneTriggers.forEach((trigger) => {
+    trigger.addEventListener("click", () => {
+      showCellScene(trigger.dataset.scene);
+    });
+  });
 })();
