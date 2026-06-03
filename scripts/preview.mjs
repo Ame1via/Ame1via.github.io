@@ -157,6 +157,8 @@ function build() {
   copy("assets/nun-agent-room-bg.png");
   copy("assets/nun-agent/nun-agent-idle.gif");
   copy("assets/nun-agent/nun-agent-waving.gif");
+  copy("assets/nun-agent/nun-agent-reading.gif");
+  copy("assets/nun-agent/nun-agent-compiling.gif");
   copy("assets/nun-agent/nun-agent-running-left.gif");
   copy("assets/nun-agent/nun-agent-running-right.gif");
   copy("assets/site-interactions.js");

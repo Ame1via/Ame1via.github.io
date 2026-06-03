@@ -154,15 +154,33 @@
       opacity: 0;
     }
 
+    .cell-agent .reading,
+    .cell-agent .compiling {
+      opacity: 0;
+    }
+
     .cell-agent:hover .idle,
     .cell-agent:focus-visible .idle,
-    body.waterfall-active .cell-agent .idle {
+    body.waterfall-active .cell-agent .idle,
+    body.desk-active .cell-agent .idle {
       opacity: 0;
     }
 
     .cell-agent:hover .wave,
-    .cell-agent:focus-visible .wave,
-    body.waterfall-active .cell-agent .wave {
+    .cell-agent:focus-visible .wave {
+      opacity: 1;
+    }
+
+    body.waterfall-active .cell-agent .wave,
+    body.desk-active .cell-agent .wave {
+      opacity: 0;
+    }
+
+    body.waterfall-active .cell-agent .compiling {
+      opacity: 1;
+    }
+
+    body.desk-active .cell-agent .reading {
       opacity: 1;
     }
 
@@ -322,6 +340,8 @@
     <button class="cell-agent" type="button" aria-label="Trigger language waterfall">
       <img class="idle" src="/assets/nun-agent/nun-agent-idle.gif" alt="Nun Agent">
       <img class="wave" src="/assets/nun-agent/nun-agent-waving.gif" alt="">
+      <img class="reading" src="/assets/nun-agent/nun-agent-reading.gif" alt="">
+      <img class="compiling" src="/assets/nun-agent/nun-agent-compiling.gif" alt="">
     </button>
 
     <a class="cell-back" href="/hidden/">Back</a>

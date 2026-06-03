@@ -159,6 +159,7 @@
 
         cellAgent.addEventListener("click", () => {
           document.body.classList.add("waterfall-active");
+          document.body.classList.remove("desk-active");
           window.clearTimeout(activeTimer);
           activeTimer = window.setTimeout(() => {
             document.body.classList.remove("waterfall-active");
@@ -180,10 +181,12 @@
     cellSceneOutput.innerHTML = scenes[scene] || "";
     cellSceneOutput.classList.add("is-visible");
     document.body.classList.toggle("window-lit", scene === "window");
+    document.body.classList.toggle("desk-active", scene === "desk");
     window.clearTimeout(sceneTimer);
     sceneTimer = window.setTimeout(() => {
       cellSceneOutput.classList.remove("is-visible");
       document.body.classList.remove("window-lit");
+      document.body.classList.remove("desk-active");
     }, 4200);
   }
 
