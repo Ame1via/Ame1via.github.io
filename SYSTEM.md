@@ -137,3 +137,11 @@ Keep these excluded from site output:
 - Do not make `a` explicit as a character or icon. Its power is absence/remainder.
 - Mobile behavior needs practical checks after changes.
 - Avoid turning Fragments into a dense dashboard. Archive handles full indexing.
+
+## Atlas Rules
+
+- Atlas uses a retroconstructive method: fragments are written first, then decomposed into relations.
+- Current axes: `place`, `time`, `body`, `state`, `theory`.
+- Atlas maps only the expressible and arrangeable material.
+- `a / remainder` stays outside the map and should not become a visible character, mascot, or complete diagram node.
+- `ATLAS.md` is the internal maintenance table for fragment decomposition and must stay excluded from public output.

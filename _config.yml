@@ -6,5 +6,6 @@ exclude:
   - CODEX_CONTEXT.md
   - FRAGMENTS_GUIDE.md
   - SYSTEM.md
+  - ATLAS.md
   - blog1.html
   - scripts/
