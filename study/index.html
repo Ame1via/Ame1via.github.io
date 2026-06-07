@@ -4,7 +4,6 @@
   <title>Study Gate - Ame1via</title>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
   <style>
     :root {
       --black: #0d0c0c;
@@ -36,7 +35,7 @@
     }
 
     .gate {
-      width: min(100%, 420px);
+      width: min(100%, 430px);
       border: 1px solid var(--line);
       padding: clamp(22px, 4vw, 34px);
       background: var(--panel);
@@ -89,9 +88,7 @@
       outline: none;
     }
 
-    input:focus {
-      border-color: rgba(242, 240, 235, 0.42);
-    }
+    input:focus { border-color: rgba(242, 240, 235, 0.42); }
 
     button {
       background: rgba(100, 24, 31, 0.22);
@@ -133,18 +130,15 @@
     }
 
     @media (max-width: 460px) {
-      .row {
-        grid-template-columns: 1fr;
-      }
+      .row { grid-template-columns: 1fr; }
     }
   </style>
 </head>
-
 <body>
   <main>
     <section class="gate" aria-label="Study password gate">
       <h1>Study</h1>
-      <p class="note">法律、日语、经济。中国留学生向けの学習室。</p>
+      <p class="note">法律、日语、经济。面向在日本的中国留学生，但题库收拢到考试导向。</p>
 
       <form id="gateForm">
         <label for="password">Password</label>
@@ -181,7 +175,7 @@
 
       if (inputHash === passwordHash) {
         sessionStorage.setItem(sessionKey, "true");
-        message.textContent = "開きます。";
+        message.textContent = "打开中。";
         window.location.href = "/study/app/";
         return;
       }

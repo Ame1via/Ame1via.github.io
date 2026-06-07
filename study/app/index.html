@@ -9,7 +9,6 @@
       window.location.replace("/study/");
     }
   </script>
-
   <style>
     :root {
       --black: #0d0c0c;
@@ -21,7 +20,6 @@
       --gold: #a0834d;
       --green: #60765f;
       --blue: #647f8a;
-      --violet: #76638b;
       --panel: rgba(14, 13, 13, 0.78);
     }
 
@@ -64,7 +62,7 @@
 
     .subtitle {
       margin: 12px 0 0;
-      max-width: 650px;
+      max-width: 680px;
       color: var(--dim);
       font-size: 15px;
       line-height: 1.75;
@@ -120,7 +118,9 @@
 
     .subject-list,
     .topic-list,
-    .mode-list {
+    .mode-list,
+    .difficulty-list,
+    .answer-list {
       display: grid;
       gap: 8px;
       margin: 0;
@@ -131,6 +131,7 @@
     .subject-button,
     .topic-button,
     .mode-button,
+    .difficulty-button,
     .answer-button,
     .action-button {
       width: 100%;
@@ -143,7 +144,8 @@
 
     .subject-button,
     .topic-button,
-    .mode-button {
+    .mode-button,
+    .difficulty-button {
       min-height: 42px;
       padding: 10px 11px;
       font-size: 13px;
@@ -153,11 +155,13 @@
     .subject-button:hover,
     .topic-button:hover,
     .mode-button:hover,
+    .difficulty-button:hover,
     .answer-button:hover,
     .action-button:hover,
     .subject-button:focus-visible,
     .topic-button:focus-visible,
     .mode-button:focus-visible,
+    .difficulty-button:focus-visible,
     .answer-button:focus-visible,
     .action-button:focus-visible {
       transform: translateY(-1px);
@@ -167,13 +171,16 @@
 
     .subject-button.is-active,
     .topic-button.is-active,
-    .mode-button.is-active {
+    .mode-button.is-active,
+    .difficulty-button.is-active {
       border-color: rgba(160, 131, 77, 0.7);
       background: rgba(160, 131, 77, 0.16);
     }
 
     .subject-button span,
-    .topic-button span {
+    .topic-button span,
+    .mode-button span,
+    .difficulty-button span {
       display: block;
       margin-top: 4px;
       color: var(--dim);
@@ -258,120 +265,95 @@
       padding-top: 24px;
     }
 
-    .question {
-      margin: 0 0 16px;
-      color: var(--paper);
-      font-size: 19px;
-      line-height: 1.6;
+    .question-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 14px;
+      color: var(--dim);
+      font-size: 12px;
     }
 
-    .answers {
-      display: grid;
-      gap: 9px;
+    .question {
+      margin: 0 0 16px;
+      font-size: clamp(18px, 2.2vw, 24px);
+      line-height: 1.55;
     }
 
     .answer-button {
       min-height: 48px;
-      padding: 12px 13px;
-      font-size: 14px;
+      padding: 12px 14px;
+      font-size: 15px;
       line-height: 1.45;
     }
 
     .answer-button.is-correct {
-      border-color: rgba(96, 118, 95, 0.84);
-      background: rgba(96, 118, 95, 0.22);
+      border-color: rgba(96, 118, 95, 0.85);
+      background: rgba(96, 118, 95, 0.24);
     }
 
     .answer-button.is-wrong {
-      border-color: rgba(140, 38, 49, 0.84);
-      background: rgba(140, 38, 49, 0.22);
+      border-color: rgba(140, 38, 49, 0.9);
+      background: rgba(140, 38, 49, 0.24);
     }
 
     .feedback {
-      min-height: 52px;
-      margin: 14px 0 0;
-      color: var(--dim);
+      min-height: 74px;
+      margin-top: 14px;
+      color: rgba(242, 240, 235, 0.88);
       font-size: 14px;
-      line-height: 1.65;
+      line-height: 1.7;
     }
 
-    .panel-section + .panel-section {
-      margin-top: 20px;
-      border-top: 1px solid var(--line);
-      padding-top: 18px;
-    }
-
-    .agent-study {
-      display: grid;
-      grid-template-columns: 54px minmax(0, 1fr);
-      gap: 12px;
-      align-items: center;
-    }
-
-    .agent-study img {
-      width: 54px;
-      height: 62px;
-      object-fit: contain;
-      opacity: 0.86;
-    }
-
-    .difficulty {
+    .actions {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 8px;
-    }
-
-    .mode-button {
-      min-height: 38px;
-      text-align: center;
-    }
-
-    .meter {
-      display: grid;
-      gap: 9px;
-    }
-
-    .meter-row {
-      display: grid;
-      grid-template-columns: 82px minmax(0, 1fr) 34px;
-      gap: 8px;
-      align-items: center;
-      color: var(--dim);
-      font-size: 12px;
-    }
-
-    .meter-bar {
-      height: 7px;
-      overflow: hidden;
-      border: 1px solid rgba(242, 240, 235, 0.13);
-      background: rgba(13, 12, 12, 0.54);
-    }
-
-    .meter-fill {
-      display: block;
-      width: var(--value);
-      height: 100%;
-      background: linear-gradient(90deg, var(--blood), var(--gold));
+      margin-top: 14px;
     }
 
     .action-button {
       min-height: 40px;
-      padding: 10px 12px;
+      padding: 9px 10px;
       text-align: center;
       font-size: 13px;
     }
 
-    .secondary-action {
-      margin-top: 8px;
-      color: var(--dim);
-      background: rgba(13, 12, 12, 0.56);
+    .panel-section + .panel-section {
+      margin-top: 20px;
+      padding-top: 18px;
+      border-top: 1px solid var(--line);
     }
 
-    .note {
-      margin: 10px 0 0;
+    .meter {
+      height: 8px;
+      overflow: hidden;
+      border: 1px solid rgba(242, 240, 235, 0.13);
+      background: rgba(13, 12, 12, 0.48);
+    }
+
+    .meter span {
+      display: block;
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--blood), var(--gold));
+      transition: width 220ms ease;
+    }
+
+    .stat {
+      margin: 8px 0 0;
       color: var(--dim);
       font-size: 12px;
       line-height: 1.6;
+    }
+
+    .empty {
+      border: 1px solid rgba(242, 240, 235, 0.13);
+      padding: 14px;
+      color: var(--dim);
+      font-size: 13px;
+      line-height: 1.65;
+      background: rgba(13, 12, 12, 0.44);
     }
 
     @media (max-width: 980px) {
@@ -381,376 +363,366 @@
 
       .rail,
       .control-panel {
-        position: relative;
-        top: auto;
+        position: static;
       }
 
       .subject-list,
-      .topic-list {
+      .topic-list,
+      .mode-list,
+      .difficulty-list {
         grid-template-columns: repeat(2, minmax(0, 1fr));
       }
     }
 
-    @media (max-width: 640px) {
-      main {
-        padding: 18px 12px 30px;
-      }
-
+    @media (max-width: 620px) {
       .top {
         grid-template-columns: 1fr;
         align-items: start;
       }
 
+      .term-grid,
       .subject-list,
       .topic-list,
-      .term-grid {
+      .mode-list,
+      .difficulty-list,
+      .actions {
         grid-template-columns: 1fr;
-      }
-
-      .workspace {
-        min-height: auto;
       }
     }
   </style>
 </head>
-
 <body>
   <main>
     <header class="top">
       <div>
         <h1>Study</h1>
-        <p class="subtitle">法律、JLPT N1、英语放在同一个学习台里。难度会改变解释密度、题目形式和提示强度；第一版用浏览器本地记录进度。</p>
+        <p class="subtitle">法律、日语、经济。面向在日本的中国留学生，但学习内容按考试复习组织。</p>
       </div>
       <a class="back" href="/">Back</a>
     </header>
 
-    <section class="study-shell" aria-label="Study component">
-      <aside class="rail" aria-label="Subjects">
+    <section class="study-shell" aria-label="Study module">
+      <aside class="rail">
         <p class="rail-title">Subjects</p>
         <ul class="subject-list" id="subjectList"></ul>
-
         <div class="panel-section">
           <p class="rail-title">Topics</p>
           <ul class="topic-list" id="topicList"></ul>
         </div>
       </aside>
 
-      <article class="workspace" aria-live="polite">
+      <section class="workspace">
         <nav class="path" id="path"></nav>
-        <p class="lesson-kicker" id="lessonKicker"></p>
         <h2 class="lesson-title" id="lessonTitle"></h2>
+        <p class="lesson-kicker" id="lessonKicker"></p>
         <p class="lesson-copy" id="lessonCopy"></p>
         <div class="term-grid" id="termGrid"></div>
 
         <section class="practice" aria-label="Practice">
-          <p class="section-label">Practice</p>
-          <p class="question" id="question"></p>
-          <div class="answers" id="answers"></div>
-          <p class="feedback" id="feedback"></p>
+          <div class="question-meta" id="questionMeta"></div>
+          <p class="question" id="questionText"></p>
+          <div class="answer-list" id="answerList"></div>
+          <p class="feedback" id="feedback" aria-live="polite"></p>
+          <div class="actions">
+            <button class="action-button" type="button" id="hintButton">提示</button>
+            <button class="action-button" type="button" id="nextButton">下一题</button>
+          </div>
         </section>
-      </article>
+      </section>
 
-      <aside class="control-panel" aria-label="Controls">
-        <section class="panel-section agent-study">
-          <img src="/assets/nun-agent/nun-agent-reading.gif" alt="Nun Agent reading">
-          <p class="note">????????????????????????</p>
-        </section>
-
-        <section class="panel-section">
-          <p class="panel-title">Difficulty</p>
-          <div class="difficulty" id="difficultyList"></div>
-          <p class="note" id="difficultyNote"></p>
-        </section>
-
+      <aside class="control-panel">
         <section class="panel-section">
           <p class="panel-title">Mode</p>
           <ul class="mode-list" id="modeList"></ul>
         </section>
 
         <section class="panel-section">
-          <p class="panel-title">Progress</p>
-          <div class="meter" id="progressMeter"></div>
-          <p class="note" id="wrongNote"></p>
+          <p class="panel-title">Difficulty</p>
+          <ul class="difficulty-list" id="difficultyList"></ul>
         </section>
 
         <section class="panel-section">
-          <button class="action-button" type="button" id="nextButton">Next card</button>
-          <button class="action-button secondary-action" type="button" id="clearWrongButton">Clear wrongs</button>
-          <p class="note">????????????????????????</p>
+          <p class="panel-title">Progress</p>
+          <div class="meter"><span id="progressBar"></span></div>
+          <p class="stat" id="progressText"></p>
+          <p class="stat" id="wrongNote"></p>
+          <button class="action-button" type="button" id="clearWrongsButton">清空错题本</button>
         </section>
       </aside>
     </section>
   </main>
 
-    <script src="/assets/study-data.js"></script>
+  <script src="/assets/study-data.js"></script>
   <script>
-    const { difficulties, modes, subjects } = window.studyData;
+    const data = window.studyData;
     const progressKey = "ame-study-progress";
     const wrongKey = "ame-study-wrongs";
-
-    function initializeQuestionIds() {
-      subjects.forEach((subject) => {
-        subject.topics.forEach((topic) => {
-          topic.questions.forEach((item, index) => {
-            item.id = item.id || `${topic.id}-${index + 1}`;
-          });
-        });
-      });
-    }
-
-    initializeQuestionIds();
-
     const state = {
-      subject: "law",
-      topic: "criminal",
-      difficulty: "standard",
-      mode: "card",
+      subjectId: data.subjects[0].id,
+      topicId: data.subjects[0].topics[0].id,
+      modeId: "card",
+      difficultyId: "standard",
       questionIndex: 0,
-      progress: JSON.parse(localStorage.getItem(progressKey) || "{}"),
-      wrongs: JSON.parse(localStorage.getItem(wrongKey) || "{}")
+      answered: false
     };
 
-    const subjectList = document.getElementById("subjectList");
-    const topicList = document.getElementById("topicList");
-    const difficultyList = document.getElementById("difficultyList");
-    const difficultyNote = document.getElementById("difficultyNote");
-    const modeList = document.getElementById("modeList");
-    const path = document.getElementById("path");
-    const lessonKicker = document.getElementById("lessonKicker");
-    const lessonTitle = document.getElementById("lessonTitle");
-    const lessonCopy = document.getElementById("lessonCopy");
-    const termGrid = document.getElementById("termGrid");
-    const question = document.getElementById("question");
-    const answers = document.getElementById("answers");
-    const feedback = document.getElementById("feedback");
-    const progressMeter = document.getElementById("progressMeter");
-    const wrongNote = document.getElementById("wrongNote");
-    const nextButton = document.getElementById("nextButton");
-    const clearWrongButton = document.getElementById("clearWrongButton");
+    const els = {
+      subjectList: document.getElementById("subjectList"),
+      topicList: document.getElementById("topicList"),
+      modeList: document.getElementById("modeList"),
+      difficultyList: document.getElementById("difficultyList"),
+      path: document.getElementById("path"),
+      lessonTitle: document.getElementById("lessonTitle"),
+      lessonKicker: document.getElementById("lessonKicker"),
+      lessonCopy: document.getElementById("lessonCopy"),
+      termGrid: document.getElementById("termGrid"),
+      questionMeta: document.getElementById("questionMeta"),
+      questionText: document.getElementById("questionText"),
+      answerList: document.getElementById("answerList"),
+      feedback: document.getElementById("feedback"),
+      hintButton: document.getElementById("hintButton"),
+      nextButton: document.getElementById("nextButton"),
+      progressBar: document.getElementById("progressBar"),
+      progressText: document.getElementById("progressText"),
+      wrongNote: document.getElementById("wrongNote"),
+      clearWrongsButton: document.getElementById("clearWrongsButton")
+    };
+
+    function loadJson(key, fallback) {
+      try {
+        return JSON.parse(localStorage.getItem(key)) || fallback;
+      } catch {
+        return fallback;
+      }
+    }
+
+    function saveJson(key, value) {
+      localStorage.setItem(key, JSON.stringify(value));
+    }
 
     function getSubject() {
-      return subjects.find((subject) => subject.id === state.subject) || subjects[0];
+      return data.subjects.find((subject) => subject.id === state.subjectId) || data.subjects[0];
     }
 
     function getTopic() {
       const subject = getSubject();
-      return subject.topics.find((topic) => topic.id === state.topic) || subject.topics[0];
+      return subject.topics.find((topic) => topic.id === state.topicId) || subject.topics[0];
     }
 
-    function getQuestionKey(topic, item) {
-      return `${topic.id}:${item.id}`;
+    function allQuestions() {
+      return data.subjects.flatMap((subject) =>
+        subject.topics.flatMap((topic) =>
+          topic.questions.map((question) => ({ subject, topic, question }))
+        )
+      );
     }
 
-    function getQuestionPool(topic) {
-      if (state.mode !== "review") return topic.questions;
-
-      const wrongPool = topic.questions.filter((item) => state.wrongs[getQuestionKey(topic, item)]);
-      return wrongPool.length ? wrongPool : topic.questions;
+    function getWrongs() {
+      return loadJson(wrongKey, {});
     }
 
-    function getActiveQuestion(topic = getTopic()) {
-      const pool = getQuestionPool(topic);
+    function setWrongs(wrongs) {
+      saveJson(wrongKey, wrongs);
+    }
+
+    function getProgress() {
+      return loadJson(progressKey, {});
+    }
+
+    function setProgress(progress) {
+      saveJson(progressKey, progress);
+    }
+
+    function getQuestionPool() {
+      const topic = getTopic();
+      if (state.modeId !== "review") return topic.questions;
+
+      const wrongs = getWrongs();
+      const wrongIds = new Set(Object.keys(wrongs));
+      const topicWrongs = topic.questions.filter((question) => wrongIds.has(question.id));
+      return topicWrongs.length ? topicWrongs : topic.questions;
+    }
+
+    function currentQuestion() {
+      const pool = getQuestionPool();
       return pool[state.questionIndex % pool.length];
     }
 
-    function saveProgress(topicId, delta = 12) {
-      const current = state.progress[topicId] || 0;
-      state.progress[topicId] = Math.min(100, current + delta);
-      localStorage.setItem(progressKey, JSON.stringify(state.progress));
+    function renderButtonList(container, items, activeId, className, onClick) {
+      container.innerHTML = items.map((item) => {
+        const note = item.subtitle || item.note || item.label || "";
+        return `
+          <li>
+            <button class="${className}${item.id === activeId ? " is-active" : ""}" type="button" data-id="${item.id}">
+              ${item.title || item.label}
+              ${note && note !== (item.title || item.label) ? `<span>${note}</span>` : ""}
+            </button>
+          </li>`;
+      }).join("");
+
+      container.querySelectorAll("button").forEach((button) => {
+        button.addEventListener("click", () => onClick(button.dataset.id));
+      });
     }
 
-    function saveWrongs() {
-      localStorage.setItem(wrongKey, JSON.stringify(state.wrongs));
-    }
-
-    function recordAnswer(topic, item, correct) {
-      const key = getQuestionKey(topic, item);
-
-      if (correct) {
-        delete state.wrongs[key];
-      } else {
-        const current = state.wrongs[key] || { misses: 0 };
-        state.wrongs[key] = {
-          misses: current.misses + 1,
-          subject: getSubject().title,
-          topic: topic.title,
-          prompt: item.prompt
-        };
-      }
-
-      saveWrongs();
-    }
-
-    function getWrongCountForTopic(topic = getTopic()) {
-      return topic.questions.filter((item) => state.wrongs[getQuestionKey(topic, item)]).length;
-    }
-
-    function getTotalWrongCount() {
-      return Object.keys(state.wrongs).length;
-    }
-
-    function renderSubjects() {
-      subjectList.innerHTML = subjects.map((subject) => `
-        <li>
-          <button class="subject-button ${subject.id === state.subject ? "is-active" : ""}" type="button" data-subject="${subject.id}">
-            ${subject.title}
-            <span>${subject.subtitle}</span>
-          </button>
-        </li>
-      `).join("");
-    }
-
-    function renderTopics() {
+    function renderNav() {
       const subject = getSubject();
-      topicList.innerHTML = subject.topics.map((topic) => `
-        <li>
-          <button class="topic-button ${topic.id === state.topic ? "is-active" : ""}" type="button" data-topic="${topic.id}">
-            ${topic.title}
-            <span>${topic.label}</span>
-          </button>
-        </li>
-      `).join("");
-    }
+      renderButtonList(els.subjectList, data.subjects, state.subjectId, "subject-button", (id) => {
+        state.subjectId = id;
+        state.topicId = getSubject().topics[0].id;
+        state.questionIndex = 0;
+        state.answered = false;
+        render();
+      });
 
-    function renderDifficulty() {
-      difficultyList.innerHTML = Object.entries(difficulties).map(([id, item]) => `
-        <button class="mode-button ${id === state.difficulty ? "is-active" : ""}" type="button" data-difficulty="${id}">${item.label}</button>
-      `).join("");
-      difficultyNote.textContent = difficulties[state.difficulty].note;
-    }
+      renderButtonList(els.topicList, subject.topics, state.topicId, "topic-button", (id) => {
+        state.topicId = id;
+        state.questionIndex = 0;
+        state.answered = false;
+        render();
+      });
 
-    function renderModes() {
-      modeList.innerHTML = modes.map((mode) => `
-        <li>
-          <button class="mode-button ${mode.id === state.mode ? "is-active" : ""}" type="button" data-mode="${mode.id}">${mode.label}</button>
-        </li>
-      `).join("");
+      renderButtonList(els.modeList, data.modes, state.modeId, "mode-button", (id) => {
+        state.modeId = id;
+        state.questionIndex = 0;
+        state.answered = false;
+        render();
+      });
+
+      const difficultyItems = Object.entries(data.difficulties).map(([id, value]) => ({ id, ...value }));
+      renderButtonList(els.difficultyList, difficultyItems, state.difficultyId, "difficulty-button", (id) => {
+        state.difficultyId = id;
+        render();
+      });
     }
 
     function renderLesson() {
       const subject = getSubject();
       const topic = getTopic();
-      const difficulty = difficulties[state.difficulty];
-      const activeMode = modes.find((mode) => mode.id === state.mode);
-      const questionPool = getQuestionPool(topic);
-      const activeQuestion = questionPool[state.questionIndex % questionPool.length];
-      const wrongCount = getWrongCountForTopic(topic);
-
-      path.innerHTML = `
-        <span>${subject.title}</span>
-        <span>${topic.title}</span>
-        <span>${difficulty.label}</span>
-        <span>${activeMode.label}</span>
-      `;
-      lessonKicker.textContent = topic.label;
-      lessonTitle.textContent = topic.title;
-      lessonCopy.textContent = topic.copy[difficulty.copyKey];
-      termGrid.innerHTML = topic.terms.map(([term, description]) => `
-        <div class="term-card">
+      const difficulty = data.difficulties[state.difficultyId];
+      els.path.innerHTML = [`${subject.title}`, `${topic.title}`, `${difficulty.label}`].map((item) => `<span>${item}</span>`).join("");
+      els.lessonTitle.textContent = topic.title;
+      els.lessonKicker.textContent = topic.label;
+      els.lessonCopy.textContent = topic.copy[difficulty.copyKey] || topic.copy.standard;
+      els.termGrid.innerHTML = topic.terms.map(([term, note]) => `
+        <article class="term-card">
           <strong>${term}</strong>
-          <span>${description}</span>
-        </div>
+          <span>${note}</span>
+        </article>
       `).join("");
-
-      question.textContent = activeQuestion.prompt;
-      answers.innerHTML = activeQuestion.answers.map((answer, index) => `
-        <button class="answer-button" type="button" data-answer="${index}">${answer}</button>
-      `).join("");
-      feedback.textContent = state.mode === "review"
-        ? wrongCount
-          ? `?????????? ${wrongCount} ???????????`
-          : "???????????????????????"
-        : "";
     }
 
-    function renderProgress() {
-      progressMeter.innerHTML = subjects.map((subject) => {
-        const values = subject.topics.map((topic) => state.progress[topic.id] || 0);
-        const average = Math.round(values.reduce((sum, value) => sum + value, 0) / values.length);
-        return `
-          <div class="meter-row">
-            <span>${subject.title}</span>
-            <span class="meter-bar"><span class="meter-fill" style="--value:${average}%"></span></span>
-            <span>${average}%</span>
-          </div>
-        `;
-      }).join("");
-      wrongNote.textContent = `错题本：${getTotalWrongCount()} 道。当前主题：${getWrongCountForTopic()} 道。`;
-    }
-
-    function renderAll() {
-      renderSubjects();
-      renderTopics();
-      renderDifficulty();
-      renderModes();
-      renderLesson();
-      renderProgress();
-    }
-
-    subjectList.addEventListener("click", (event) => {
-      const button = event.target.closest("[data-subject]");
-      if (!button) return;
-      state.subject = button.dataset.subject;
-      state.topic = getSubject().topics[0].id;
-      state.questionIndex = 0;
-      renderAll();
-    });
-
-    topicList.addEventListener("click", (event) => {
-      const button = event.target.closest("[data-topic]");
-      if (!button) return;
-      state.topic = button.dataset.topic;
-      state.questionIndex = 0;
-      renderAll();
-    });
-
-    difficultyList.addEventListener("click", (event) => {
-      const button = event.target.closest("[data-difficulty]");
-      if (!button) return;
-      state.difficulty = button.dataset.difficulty;
-      renderAll();
-    });
-
-    modeList.addEventListener("click", (event) => {
-      const button = event.target.closest("[data-mode]");
-      if (!button) return;
-      state.mode = button.dataset.mode;
-      renderAll();
-    });
-
-    answers.addEventListener("click", (event) => {
-      const button = event.target.closest("[data-answer]");
-      if (!button) return;
+    function renderQuestion() {
       const topic = getTopic();
-      const activeQuestion = getActiveQuestion(topic);
-      const selected = Number(button.dataset.answer);
-      const correct = selected === activeQuestion.correct;
+      const pool = getQuestionPool();
+      const question = currentQuestion();
+      const progress = getProgress();
+      const topicDone = topic.questions.filter((item) => progress[item.id]?.correct).length;
+      const wrongs = getWrongs();
+      const wrongCount = Object.keys(wrongs).length;
+      const topicWrongCount = topic.questions.filter((item) => wrongs[item.id]).length;
 
-      answers.querySelectorAll(".answer-button").forEach((answerButton) => {
-        const index = Number(answerButton.dataset.answer);
-        answerButton.classList.toggle("is-correct", index === activeQuestion.correct);
-        answerButton.classList.toggle("is-wrong", index === selected && !correct);
+      els.questionMeta.innerHTML = [
+        `题目 ${state.questionIndex % pool.length + 1} / ${pool.length}`,
+        `本主题 ${topicDone} / ${topic.questions.length}`,
+        state.modeId === "review" && topicWrongCount === 0 ? "本主题暂无错题，显示普通题库" : ""
+      ].filter(Boolean).map((item) => `<span>${item}</span>`).join("");
+
+      els.questionText.textContent = question.prompt;
+      els.answerList.innerHTML = question.answers.map((answer, index) => `
+        <button class="answer-button" type="button" data-index="${index}">${answer}</button>
+      `).join("");
+      els.feedback.textContent = state.modeId === "card" ? "先看知识卡片，再用题目确认自己是否真的能判断。" : "";
+      els.answerList.querySelectorAll("button").forEach((button) => {
+        button.addEventListener("click", () => answerQuestion(Number(button.dataset.index)));
       });
 
-      feedback.textContent = `${correct ? "???" : "?????"}${activeQuestion.explain}`;
-      recordAnswer(topic, activeQuestion, correct);
-      saveProgress(topic.id, correct ? 14 : 6);
-      renderProgress();
-    });
+      const percent = topic.questions.length ? Math.round((topicDone / topic.questions.length) * 100) : 0;
+      els.progressBar.style.width = `${percent}%`;
+      els.progressText.textContent = `当前主题正确完成 ${topicDone}/${topic.questions.length}。`;
+      els.wrongNote.textContent = `错题本 ${wrongCount} 题；当前主题 ${topicWrongCount} 题。`;
+    }
 
-    nextButton.addEventListener("click", () => {
+    function answerQuestion(index) {
+      if (state.answered) return;
+      state.answered = true;
+      const subject = getSubject();
       const topic = getTopic();
-      state.questionIndex = (state.questionIndex + 1) % getQuestionPool(topic).length;
+      const question = currentQuestion();
+      const isCorrect = index === question.correct;
+      const progress = getProgress();
+      const wrongs = getWrongs();
+
+      progress[question.id] = {
+        correct: isCorrect,
+        attempts: (progress[question.id]?.attempts || 0) + 1,
+        updatedAt: new Date().toISOString()
+      };
+
+      if (isCorrect) {
+        delete wrongs[question.id];
+      } else {
+        wrongs[question.id] = {
+          subject: subject.title,
+          topic: topic.title,
+          prompt: question.prompt,
+          misses: (wrongs[question.id]?.misses || 0) + 1,
+          updatedAt: new Date().toISOString()
+        };
+      }
+
+      setProgress(progress);
+      setWrongs(wrongs);
+
+      els.answerList.querySelectorAll("button").forEach((button) => {
+        const buttonIndex = Number(button.dataset.index);
+        if (buttonIndex === question.correct) button.classList.add("is-correct");
+        if (buttonIndex === index && !isCorrect) button.classList.add("is-wrong");
+      });
+
+      els.feedback.textContent = `${isCorrect ? "正确。" : "这一题先收进错题本。"} ${question.explain}`;
+      renderQuestionStatsOnly();
+    }
+
+    function renderQuestionStatsOnly() {
+      const topic = getTopic();
+      const progress = getProgress();
+      const wrongs = getWrongs();
+      const topicDone = topic.questions.filter((item) => progress[item.id]?.correct).length;
+      const wrongCount = Object.keys(wrongs).length;
+      const topicWrongCount = topic.questions.filter((item) => wrongs[item.id]).length;
+      const percent = topic.questions.length ? Math.round((topicDone / topic.questions.length) * 100) : 0;
+      els.progressBar.style.width = `${percent}%`;
+      els.progressText.textContent = `当前主题正确完成 ${topicDone}/${topic.questions.length}。`;
+      els.wrongNote.textContent = `错题本 ${wrongCount} 题；当前主题 ${topicWrongCount} 题。`;
+    }
+
+    els.hintButton.addEventListener("click", () => {
+      const question = currentQuestion();
+      els.feedback.textContent = `提示：${question.hint}`;
+    });
+
+    els.nextButton.addEventListener("click", () => {
+      const pool = getQuestionPool();
+      state.questionIndex = (state.questionIndex + 1) % pool.length;
+      state.answered = false;
+      renderQuestion();
+    });
+
+    els.clearWrongsButton.addEventListener("click", () => {
+      setWrongs({});
+      state.questionIndex = 0;
+      state.answered = false;
+      renderQuestion();
+    });
+
+    function render() {
+      renderNav();
       renderLesson();
-    });
+      renderQuestion();
+    }
 
-    clearWrongButton.addEventListener("click", () => {
-      state.wrongs = {};
-      saveWrongs();
-      renderAll();
-    });
-
-    renderAll();
+    render();
   </script>
 </body>
 </html>
