@@ -111,6 +111,7 @@
         }
 
         .study-gate {
+            position: relative;
             display: inline-block;
             margin-top: 24px;
             color: var(--dim);
@@ -127,6 +128,16 @@
             color: var(--white);
             border-color: var(--white);
             transform: translateY(-2px);
+        }
+
+        .study-gate .hint {
+            top: calc(100% + 14px);
+        }
+
+        .study-gate:hover .hint,
+        .study-gate:focus-visible .hint {
+            opacity: 1;
+            transform: translate(-50%, 0);
         }
 
         .gate:hover .hint,
@@ -276,7 +287,10 @@
             <span class="hint">Short writings, kept quiet.</span>
         </a>
         <br>
-        <a class="study-gate" href="/study/">Study</a>
+        <a class="study-gate" href="/study/">
+            Study
+            <span class="hint">Locked notes for law, Japanese, and economics.</span>
+        </a>
     </div>
 </main>
 <figure class="agent-widget" aria-label="Nun Agent">

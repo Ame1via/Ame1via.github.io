@@ -29,6 +29,8 @@ E:\github\Ame1via.github.io
 
 ```text
 E:\github\Ame1via.github.io\study\index.html
+E:\github\Ame1via.github.io\study\app\index.html
+E:\github\Ame1via.github.io\assets\study-data.js
 ```
 
 首页入口：
@@ -51,10 +53,12 @@ E:\github\Ame1via.github.io\SYSTEM.md
 
 ## 3. 最小同步文件
 
-最小同步方案只需要复制：
+最小同步方案需要复制：
 
 ```text
 study/index.html
+study/app/index.html
+assets/study-data.js
 ```
 
 如果目标项目也有首页入口，在首页合适位置加入：
@@ -78,6 +82,10 @@ your-site/
   index.html
   study/
     index.html
+    app/
+      index.html
+  assets/
+    study-data.js
 ```
 
 后续扩展版：
@@ -149,12 +157,55 @@ JLPT N1 目前包含：
 当前题量：
 
 ```text
-法律：36 题
-JLPT N1：30 题
+法律：58 题
+日语：52 题
 English：14 题
-经济：22 题
-合计：102 题
+经济：42 题
+合计：166 题
 ```
+
+当前目标用户：
+
+```text
+在日本学习/备考的中国留学生
+```
+
+内容方向：
+
+- 法律、日语、经济优先使用日语原文表记
+- 必要处提供中文注释
+- 注释量后续再单独调校
+- 题库收拢为考试导向，不加入生活手续类内容
+- 题目不直接搬运电子书原题，使用 OCR 抽取的章节和知识点线索生成原创题
+
+当前学习逻辑：
+
+- 答错会写入 `localStorage` 错题本
+- 复习模式优先显示当前主题错题
+- 错题答对后自动移出错题本
+- `Clear wrongs` 可以清空本地错题
+
+本地存储键：
+
+```text
+ame-study-progress
+ame-study-wrongs
+```
+
+访问结构：
+
+```text
+/study/      密码入口页
+/study/app/  学习页
+```
+
+当前入口密码：
+
+```text
+ame-study
+```
+
+说明：这是静态网页里的轻访问控制，只用于避免公开入口直接展示学习页，不等同于后端安全认证。
 
 每个主题包含：
 

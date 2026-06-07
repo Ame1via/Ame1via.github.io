@@ -162,6 +162,7 @@ function build() {
   copy("assets/nun-agent/nun-agent-running-left.gif");
   copy("assets/nun-agent/nun-agent-running-right.gif");
   copy("assets/site-interactions.js");
+  copy("assets/study-data.js");
 
   const posts = readdirSync(join(root, "_posts"))
     .filter((file) => file.endsWith(".md"))
@@ -173,6 +174,7 @@ function build() {
   write("hidden/index.html", read("hidden/index.html"));
   write("atlas/index.html", read("atlas/index.html"));
   write("study/index.html", read("study/index.html"));
+  write("study/app/index.html", read("study/app/index.html"));
   write("room/nun-agent/index.html", renderNunAgentRoom(read("room/nun-agent/index.html"), posts));
   write("404.html", read("404.html"));
   write("blog/index.html", page("Fragments", renderFragments(read("blog/index.html"), posts)));
