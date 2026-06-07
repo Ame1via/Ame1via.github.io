@@ -5,6 +5,7 @@ exclude:
   - PROJECT.md
   - CODEX_CONTEXT.md
   - FRAGMENTS_GUIDE.md
+  - study-component-sync-guide.md
   - SYSTEM.md
   - ATLAS.md
   - blog1.html

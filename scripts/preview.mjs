@@ -172,6 +172,7 @@ function build() {
   write("index.html", read("index.html"));
   write("hidden/index.html", read("hidden/index.html"));
   write("atlas/index.html", read("atlas/index.html"));
+  write("study/index.html", read("study/index.html"));
   write("room/nun-agent/index.html", renderNunAgentRoom(read("room/nun-agent/index.html"), posts));
   write("404.html", read("404.html"));
   write("blog/index.html", page("Fragments", renderFragments(read("blog/index.html"), posts)));

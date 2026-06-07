@@ -14,6 +14,9 @@ Fragments
 /hidden/
 Stage
 
+/study/
+Study
+
 /room/nun-agent/
 Cell
 ```
