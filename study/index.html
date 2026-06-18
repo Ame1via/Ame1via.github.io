@@ -6,7 +6,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     :root {
-      --black: #0d0c0c;
       --paper: #f2f0eb;
       --dim: #948d83;
       --line: rgba(242, 240, 235, 0.16);
@@ -50,16 +49,9 @@
       letter-spacing: 0;
     }
 
-    .note {
-      margin: 16px 0 24px;
-      color: var(--dim);
-      font-size: 14px;
-      line-height: 1.75;
-    }
-
     label {
       display: block;
-      margin: 0 0 8px;
+      margin: 22px 0 8px;
       color: var(--dim);
       font-size: 11px;
       letter-spacing: 0.12em;
@@ -138,7 +130,6 @@
   <main>
     <section class="gate" aria-label="Study password gate">
       <h1>Study</h1>
-      <p class="note">法律、日语、经济。面向在日本的中国留学生，但题库收拢到考试导向。</p>
 
       <form id="gateForm">
         <label for="password">Password</label>
@@ -175,14 +166,14 @@
 
       if (inputHash === passwordHash) {
         sessionStorage.setItem(sessionKey, "true");
-        message.textContent = "打开中。";
+        message.textContent = "\u6253\u5f00\u4e2d\u3002";
         window.location.href = "/study/app/";
         return;
       }
 
       password.value = "";
       password.focus();
-      message.textContent = "密码不对。";
+      message.textContent = "\u5bc6\u7801\u4e0d\u5bf9\u3002";
     });
   </script>
 </body>
