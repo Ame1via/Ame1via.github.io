@@ -33,6 +33,8 @@
 
     .set-gallery,
     .set-layer,
+    .figure-gallery,
+    .figure-layer,
     .set-light,
     .set-vignette,
     .set-grain,
@@ -70,8 +72,30 @@
       filter: saturate(0.78) brightness(0.2) contrast(1.18);
     }
 
-    .set-light {
+    .figure-gallery {
       z-index: 2;
+      overflow: hidden;
+    }
+
+    .figure-layer {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0;
+      transform: translate3d(var(--pan-x), var(--pan-y), 0) scale(1.04);
+      transition: opacity 480ms ease, transform 180ms ease-out;
+    }
+
+    .figure-layer.is-active {
+      opacity: 1;
+    }
+
+    body.is-transitioning .figure-layer {
+      opacity: 0;
+    }
+
+    .set-light {
+      z-index: 3;
       background:
         radial-gradient(circle at var(--mx) 48%, rgba(242, 240, 235, 0.16), transparent 22%),
         radial-gradient(circle at var(--mx) 58%, rgba(91, 20, 23, 0.26), transparent 34%);
@@ -79,14 +103,14 @@
     }
 
     .set-vignette {
-      z-index: 3;
+      z-index: 4;
       background:
         radial-gradient(circle at 50% 48%, transparent 36%, rgba(8, 7, 7, 0.54) 82%),
         linear-gradient(180deg, rgba(8, 7, 7, 0.3), transparent 30%, rgba(8, 7, 7, 0.76));
     }
 
     .set-grain {
-      z-index: 4;
+      z-index: 5;
       opacity: 0.16;
       background-image:
         linear-gradient(0deg, rgba(242, 240, 235, 0.05) 1px, transparent 1px),
@@ -96,7 +120,7 @@
     }
 
     .transition-canvas {
-      z-index: 4;
+      z-index: 6;
       width: 100vw;
       height: 100vh;
       opacity: 0;
@@ -112,7 +136,7 @@
       position: fixed;
       left: clamp(22px, 5vw, 70px);
       bottom: clamp(24px, 6vh, 68px);
-      z-index: 5;
+      z-index: 7;
       max-width: 320px;
       text-shadow: 0 0 24px rgba(8, 7, 7, 0.94);
     }
@@ -144,7 +168,7 @@
       position: fixed;
       left: 50%;
       bottom: 24px;
-      z-index: 5;
+      z-index: 7;
       display: grid;
       grid-template-columns: repeat(15, 1fr);
       gap: 5px;
@@ -174,7 +198,7 @@
       position: fixed;
       right: 28px;
       bottom: 24px;
-      z-index: 5;
+      z-index: 7;
       color: var(--dim);
       font-size: 12px;
       letter-spacing: 0.12em;
@@ -247,21 +271,38 @@
 <body>
   <main class="sanctum-room" aria-label="Sanctum sets">
     <div class="set-gallery" aria-hidden="true">
-      <img class="set-layer is-active" src="/assets/sanctum/sets/set-01.png" alt="">
-      <img class="set-layer" src="/assets/sanctum/sets/set-02.png" alt="">
-      <img class="set-layer" src="/assets/sanctum/sets/set-03.png" alt="">
-      <img class="set-layer" src="/assets/sanctum/sets/set-04.png" alt="">
-      <img class="set-layer" src="/assets/sanctum/sets/set-05.png" alt="">
-      <img class="set-layer" src="/assets/sanctum/sets/set-06.png" alt="">
-      <img class="set-layer" src="/assets/sanctum/sets/set-07.png" alt="">
-      <img class="set-layer" src="/assets/sanctum/sets/set-08.png" alt="">
-      <img class="set-layer" src="/assets/sanctum/sets/set-09.png" alt="">
-      <img class="set-layer" src="/assets/sanctum/sets/set-10.png" alt="">
-      <img class="set-layer" src="/assets/sanctum/sets/set-11.png" alt="">
-      <img class="set-layer" src="/assets/sanctum/sets/set-12.png" alt="">
-      <img class="set-layer" src="/assets/sanctum/sets/set-13.png" alt="">
-      <img class="set-layer" src="/assets/sanctum/sets/set-14.png" alt="">
-      <img class="set-layer" src="/assets/sanctum/sets/set-15.png" alt="">
+      <img class="set-layer is-active" src="/assets/sanctum/layers/backgrounds/background-01.png" alt="">
+      <img class="set-layer" src="/assets/sanctum/layers/backgrounds/background-02.png" alt="">
+      <img class="set-layer" src="/assets/sanctum/layers/backgrounds/background-03.png" alt="">
+      <img class="set-layer" src="/assets/sanctum/layers/backgrounds/background-04.png" alt="">
+      <img class="set-layer" src="/assets/sanctum/layers/backgrounds/background-05.png" alt="">
+      <img class="set-layer" src="/assets/sanctum/layers/backgrounds/background-06.png" alt="">
+      <img class="set-layer" src="/assets/sanctum/layers/backgrounds/background-07.png" alt="">
+      <img class="set-layer" src="/assets/sanctum/layers/backgrounds/background-08.png" alt="">
+      <img class="set-layer" src="/assets/sanctum/layers/backgrounds/background-09.png" alt="">
+      <img class="set-layer" src="/assets/sanctum/layers/backgrounds/background-10.png" alt="">
+      <img class="set-layer" src="/assets/sanctum/layers/backgrounds/background-11.png" alt="">
+      <img class="set-layer" src="/assets/sanctum/layers/backgrounds/background-12.png" alt="">
+      <img class="set-layer" src="/assets/sanctum/layers/backgrounds/background-13.png" alt="">
+      <img class="set-layer" src="/assets/sanctum/layers/backgrounds/background-14.png" alt="">
+      <img class="set-layer" src="/assets/sanctum/layers/backgrounds/background-15.png" alt="">
+    </div>
+    <div class="figure-gallery" aria-hidden="true">
+      <img class="figure-layer is-active" src="/assets/sanctum/layers/figures/figure-01.png" alt="">
+      <img class="figure-layer" src="/assets/sanctum/layers/figures/figure-02.png" alt="">
+      <img class="figure-layer" src="/assets/sanctum/layers/figures/figure-03.png" alt="">
+      <img class="figure-layer" src="/assets/sanctum/layers/figures/figure-04.png" alt="">
+      <img class="figure-layer" src="/assets/sanctum/layers/figures/figure-05.png" alt="">
+      <img class="figure-layer" src="/assets/sanctum/layers/figures/figure-06.png" alt="">
+      <img class="figure-layer" src="/assets/sanctum/layers/figures/figure-07.png" alt="">
+      <img class="figure-layer" src="/assets/sanctum/layers/figures/figure-08.png" alt="">
+      <img class="figure-layer" src="/assets/sanctum/layers/figures/figure-09.png" alt="">
+      <img class="figure-layer" src="/assets/sanctum/layers/figures/figure-10.png" alt="">
+      <img class="figure-layer" src="/assets/sanctum/layers/figures/figure-11.png" alt="">
+      <img class="figure-layer" src="/assets/sanctum/layers/figures/figure-12.png" alt="">
+      <img class="figure-layer" src="/assets/sanctum/layers/figures/figure-13.png" alt="">
+      <img class="figure-layer" src="/assets/sanctum/layers/figures/figure-14.png" alt="">
+      <img class="figure-layer" src="/assets/sanctum/layers/figures/figure-15.png" alt="">
     </div>
     <div class="set-light" aria-hidden="true"></div>
     <canvas class="transition-canvas" id="transitionCanvas" aria-hidden="true"></canvas>
@@ -282,6 +323,7 @@
   <script>
     const root = document.documentElement;
     const layers = Array.from(document.querySelectorAll(".set-layer"));
+    const figureDisplays = Array.from(document.querySelectorAll(".figure-layer"));
     const setIndex = document.getElementById("setIndex");
     const setName = document.getElementById("setName");
     const setTrack = document.getElementById("setTrack");
@@ -289,6 +331,11 @@
     const nextSet = document.getElementById("nextSet");
     const canvas = document.getElementById("transitionCanvas");
     const ctx = canvas.getContext("2d");
+    const figureLayers = Array.from({ length: 15 }, (_, index) => {
+      const image = new Image();
+      image.src = `/assets/sanctum/layers/figures/figure-${String(index + 1).padStart(2, "0")}.png`;
+      return image;
+    });
     const names = [
       "Cathedral library",
       "Moonlit cloister",
@@ -340,6 +387,9 @@
       layers.forEach((layer, layerIndex) => {
         layer.classList.toggle("is-active", layerIndex === index);
         layer.classList.remove("is-pending");
+      });
+      figureDisplays.forEach((figure, figureIndex) => {
+        figure.classList.toggle("is-active", figureIndex === index);
       });
       ticks.forEach((tick, tickIndex) => {
         tick.classList.toggle("is-active", tickIndex === index);
@@ -422,7 +472,7 @@
       resizeCanvas();
       const width = window.innerWidth;
       const height = window.innerHeight;
-      knitPoints = generateKnitPoints(index, width, height, layers[index]);
+      knitPoints = generateKnitPoints(index, width, height, figureLayers[index]);
       relaxKnitPoints(width, height, 4);
       knitEdges = generateKnitEdges(index, width, height);
       knitDegrees = new Array(knitPoints.length).fill(0);
@@ -465,7 +515,7 @@
       drawFourthWall(layers[activeIndex], layers[index], wallProgress, progress, index);
       veilPersonCutout(progress, index);
 
-      drawKnitMesh(knitProgress, knitFade, layers[index], index);
+      drawKnitMesh(knitProgress, knitFade, figureLayers[index], index);
 
       const flash = smoothstep(0.82, 1, progress);
       ctx.save();
@@ -479,21 +529,21 @@
       const width = window.innerWidth;
       const height = window.innerHeight;
       const mode = index % 5;
-      const settle = smoothstep(0.26, 0.86, totalProgress);
+      const settle = smoothstep(0.08, 0.54, totalProgress);
 
       ctx.save();
-      ctx.globalAlpha = 0.18 * (1 - settle);
+      ctx.globalAlpha = 0.08 * (1 - settle);
       drawCoverImage(currentImage, 0, 0, width, height);
       ctx.fillStyle = "rgba(8, 7, 7, 0.72)";
       ctx.fillRect(0, 0, width, height);
       ctx.restore();
 
       ctx.save();
-      ctx.globalAlpha = 0.18 + settle * 0.22;
+      ctx.globalAlpha = 0.28 + settle * 0.32;
       ctx.filter = `brightness(${0.18 + settle * 0.34}) saturate(0.86) contrast(1.1)`;
       drawCoverImage(nextImage, 0, 0, width, height);
       ctx.filter = "none";
-      ctx.fillStyle = "rgba(8, 7, 7, 0.48)";
+      ctx.fillStyle = "rgba(8, 7, 7, 0.36)";
       ctx.fillRect(0, 0, width, height);
       ctx.restore();
 

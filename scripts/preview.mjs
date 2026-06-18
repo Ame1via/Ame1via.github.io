@@ -153,6 +153,9 @@ function build() {
   ensureDir(join(out, "assets"));
   ensureDir(join(out, "assets", "sanctum"));
   ensureDir(join(out, "assets", "sanctum", "sets"));
+  ensureDir(join(out, "assets", "sanctum", "layers"));
+  ensureDir(join(out, "assets", "sanctum", "layers", "backgrounds"));
+  ensureDir(join(out, "assets", "sanctum", "layers", "figures"));
   ensureDir(join(out, "assets", "nun-agent"));
 
   copy("assets/fussli-fragments-bg.png");
@@ -168,6 +171,12 @@ function build() {
   copy("assets/sanctum/world-threshold.png");
   for (const file of readdirSync(join(root, "assets", "sanctum", "sets")).filter((item) => item.endsWith(".png"))) {
     copy(`assets/sanctum/sets/${file}`);
+  }
+  for (const file of readdirSync(join(root, "assets", "sanctum", "layers", "backgrounds")).filter((item) => item.endsWith(".png"))) {
+    copy(`assets/sanctum/layers/backgrounds/${file}`);
+  }
+  for (const file of readdirSync(join(root, "assets", "sanctum", "layers", "figures")).filter((item) => item.endsWith(".png"))) {
+    copy(`assets/sanctum/layers/figures/${file}`);
   }
   copy("assets/nun-agent-room-bg.png");
   copy("assets/nun-agent/nun-agent-idle.gif");
