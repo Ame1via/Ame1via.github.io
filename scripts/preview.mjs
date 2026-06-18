@@ -151,14 +151,20 @@ function build() {
   rmSync(out, { recursive: true, force: true });
   ensureDir(out);
   ensureDir(join(out, "assets"));
-  ensureDir(join(out, "assets", "concept"));
+  ensureDir(join(out, "assets", "sanctum"));
   ensureDir(join(out, "assets", "nun-agent"));
 
   copy("assets/fussli-fragments-bg.png");
-  copy("assets/concept/nun-agent-prayer.png");
-  copy("assets/concept/world-archive.png");
-  copy("assets/concept/world-cell.png");
-  copy("assets/concept/world-threshold.png");
+  copy("assets/sanctum/nun-agent-prayer.png");
+  copy("assets/sanctum/world-archive.png");
+  copy("assets/sanctum/world-cell.png");
+  copy("assets/sanctum/world-chapel.png");
+  copy("assets/sanctum/world-cloister.png");
+  copy("assets/sanctum/world-cosmic.png");
+  copy("assets/sanctum/world-library.png");
+  copy("assets/sanctum/world-manuscript.png");
+  copy("assets/sanctum/world-reliquary.png");
+  copy("assets/sanctum/world-threshold.png");
   copy("assets/nun-agent-room-bg.png");
   copy("assets/nun-agent/nun-agent-idle.gif");
   copy("assets/nun-agent/nun-agent-waving.gif");
@@ -177,6 +183,7 @@ function build() {
 
   write("index.html", read("index.html"));
   write("concept/index.html", read("concept/index.html"));
+  write("sanctum/index.html", read("sanctum/index.html"));
   write("hidden/index.html", read("hidden/index.html"));
   write("atlas/index.html", read("atlas/index.html"));
   write("study/index.html", read("study/index.html"));
