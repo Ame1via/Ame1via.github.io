@@ -361,21 +361,21 @@
     let knitEdges = [];
     let knitDegrees = [];
     const personMasks = [
-      [[[0.42,0.08],[0.57,0.08],[0.64,0.36],[0.67,0.9],[0.54,0.96],[0.45,0.96],[0.32,0.9],[0.35,0.36]]],
-      [[[0.39,0.1],[0.55,0.08],[0.72,0.36],[0.72,0.95],[0.55,0.98],[0.42,0.94],[0.31,0.55]]],
-      [[[0.36,0.02],[0.61,0.05],[0.68,0.35],[0.66,0.67],[0.5,0.82],[0.28,0.95],[0.16,0.82],[0.19,0.48]]],
-      [[[0.39,0.08],[0.58,0.08],[0.68,0.33],[0.74,0.72],[0.62,0.94],[0.38,0.94],[0.24,0.72],[0.31,0.33]]],
-      [[[0.42,0.08],[0.6,0.08],[0.66,0.32],[0.68,0.68],[0.55,0.86],[0.38,0.8],[0.32,0.55],[0.34,0.25]]],
-      [[[0.44,0.15],[0.56,0.15],[0.69,0.45],[0.76,0.9],[0.54,0.98],[0.36,0.94],[0.24,0.64],[0.32,0.36]]],
-      [[[0.36,0.1],[0.52,0.12],[0.63,0.38],[0.62,0.93],[0.42,0.98],[0.27,0.88],[0.24,0.42]]],
-      [[[0.4,0.06],[0.56,0.08],[0.65,0.36],[0.66,0.92],[0.47,0.98],[0.31,0.88],[0.33,0.3]],[[0.26,0.34],[0.34,0.27],[0.37,0.43],[0.28,0.48]]],
-      [[[0.34,0.22],[0.63,0.22],[0.78,0.56],[0.69,0.9],[0.51,0.98],[0.31,0.9],[0.2,0.58]]],
-      [[[0.06,0.07],[0.35,0.08],[0.42,0.38],[0.4,0.83],[0.25,0.96],[0.08,0.88],[0.02,0.45]]],
-      [[[0.43,0.16],[0.57,0.16],[0.7,0.42],[0.76,0.9],[0.56,0.98],[0.42,0.93],[0.28,0.58],[0.36,0.34]]],
-      [[[0.38,0.1],[0.58,0.1],[0.68,0.38],[0.65,0.94],[0.45,0.98],[0.33,0.82],[0.33,0.35]]],
-      [[[0.12,0.08],[0.35,0.06],[0.44,0.34],[0.42,0.86],[0.26,0.98],[0.1,0.88],[0.04,0.48]]],
-      [[[0.44,0.1],[0.6,0.11],[0.69,0.4],[0.67,0.95],[0.48,0.99],[0.36,0.82],[0.35,0.32]],[[0.26,0.36],[0.36,0.28],[0.39,0.44],[0.29,0.5]]],
-      [[[0.42,0.1],[0.58,0.1],[0.73,0.42],[0.75,0.93],[0.55,0.98],[0.39,0.94],[0.25,0.48],[0.33,0.26]]]
+      [[[0.43,0.07],[0.57,0.07],[0.61,0.38],[0.58,0.88],[0.53,0.96],[0.46,0.96],[0.40,0.88],[0.38,0.38]],[[0.45,0.17],[0.55,0.17],[0.58,0.88],[0.42,0.88]],[[0.45,0.28],[0.55,0.28],[0.56,0.39],[0.44,0.39]]],
+      [[[0.42,0.09],[0.55,0.08],[0.64,0.35],[0.67,0.9],[0.54,0.97],[0.43,0.93],[0.34,0.56]],[[0.45,0.2],[0.55,0.2],[0.6,0.9],[0.42,0.9]],[[0.55,0.34],[0.68,0.42],[0.66,0.52],[0.55,0.45]]],
+      [[[0.36,0.04],[0.60,0.05],[0.65,0.32],[0.61,0.58],[0.48,0.74],[0.28,0.91],[0.18,0.78],[0.21,0.48]],[[0.43,0.22],[0.59,0.24],[0.62,0.57],[0.50,0.72],[0.36,0.60]],[[0.50,0.56],[0.66,0.56],[0.65,0.66],[0.50,0.68]]],
+      [[[0.39,0.09],[0.58,0.09],[0.66,0.34],[0.70,0.72],[0.61,0.93],[0.39,0.93],[0.29,0.72],[0.33,0.34]],[[0.43,0.18],[0.55,0.18],[0.60,0.88],[0.40,0.88]],[[0.25,0.34],[0.38,0.42],[0.35,0.57],[0.25,0.52]],[[0.60,0.42],[0.73,0.34],[0.72,0.52],[0.63,0.57]]],
+      [[[0.42,0.08],[0.59,0.08],[0.64,0.32],[0.62,0.62],[0.55,0.82],[0.40,0.77],[0.34,0.55],[0.35,0.26]],[[0.45,0.22],[0.58,0.22],[0.59,0.58],[0.45,0.58]],[[0.58,0.55],[0.66,0.56],[0.66,0.66],[0.55,0.66]]],
+      [[[0.45,0.16],[0.55,0.16],[0.67,0.45],[0.72,0.88],[0.54,0.97],[0.37,0.92],[0.28,0.64],[0.34,0.36]],[[0.46,0.24],[0.54,0.24],[0.58,0.82],[0.43,0.82]]],
+      [[[0.37,0.11],[0.52,0.12],[0.60,0.38],[0.58,0.9],[0.43,0.96],[0.30,0.86],[0.27,0.42]],[[0.39,0.21],[0.51,0.21],[0.53,0.84],[0.36,0.84]]],
+      [[[0.41,0.07],[0.56,0.08],[0.62,0.36],[0.62,0.9],[0.48,0.97],[0.34,0.86],[0.35,0.30]],[[0.26,0.34],[0.36,0.28],[0.38,0.44],[0.29,0.49]],[[0.43,0.20],[0.55,0.20],[0.57,0.84],[0.40,0.84]]],
+      [[[0.35,0.22],[0.62,0.22],[0.72,0.55],[0.66,0.86],[0.51,0.96],[0.33,0.88],[0.23,0.58]],[[0.41,0.30],[0.56,0.30],[0.60,0.76],[0.39,0.76]],[[0.34,0.72],[0.49,0.78],[0.45,0.91],[0.30,0.86]],[[0.52,0.78],[0.67,0.72],[0.70,0.86],[0.55,0.91]]],
+      [[[0.10,0.08],[0.34,0.08],[0.39,0.37],[0.36,0.80],[0.25,0.94],[0.10,0.86],[0.05,0.45]],[[0.18,0.20],[0.34,0.20],[0.35,0.72],[0.16,0.72]],[[0.30,0.34],[0.43,0.42],[0.41,0.55],[0.31,0.50]]],
+      [[[0.44,0.17],[0.56,0.17],[0.66,0.43],[0.71,0.88],[0.55,0.97],[0.43,0.92],[0.32,0.58],[0.38,0.34]],[[0.45,0.27],[0.55,0.27],[0.59,0.84],[0.41,0.84]],[[0.57,0.36],[0.70,0.26],[0.73,0.42],[0.61,0.48]]],
+      [[[0.39,0.11],[0.58,0.11],[0.65,0.38],[0.62,0.90],[0.46,0.97],[0.35,0.80],[0.35,0.36]],[[0.43,0.23],[0.56,0.23],[0.57,0.82],[0.39,0.82]],[[0.41,0.62],[0.60,0.62],[0.63,0.78],[0.38,0.78]]],
+      [[[0.13,0.08],[0.34,0.07],[0.40,0.34],[0.38,0.82],[0.26,0.96],[0.11,0.86],[0.06,0.48]],[[0.18,0.19],[0.34,0.19],[0.35,0.72],[0.16,0.72]],[[0.30,0.50],[0.42,0.58],[0.40,0.70],[0.28,0.62]]],
+      [[[0.45,0.11],[0.60,0.12],[0.65,0.40],[0.63,0.92],[0.49,0.98],[0.38,0.80],[0.37,0.32]],[[0.27,0.36],[0.37,0.28],[0.39,0.44],[0.30,0.50]],[[0.46,0.23],[0.58,0.23],[0.58,0.78],[0.42,0.78]]],
+      [[[0.43,0.11],[0.58,0.11],[0.69,0.42],[0.71,0.90],[0.55,0.97],[0.40,0.92],[0.29,0.49],[0.35,0.27]],[[0.46,0.22],[0.57,0.22],[0.60,0.84],[0.42,0.84]],[[0.34,0.43],[0.45,0.52],[0.42,0.68],[0.31,0.60]],[[0.58,0.52],[0.70,0.43],[0.73,0.60],[0.62,0.68]]]
     ];
 
     setTrack.innerHTML = layers.map((_, index) => `<button class="${index === 0 ? "is-active" : ""}" type="button" aria-label="Show set ${index + 1}"></button>`).join("");
@@ -513,8 +513,6 @@
       const knitFade = 1 - smoothstep(0.86, 1, progress);
 
       drawFourthWall(layers[activeIndex], layers[index], wallProgress, progress, index);
-      veilPersonCutout(progress, index);
-
       drawKnitMesh(knitProgress, knitFade, figureLayers[index], index);
 
       const flash = smoothstep(0.82, 1, progress);
@@ -721,18 +719,6 @@
       ctx.restore();
     }
 
-    function veilPersonCutout(progress, index) {
-      const width = window.innerWidth;
-      const height = window.innerHeight;
-      const veil = 1 - smoothstep(0.74, 0.98, progress);
-
-      ctx.save();
-      ctx.globalAlpha = 0.38 * veil;
-      ctx.fillStyle = "rgba(6, 5, 5, 0.92)";
-      ctx.fill(personPath(width, height, index));
-      ctx.restore();
-    }
-
     function drawKnitMesh(progress, fade, image, index) {
       const width = window.innerWidth;
       const height = window.innerHeight;
@@ -745,12 +731,11 @@
 
       ctx.save();
       ctx.globalAlpha = fade;
-      ctx.fillStyle = "rgba(242, 240, 235, 0.07)";
-      ctx.fill(personPath(width, height, index));
+      ctx.fillStyle = "rgba(242, 240, 235, 0.035)";
+      ctx.fillRect(0, 0, width, height);
       ctx.restore();
 
       ctx.save();
-      ctx.clip(personPath(width, height, index));
       ctx.globalAlpha = fade * smoothstep(0.12, 0.92, progress) * 0.74;
       ctx.filter = `brightness(${0.3 + progress * 0.76}) saturate(${0.78 + progress * 0.2}) contrast(1.08)`;
       drawCoverImage(image, 0, 0, width, height);
@@ -760,7 +745,6 @@
       ctx.restore();
 
       ctx.save();
-      ctx.clip(personPath(width, height, index));
       ctx.lineCap = "round";
       ctx.lineJoin = "round";
 
@@ -784,7 +768,6 @@
       ctx.restore();
 
       ctx.save();
-      ctx.clip(personPath(width, height, index));
       ctx.globalAlpha = fade * smoothstep(0.7, 1, progress) * 0.58;
       for (let i = 0; i < visibleCount; i += 1) {
         const point = knitPoints[i];
@@ -794,15 +777,6 @@
         ctx.arc(point.x, point.y, 1.05, 0, Math.PI * 2);
         ctx.fill();
       }
-      ctx.restore();
-
-      ctx.save();
-      ctx.globalAlpha = fade * smoothstep(0.36, 1, progress) * 0.74;
-      ctx.strokeStyle = "rgba(242, 240, 235, 0.72)";
-      ctx.lineWidth = 1.05;
-      ctx.shadowColor = "rgba(242, 240, 235, 0.2)";
-      ctx.shadowBlur = 16;
-      strokeDashedPath(personPath(width, height, index), smoothstep(0.32, 1, progress), scale);
       ctx.restore();
 
     }
@@ -818,7 +792,7 @@
         attempts += 1;
         const nx = seeded(index, attempts, 1, 0);
         const ny = seeded(index, attempts, 2, 0);
-        if (!insidePersonMask(index, nx, ny)) continue;
+        if (!insideFigureAlpha(image, nx, ny)) continue;
 
         const tone = sampleSetKnitTone(image, nx, ny, width, height);
         const shapeBrightness = syntheticKnitBrightness(nx, ny);
@@ -889,7 +863,7 @@
           const distance = Math.hypot(knitPoints[i].x - knitPoints[j].x, knitPoints[i].y - knitPoints[j].y);
           if (distance > maxDistance) continue;
           const mid = fromKnitScreen((knitPoints[i].x + knitPoints[j].x) / 2, (knitPoints[i].y + knitPoints[j].y) / 2, width, height);
-          if (!insidePersonMask(index, mid.nx, mid.ny)) continue;
+          if (!insideFigureAlpha(figureLayers[index], mid.nx, mid.ny)) continue;
           candidates.push({ point: knitPoints[j], distance });
         }
 
@@ -976,6 +950,23 @@
       }
       const data = samplerCtx.getImageData(ix, iy, 1, 1).data;
       return { r: data[0], g: data[1], b: data[2] };
+    }
+
+    function insideFigureAlpha(image, nx, ny) {
+      if (!image || !image.complete || !image.naturalWidth || !image.naturalHeight) return false;
+      const sampler = insideFigureAlpha.canvas || (insideFigureAlpha.canvas = document.createElement("canvas"));
+      const samplerCtx = insideFigureAlpha.ctx || (insideFigureAlpha.ctx = sampler.getContext("2d", { willReadFrequently: true }));
+      const key = `${image.currentSrc || image.src}:${image.naturalWidth}x${image.naturalHeight}`;
+      if (insideFigureAlpha.key !== key) {
+        sampler.width = image.naturalWidth;
+        sampler.height = image.naturalHeight;
+        samplerCtx.clearRect(0, 0, sampler.width, sampler.height);
+        samplerCtx.drawImage(image, 0, 0);
+        insideFigureAlpha.key = key;
+      }
+      const x = Math.max(0, Math.min(image.naturalWidth - 1, Math.floor(nx * image.naturalWidth)));
+      const y = Math.max(0, Math.min(image.naturalHeight - 1, Math.floor(ny * image.naturalHeight)));
+      return samplerCtx.getImageData(x, y, 1, 1).data[3] > 36;
     }
 
     function mixThreadColor(a, b) {
