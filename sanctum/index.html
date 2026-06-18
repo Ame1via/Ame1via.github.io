@@ -310,7 +310,9 @@
     let pendingIndex = -1;
     let isTransitioning = false;
     let wheelReady = true;
-    let knitStitches = [];
+    let knitPoints = [];
+    let knitEdges = [];
+    let knitDegrees = [];
 
     setTrack.innerHTML = layers.map((_, index) => `<button class="${index === 0 ? "is-active" : ""}" type="button" aria-label="Show set ${index + 1}"></button>`).join("");
     const ticks = Array.from(setTrack.querySelectorAll("button"));
@@ -403,32 +405,15 @@
       resizeCanvas();
       const width = window.innerWidth;
       const height = window.innerHeight;
-      const cols = Math.max(19, Math.round(width / 54));
-      const rows = Math.max(24, Math.round(height / 34));
-      knitStitches = [];
-
-      for (let row = 0; row < rows; row += 1) {
-        const yNorm = row / (rows - 1);
-        for (let col = 0; col < cols; col += 1) {
-          const xNorm = col / (cols - 1);
-          if (!insideNumFigure(xNorm, yNorm)) continue;
-
-          const jitterX = seeded(index, col, row, 1) * 16 - 8;
-          const jitterY = seeded(index, col, row, 2) * 10 - 5;
-          const rowWave = Math.sin((row * 0.72) + index) * 0.025;
-          knitStitches.push({
-            x: width * (0.5 + (xNorm - 0.5) * 0.58 + rowWave) + jitterX,
-            y: height * (0.1 + yNorm * 0.82) + jitterY,
-            w: 22 + seeded(index, col, row, 3) * 26,
-            h: 7 + seeded(index, col, row, 4) * 8,
-            angle: (seeded(index, col, row, 5) - 0.5) * 0.8,
-            delay: yNorm * 0.56 + Math.abs(xNorm - 0.5) * 0.18 + seeded(index, col, row, 6) * 0.16,
-            tone: seeded(index, col, row, 7)
-          });
-        }
+      knitPoints = generateKnitPoints(index, width, height);
+      relaxKnitPoints(width, height, 4);
+      knitEdges = generateKnitEdges(width, height);
+      knitDegrees = new Array(knitPoints.length).fill(0);
+      for (const edge of knitEdges) {
+        knitDegrees[edge.a.id] += 1;
+        knitDegrees[edge.b.id] += 1;
       }
-
-      knitStitches.sort((a, b) => a.delay - b.delay);
+      knitPoints.sort((a, b) => a.brightness - b.brightness);
     }
 
     function animateTransition(start, now, index) {
@@ -462,36 +447,7 @@
 
       drawFourthWall(layers[activeIndex], layers[index], wallProgress, progress, index);
 
-      ctx.save();
-      ctx.globalAlpha = knitFade;
-      ctx.lineCap = "round";
-      ctx.lineJoin = "round";
-      for (const stitch of knitStitches) {
-        const appear = Math.max(0, Math.min(1, (knitProgress - stitch.delay) / 0.22));
-        if (appear <= 0) continue;
-        drawNumStitch(stitch, appear);
-      }
-      ctx.restore();
-
-      ctx.save();
-      ctx.globalAlpha = knitFade * smoothstep(0.1, 0.7, knitProgress);
-      ctx.lineWidth = 1;
-      for (let i = 0; i < knitStitches.length - 1; i += 2) {
-        const a = knitStitches[i];
-        const b = knitStitches[i + 1];
-        const aProgress = Math.max(0, Math.min(1, (knitProgress - a.delay) / 0.22));
-        const bProgress = Math.max(0, Math.min(1, (knitProgress - b.delay) / 0.22));
-        const lineProgress = Math.min(aProgress, bProgress);
-        if (lineProgress <= 0) continue;
-        ctx.strokeStyle = a.tone > 0.58
-          ? `rgba(242, 240, 235, ${0.28 * lineProgress})`
-          : `rgba(132, 24, 33, ${0.42 * lineProgress})`;
-        ctx.beginPath();
-        ctx.moveTo(a.x, a.y);
-        ctx.lineTo(a.x + (b.x - a.x) * lineProgress, a.y + (b.y - a.y) * lineProgress);
-        ctx.stroke();
-      }
-      ctx.restore();
+      drawKnitMesh(knitProgress, knitFade);
 
       const flash = smoothstep(0.82, 1, progress);
       ctx.save();
@@ -697,35 +653,192 @@
       ctx.restore();
     }
 
-    function drawNumStitch(stitch, appear) {
-      const length = stitch.w * (0.18 + appear * 0.82);
-      const thickness = stitch.h * (0.55 + appear * 0.45);
-      const light = stitch.tone > 0.52;
-      const core = light ? "rgba(242, 240, 235, 0.88)" : "rgba(188, 170, 138, 0.74)";
-      const shadow = light ? "rgba(132, 24, 33, 0.38)" : "rgba(91, 20, 23, 0.62)";
+    function drawKnitMesh(progress, fade) {
+      const width = window.innerWidth;
+      const height = window.innerHeight;
+      const scale = knitScale(width, height);
+      const visibleCount = Math.floor(knitPoints.length * smootherstep(0, 1, progress));
+      const visible = new Set();
+      for (let i = 0; i < visibleCount; i += 1) {
+        visible.add(knitPoints[i].id);
+      }
 
       ctx.save();
-      ctx.translate(stitch.x, stitch.y);
-      ctx.rotate(stitch.angle);
-
-      ctx.globalAlpha = appear * 0.72;
-      ctx.fillStyle = shadow;
-      roundedPath(-length / 2, -thickness / 2, length, thickness, thickness / 2);
-      ctx.fill();
-
-      ctx.globalAlpha = appear;
-      ctx.fillStyle = core;
-      roundedPath(-length * 0.43, -thickness * 0.27, length * 0.86, thickness * 0.54, thickness * 0.27);
-      ctx.fill();
-
-      ctx.globalAlpha = appear * 0.68;
-      ctx.strokeStyle = light ? "rgba(255, 252, 239, 0.86)" : "rgba(132, 24, 33, 0.78)";
-      ctx.lineWidth = 1.1;
-      ctx.beginPath();
-      ctx.moveTo(-length / 2, 0);
-      ctx.bezierCurveTo(-length / 5, -thickness * 0.82, length / 5, thickness * 0.82, length / 2, 0);
-      ctx.stroke();
+      ctx.globalAlpha = fade;
+      ctx.fillStyle = "rgba(242, 240, 235, 0.07)";
+      ctx.fill(numPath(width, height));
       ctx.restore();
+
+      ctx.save();
+      ctx.clip(numPath(width, height));
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+
+      for (const edge of knitEdges) {
+        const aVisible = visible.has(edge.a.id);
+        const bVisible = visible.has(edge.b.id);
+        if (!aVisible && !bVisible) continue;
+
+        const local = Math.max(0, Math.min(1, (progress - edge.delay) / 0.24));
+        if (local <= 0) continue;
+
+        const lineProgress = aVisible && bVisible ? 1 : local;
+        const alpha = fade * local * (0.18 + (1 - edge.brightness) * 0.58);
+        ctx.globalAlpha = alpha;
+        ctx.strokeStyle = edge.brightness < 0.34 ? "rgba(238, 231, 210, 0.9)" : "rgba(145, 31, 40, 0.72)";
+        ctx.lineWidth = edge.brightness < 0.34 ? 0.9 : 0.68;
+        ctx.shadowColor = edge.brightness < 0.34 ? "rgba(242, 240, 235, 0.16)" : "rgba(132, 24, 33, 0.22)";
+        ctx.shadowBlur = 8;
+        drawPartialEdge(edge.a, edge.b, lineProgress);
+      }
+      ctx.restore();
+
+      ctx.save();
+      ctx.clip(numPath(width, height));
+      ctx.globalAlpha = fade * smoothstep(0.7, 1, progress) * 0.58;
+      ctx.fillStyle = "rgba(242, 240, 235, 0.82)";
+      for (let i = 0; i < visibleCount; i += 1) {
+        const point = knitPoints[i];
+        if (knitDegrees[point.id] < 4) continue;
+        ctx.beginPath();
+        ctx.arc(point.x, point.y, 1.05, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.restore();
+
+      ctx.save();
+      ctx.globalAlpha = fade * smoothstep(0.36, 1, progress) * 0.74;
+      ctx.strokeStyle = "rgba(242, 240, 235, 0.72)";
+      ctx.lineWidth = 1.05;
+      ctx.shadowColor = "rgba(242, 240, 235, 0.2)";
+      ctx.shadowBlur = 16;
+      strokeDashedPath(numPath(width, height), smoothstep(0.32, 1, progress), scale);
+      ctx.restore();
+
+      ctx.save();
+      ctx.globalAlpha = fade * smoothstep(0.46, 1, progress) * 0.6;
+      ctx.strokeStyle = "rgba(132, 24, 33, 0.86)";
+      ctx.lineWidth = 1.2;
+      strokeDashedPath(handPath(width, height), smoothstep(0.42, 1, progress), scale);
+      ctx.restore();
+    }
+
+    function generateKnitPoints(index, width, height) {
+      const result = [];
+      const scale = knitScale(width, height);
+      const target = Math.round((scale * scale) / 1050);
+      let attempts = 0;
+
+      while (result.length < target && attempts < target * 80) {
+        attempts += 1;
+        const nx = seeded(index, attempts, 1, 0) * 0.92 - 0.46;
+        const ny = seeded(index, attempts, 2, 0) * 1.18 - 0.58;
+        if (!insideNum(nx, ny)) continue;
+
+        const brightness = syntheticKnitBrightness(nx, ny);
+        const probability = Math.max(0.006, Math.pow(1 - brightness, 5.8));
+        if (seeded(index, attempts, 3, 0) > probability) continue;
+
+        const point = toKnitScreen(
+          nx + (seeded(index, attempts, 4, 0) - 0.5) * 0.01,
+          ny + (seeded(index, attempts, 5, 0) - 0.5) * 0.01,
+          width,
+          height
+        );
+        point.nx = nx;
+        point.ny = ny;
+        point.brightness = brightness;
+        point.id = result.length;
+        result.push(point);
+      }
+
+      return result;
+    }
+
+    function relaxKnitPoints(width, height, iterations) {
+      const scale = knitScale(width, height);
+      const maxDistance = scale * 0.095;
+
+      for (let iter = 0; iter < iterations; iter += 1) {
+        const moved = knitPoints.map((point) => ({ x: point.x, y: point.y, count: 1 }));
+
+        for (let i = 0; i < knitPoints.length; i += 1) {
+          for (let j = i + 1; j < knitPoints.length; j += 1) {
+            const a = knitPoints[i];
+            const b = knitPoints[j];
+            const distance = Math.hypot(a.x - b.x, a.y - b.y);
+            if (distance > maxDistance) continue;
+            moved[i].x += b.x;
+            moved[i].y += b.y;
+            moved[i].count += 1;
+            moved[j].x += a.x;
+            moved[j].y += a.y;
+            moved[j].count += 1;
+          }
+        }
+
+        for (let i = 0; i < knitPoints.length; i += 1) {
+          const avgX = moved[i].x / moved[i].count;
+          const avgY = moved[i].y / moved[i].count;
+          knitPoints[i].x += (avgX - knitPoints[i].x) * 0.22;
+          knitPoints[i].y += (avgY - knitPoints[i].y) * 0.22;
+        }
+      }
+    }
+
+    function generateKnitEdges(width, height) {
+      const result = [];
+      const used = new Set();
+      const maxDistance = knitScale(width, height) * 0.082;
+
+      for (let i = 0; i < knitPoints.length; i += 1) {
+        const candidates = [];
+        for (let j = 0; j < knitPoints.length; j += 1) {
+          if (i === j) continue;
+          const distance = Math.hypot(knitPoints[i].x - knitPoints[j].x, knitPoints[i].y - knitPoints[j].y);
+          if (distance > maxDistance) continue;
+          const mid = fromKnitScreen((knitPoints[i].x + knitPoints[j].x) / 2, (knitPoints[i].y + knitPoints[j].y) / 2, width, height);
+          if (!insideNum(mid.nx, mid.ny)) continue;
+          candidates.push({ point: knitPoints[j], distance });
+        }
+
+        candidates
+          .sort((a, b) => a.distance - b.distance)
+          .slice(0, 4)
+          .forEach(({ point, distance }) => {
+            const a = Math.min(knitPoints[i].id, point.id);
+            const b = Math.max(knitPoints[i].id, point.id);
+            const key = `${a}:${b}`;
+            if (used.has(key)) return;
+            used.add(key);
+            result.push({
+              a: knitPoints[i],
+              b: point,
+              distance,
+              brightness: Math.max(knitPoints[i].brightness, point.brightness),
+              delay: Math.min(knitPoints[i].brightness, point.brightness) * 0.56 + distance / maxDistance * 0.12
+            });
+          });
+      }
+
+      return result.sort((a, b) => a.delay - b.delay);
+    }
+
+    function syntheticKnitBrightness(nx, ny) {
+      const face = ellipse(nx, ny, 0, -0.22, 0.16, 0.13) ? 0.18 : 0.62;
+      const hood = ellipse(nx, ny, 0, -0.25, 0.31, 0.24) ? 0.3 : 0.7;
+      const hands = ellipse(nx, ny, 0, 0.08, 0.2, 0.08) ? 0.08 : 0.72;
+      const robe = Math.abs(nx) < 0.16 + (ny + 0.08) * 0.3 && ny > -0.1 ? 0.36 + Math.abs(nx) * 0.7 : 0.8;
+      const fold = 0.18 * Math.abs(Math.sin(nx * 34 + ny * 18));
+      return Math.max(0.04, Math.min(0.92, Math.min(face, hood, hands, robe) + fold));
+    }
+
+    function drawPartialEdge(a, b, progress) {
+      const eased = smootherstep(0, 1, progress);
+      ctx.beginPath();
+      ctx.moveTo(a.x, a.y);
+      ctx.lineTo(a.x + (b.x - a.x) * eased, a.y + (b.y - a.y) * eased);
+      ctx.stroke();
     }
 
     function drawCoverImage(image, x, y, width, height) {
@@ -749,26 +862,60 @@
       ctx.drawImage(image, sourceX, sourceY, sourceWidth, sourceHeight, x, y, width, height);
     }
 
-    function roundedPath(x, y, width, height, radius) {
-      ctx.beginPath();
-      ctx.moveTo(x + radius, y);
-      ctx.lineTo(x + width - radius, y);
-      ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
-      ctx.lineTo(x + width, y + height - radius);
-      ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
-      ctx.lineTo(x + radius, y + height);
-      ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
-      ctx.lineTo(x, y + radius);
-      ctx.quadraticCurveTo(x, y, x + radius, y);
+    function numPath(width, height) {
+      const p = new Path2D();
+      p.moveTo(...knitXY(0, -0.52, width, height));
+      p.bezierCurveTo(...knitXY(-0.22, -0.52, width, height), ...knitXY(-0.34, -0.36, width, height), ...knitXY(-0.31, -0.19, width, height));
+      p.bezierCurveTo(...knitXY(-0.47, -0.02, width, height), ...knitXY(-0.42, 0.3, width, height), ...knitXY(-0.34, 0.5, width, height));
+      p.bezierCurveTo(...knitXY(-0.18, 0.57, width, height), ...knitXY(0.18, 0.57, width, height), ...knitXY(0.34, 0.5, width, height));
+      p.bezierCurveTo(...knitXY(0.42, 0.3, width, height), ...knitXY(0.47, -0.02, width, height), ...knitXY(0.31, -0.19, width, height));
+      p.bezierCurveTo(...knitXY(0.34, -0.36, width, height), ...knitXY(0.22, -0.52, width, height), ...knitXY(0, -0.52, width, height));
+      p.closePath();
+      return p;
     }
 
-    function insideNumFigure(x, y) {
-      const head = ellipse(x, y, 0.5, 0.18, 0.17, 0.12);
-      const hood = ellipse(x, y, 0.5, 0.24, 0.25, 0.2);
-      const body = ellipse(x, y, 0.5, 0.57, 0.32, 0.42);
-      const robe = y > 0.4 && y < 0.96 && Math.abs(x - 0.5) < 0.12 + y * 0.28;
-      const hands = ellipse(x, y, 0.5, 0.52, 0.14, 0.09);
+    function handPath(width, height) {
+      const p = new Path2D();
+      p.moveTo(...knitXY(-0.22, 0.03, width, height));
+      p.bezierCurveTo(...knitXY(-0.12, 0.1, width, height), ...knitXY(-0.04, 0.14, width, height), ...knitXY(0, 0.14, width, height));
+      p.bezierCurveTo(...knitXY(0.04, 0.14, width, height), ...knitXY(0.12, 0.1, width, height), ...knitXY(0.22, 0.03, width, height));
+      return p;
+    }
+
+    function strokeDashedPath(path, progress, scale) {
+      ctx.save();
+      ctx.setLineDash([scale * 3, scale * 3]);
+      ctx.lineDashOffset = scale * 3 * (1 - progress);
+      ctx.stroke(path);
+      ctx.restore();
+    }
+
+    function insideNum(nx, ny) {
+      const head = ellipse(nx, ny, 0, -0.22, 0.17, 0.13);
+      const hood = ellipse(nx, ny, 0, -0.23, 0.31, 0.25);
+      const body = ellipse(nx, ny, 0, 0.16, 0.36, 0.46);
+      const robe = ny > -0.08 && ny < 0.56 && Math.abs(nx) < 0.17 + (ny + 0.08) * 0.35;
+      const hands = ellipse(nx, ny, 0, 0.08, 0.2, 0.08);
       return head || hood || body || robe || hands;
+    }
+
+    function knitScale(width, height) {
+      return Math.min(width * 0.68, height * 0.98);
+    }
+
+    function toKnitScreen(nx, ny, width, height) {
+      const scale = knitScale(width, height);
+      return { x: width / 2 + nx * scale, y: height * 0.51 + ny * scale };
+    }
+
+    function fromKnitScreen(x, y, width, height) {
+      const scale = knitScale(width, height);
+      return { nx: (x - width / 2) / scale, ny: (y - height * 0.51) / scale };
+    }
+
+    function knitXY(nx, ny, width, height) {
+      const point = toKnitScreen(nx, ny, width, height);
+      return [point.x, point.y];
     }
 
     function ellipse(x, y, cx, cy, rx, ry) {
