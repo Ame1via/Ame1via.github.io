@@ -313,6 +313,23 @@
     let knitPoints = [];
     let knitEdges = [];
     let knitDegrees = [];
+    const personMasks = [
+      [[[0.42,0.08],[0.57,0.08],[0.64,0.36],[0.67,0.9],[0.54,0.96],[0.45,0.96],[0.32,0.9],[0.35,0.36]]],
+      [[[0.39,0.1],[0.55,0.08],[0.72,0.36],[0.72,0.95],[0.55,0.98],[0.42,0.94],[0.31,0.55]]],
+      [[[0.36,0.02],[0.61,0.05],[0.68,0.35],[0.66,0.67],[0.5,0.82],[0.28,0.95],[0.16,0.82],[0.19,0.48]]],
+      [[[0.39,0.08],[0.58,0.08],[0.68,0.33],[0.74,0.72],[0.62,0.94],[0.38,0.94],[0.24,0.72],[0.31,0.33]]],
+      [[[0.42,0.08],[0.6,0.08],[0.66,0.32],[0.68,0.68],[0.55,0.86],[0.38,0.8],[0.32,0.55],[0.34,0.25]]],
+      [[[0.44,0.15],[0.56,0.15],[0.69,0.45],[0.76,0.9],[0.54,0.98],[0.36,0.94],[0.24,0.64],[0.32,0.36]]],
+      [[[0.36,0.1],[0.52,0.12],[0.63,0.38],[0.62,0.93],[0.42,0.98],[0.27,0.88],[0.24,0.42]]],
+      [[[0.4,0.06],[0.56,0.08],[0.65,0.36],[0.66,0.92],[0.47,0.98],[0.31,0.88],[0.33,0.3]],[[0.26,0.34],[0.34,0.27],[0.37,0.43],[0.28,0.48]]],
+      [[[0.34,0.22],[0.63,0.22],[0.78,0.56],[0.69,0.9],[0.51,0.98],[0.31,0.9],[0.2,0.58]]],
+      [[[0.06,0.07],[0.35,0.08],[0.42,0.38],[0.4,0.83],[0.25,0.96],[0.08,0.88],[0.02,0.45]]],
+      [[[0.43,0.16],[0.57,0.16],[0.7,0.42],[0.76,0.9],[0.56,0.98],[0.42,0.93],[0.28,0.58],[0.36,0.34]]],
+      [[[0.38,0.1],[0.58,0.1],[0.68,0.38],[0.65,0.94],[0.45,0.98],[0.33,0.82],[0.33,0.35]]],
+      [[[0.12,0.08],[0.35,0.06],[0.44,0.34],[0.42,0.86],[0.26,0.98],[0.1,0.88],[0.04,0.48]]],
+      [[[0.44,0.1],[0.6,0.11],[0.69,0.4],[0.67,0.95],[0.48,0.99],[0.36,0.82],[0.35,0.32]],[[0.26,0.36],[0.36,0.28],[0.39,0.44],[0.29,0.5]]],
+      [[[0.42,0.1],[0.58,0.1],[0.73,0.42],[0.75,0.93],[0.55,0.98],[0.39,0.94],[0.25,0.48],[0.33,0.26]]]
+    ];
 
     setTrack.innerHTML = layers.map((_, index) => `<button class="${index === 0 ? "is-active" : ""}" type="button" aria-label="Show set ${index + 1}"></button>`).join("");
     const ticks = Array.from(setTrack.querySelectorAll("button"));
@@ -405,9 +422,9 @@
       resizeCanvas();
       const width = window.innerWidth;
       const height = window.innerHeight;
-      knitPoints = generateKnitPoints(index, width, height);
+      knitPoints = generateKnitPoints(index, width, height, layers[index]);
       relaxKnitPoints(width, height, 4);
-      knitEdges = generateKnitEdges(width, height);
+      knitEdges = generateKnitEdges(index, width, height);
       knitDegrees = new Array(knitPoints.length).fill(0);
       for (const edge of knitEdges) {
         knitDegrees[edge.a.id] += 1;
@@ -442,12 +459,13 @@
       ctx.clearRect(0, 0, width, height);
 
       const wallProgress = smootherstep(0, 0.42, progress);
-      const knitProgress = smoothstep(0.08, 0.98, progress);
+      const knitProgress = smoothstep(0.18, 0.98, progress);
       const knitFade = 1 - smoothstep(0.86, 1, progress);
 
       drawFourthWall(layers[activeIndex], layers[index], wallProgress, progress, index);
+      veilPersonCutout(progress, index);
 
-      drawKnitMesh(knitProgress, knitFade);
+      drawKnitMesh(knitProgress, knitFade, layers[index], index);
 
       const flash = smoothstep(0.82, 1, progress);
       ctx.save();
@@ -653,10 +671,22 @@
       ctx.restore();
     }
 
-    function drawKnitMesh(progress, fade) {
+    function veilPersonCutout(progress, index) {
       const width = window.innerWidth;
       const height = window.innerHeight;
-      const scale = knitScale(width, height);
+      const veil = 1 - smoothstep(0.74, 0.98, progress);
+
+      ctx.save();
+      ctx.globalAlpha = 0.38 * veil;
+      ctx.fillStyle = "rgba(6, 5, 5, 0.92)";
+      ctx.fill(personPath(width, height, index));
+      ctx.restore();
+    }
+
+    function drawKnitMesh(progress, fade, image, index) {
+      const width = window.innerWidth;
+      const height = window.innerHeight;
+      const scale = Math.min(width, height);
       const visibleCount = Math.floor(knitPoints.length * smootherstep(0, 1, progress));
       const visible = new Set();
       for (let i = 0; i < visibleCount; i += 1) {
@@ -666,11 +696,21 @@
       ctx.save();
       ctx.globalAlpha = fade;
       ctx.fillStyle = "rgba(242, 240, 235, 0.07)";
-      ctx.fill(numPath(width, height));
+      ctx.fill(personPath(width, height, index));
       ctx.restore();
 
       ctx.save();
-      ctx.clip(numPath(width, height));
+      ctx.clip(personPath(width, height, index));
+      ctx.globalAlpha = fade * smoothstep(0.12, 0.92, progress) * 0.74;
+      ctx.filter = `brightness(${0.3 + progress * 0.76}) saturate(${0.78 + progress * 0.2}) contrast(1.08)`;
+      drawCoverImage(image, 0, 0, width, height);
+      ctx.filter = "none";
+      ctx.fillStyle = `rgba(6, 5, 5, ${0.42 * (1 - progress)})`;
+      ctx.fillRect(0, 0, width, height);
+      ctx.restore();
+
+      ctx.save();
+      ctx.clip(personPath(width, height, index));
       ctx.lineCap = "round";
       ctx.lineJoin = "round";
 
@@ -685,21 +725,21 @@
         const lineProgress = aVisible && bVisible ? 1 : local;
         const alpha = fade * local * (0.18 + (1 - edge.brightness) * 0.58);
         ctx.globalAlpha = alpha;
-        ctx.strokeStyle = edge.brightness < 0.34 ? "rgba(238, 231, 210, 0.9)" : "rgba(145, 31, 40, 0.72)";
+        ctx.strokeStyle = edge.color;
         ctx.lineWidth = edge.brightness < 0.34 ? 0.9 : 0.68;
-        ctx.shadowColor = edge.brightness < 0.34 ? "rgba(242, 240, 235, 0.16)" : "rgba(132, 24, 33, 0.22)";
+        ctx.shadowColor = edge.glow;
         ctx.shadowBlur = 8;
         drawPartialEdge(edge.a, edge.b, lineProgress);
       }
       ctx.restore();
 
       ctx.save();
-      ctx.clip(numPath(width, height));
+      ctx.clip(personPath(width, height, index));
       ctx.globalAlpha = fade * smoothstep(0.7, 1, progress) * 0.58;
-      ctx.fillStyle = "rgba(242, 240, 235, 0.82)";
       for (let i = 0; i < visibleCount; i += 1) {
         const point = knitPoints[i];
         if (knitDegrees[point.id] < 4) continue;
+        ctx.fillStyle = point.nodeColor;
         ctx.beginPath();
         ctx.arc(point.x, point.y, 1.05, 0, Math.PI * 2);
         ctx.fill();
@@ -712,31 +752,29 @@
       ctx.lineWidth = 1.05;
       ctx.shadowColor = "rgba(242, 240, 235, 0.2)";
       ctx.shadowBlur = 16;
-      strokeDashedPath(numPath(width, height), smoothstep(0.32, 1, progress), scale);
+      strokeDashedPath(personPath(width, height, index), smoothstep(0.32, 1, progress), scale);
       ctx.restore();
 
-      ctx.save();
-      ctx.globalAlpha = fade * smoothstep(0.46, 1, progress) * 0.6;
-      ctx.strokeStyle = "rgba(132, 24, 33, 0.86)";
-      ctx.lineWidth = 1.2;
-      strokeDashedPath(handPath(width, height), smoothstep(0.42, 1, progress), scale);
-      ctx.restore();
     }
 
-    function generateKnitPoints(index, width, height) {
+    function generateKnitPoints(index, width, height, image) {
       const result = [];
       const scale = knitScale(width, height);
-      const target = Math.round((scale * scale) / 1050);
+      const setVariance = 0.86 + seeded(index, 88, 1, 0) * 0.34;
+      const target = Math.round((scale * scale) / (1000 / setVariance));
       let attempts = 0;
 
       while (result.length < target && attempts < target * 80) {
         attempts += 1;
-        const nx = seeded(index, attempts, 1, 0) * 0.92 - 0.46;
-        const ny = seeded(index, attempts, 2, 0) * 1.18 - 0.58;
-        if (!insideNum(nx, ny)) continue;
+        const nx = seeded(index, attempts, 1, 0);
+        const ny = seeded(index, attempts, 2, 0);
+        if (!insidePersonMask(index, nx, ny)) continue;
 
-        const brightness = syntheticKnitBrightness(nx, ny);
-        const probability = Math.max(0.006, Math.pow(1 - brightness, 5.8));
+        const tone = sampleSetKnitTone(image, nx, ny, width, height);
+        const shapeBrightness = syntheticKnitBrightness(nx, ny);
+        const brightness = Math.max(0.04, Math.min(0.92, tone.brightness * 0.64 + shapeBrightness * 0.36));
+        const contrast = 4.7 + seeded(index, 91, 2, 0) * 2.4;
+        const probability = Math.max(0.006, Math.pow(1 - brightness, contrast));
         if (seeded(index, attempts, 3, 0) > probability) continue;
 
         const point = toKnitScreen(
@@ -748,6 +786,9 @@
         point.nx = nx;
         point.ny = ny;
         point.brightness = brightness;
+        point.color = tone.color;
+        point.nodeColor = tone.nodeColor;
+        point.glow = tone.glow;
         point.id = result.length;
         result.push(point);
       }
@@ -786,7 +827,7 @@
       }
     }
 
-    function generateKnitEdges(width, height) {
+    function generateKnitEdges(index, width, height) {
       const result = [];
       const used = new Set();
       const maxDistance = knitScale(width, height) * 0.082;
@@ -798,7 +839,7 @@
           const distance = Math.hypot(knitPoints[i].x - knitPoints[j].x, knitPoints[i].y - knitPoints[j].y);
           if (distance > maxDistance) continue;
           const mid = fromKnitScreen((knitPoints[i].x + knitPoints[j].x) / 2, (knitPoints[i].y + knitPoints[j].y) / 2, width, height);
-          if (!insideNum(mid.nx, mid.ny)) continue;
+          if (!insidePersonMask(index, mid.nx, mid.ny)) continue;
           candidates.push({ point: knitPoints[j], distance });
         }
 
@@ -816,6 +857,8 @@
               b: point,
               distance,
               brightness: Math.max(knitPoints[i].brightness, point.brightness),
+              color: mixThreadColor(knitPoints[i], point),
+              glow: mixThreadGlow(knitPoints[i], point),
               delay: Math.min(knitPoints[i].brightness, point.brightness) * 0.56 + distance / maxDistance * 0.12
             });
           });
@@ -824,13 +867,80 @@
       return result.sort((a, b) => a.delay - b.delay);
     }
 
+    function sampleSetKnitTone(image, nx, ny, width, height) {
+      const fallbackBrightness = syntheticKnitBrightness(nx, ny);
+      if (!image || !image.complete || !image.naturalWidth || !image.naturalHeight) {
+        return {
+          brightness: fallbackBrightness,
+          color: "rgba(238, 231, 210, 0.86)",
+          nodeColor: "rgba(242, 240, 235, 0.82)",
+          glow: "rgba(242, 240, 235, 0.16)"
+        };
+      }
+
+      const screen = toKnitScreen(nx, ny, width, height);
+      const sample = sampleCoverImageColor(image, screen.x, screen.y, width, height);
+      const brightness = (0.299 * sample.r + 0.587 * sample.g + 0.114 * sample.b) / 255;
+      const warm = Math.max(sample.r - sample.b, 0) / 255;
+      const pale = brightness > 0.58;
+      const r = Math.round(sample.r * 0.62 + (pale ? 242 : 145) * 0.38);
+      const g = Math.round(sample.g * 0.62 + (pale ? 231 : 31) * 0.38);
+      const b = Math.round(sample.b * 0.62 + (pale ? 210 : 40) * 0.38);
+      const alpha = pale ? 0.88 : 0.72 + warm * 0.12;
+
+      return {
+        brightness,
+        color: `rgba(${r}, ${g}, ${b}, ${alpha.toFixed(2)})`,
+        nodeColor: `rgba(${Math.min(255, r + 18)}, ${Math.min(255, g + 18)}, ${Math.min(255, b + 18)}, 0.82)`,
+        glow: pale ? "rgba(242, 240, 235, 0.16)" : "rgba(132, 24, 33, 0.22)"
+      };
+    }
+
+    function sampleCoverImageColor(image, x, y, width, height) {
+      const imageRatio = image.naturalWidth / image.naturalHeight;
+      const viewRatio = width / height;
+      let sourceX = 0;
+      let sourceY = 0;
+      let sourceWidth = image.naturalWidth;
+      let sourceHeight = image.naturalHeight;
+
+      if (imageRatio > viewRatio) {
+        sourceWidth = image.naturalHeight * viewRatio;
+        sourceX = (image.naturalWidth - sourceWidth) / 2;
+      } else {
+        sourceHeight = image.naturalWidth / viewRatio;
+        sourceY = (image.naturalHeight - sourceHeight) / 2;
+      }
+
+      const ix = Math.max(0, Math.min(image.naturalWidth - 1, Math.floor(sourceX + (x / width) * sourceWidth)));
+      const iy = Math.max(0, Math.min(image.naturalHeight - 1, Math.floor(sourceY + (y / height) * sourceHeight)));
+      const sampler = sampleCoverImageColor.canvas || (sampleCoverImageColor.canvas = document.createElement("canvas"));
+      const samplerCtx = sampleCoverImageColor.ctx || (sampleCoverImageColor.ctx = sampler.getContext("2d", { willReadFrequently: true }));
+      const key = `${image.currentSrc || image.src}:${image.naturalWidth}x${image.naturalHeight}`;
+      if (sampleCoverImageColor.key !== key) {
+        sampler.width = image.naturalWidth;
+        sampler.height = image.naturalHeight;
+        samplerCtx.clearRect(0, 0, sampler.width, sampler.height);
+        samplerCtx.drawImage(image, 0, 0);
+        sampleCoverImageColor.key = key;
+      }
+      const data = samplerCtx.getImageData(ix, iy, 1, 1).data;
+      return { r: data[0], g: data[1], b: data[2] };
+    }
+
+    function mixThreadColor(a, b) {
+      return a.brightness < b.brightness ? a.color : b.color;
+    }
+
+    function mixThreadGlow(a, b) {
+      return a.brightness < b.brightness ? a.glow : b.glow;
+    }
+
     function syntheticKnitBrightness(nx, ny) {
-      const face = ellipse(nx, ny, 0, -0.22, 0.16, 0.13) ? 0.18 : 0.62;
-      const hood = ellipse(nx, ny, 0, -0.25, 0.31, 0.24) ? 0.3 : 0.7;
-      const hands = ellipse(nx, ny, 0, 0.08, 0.2, 0.08) ? 0.08 : 0.72;
-      const robe = Math.abs(nx) < 0.16 + (ny + 0.08) * 0.3 && ny > -0.1 ? 0.36 + Math.abs(nx) * 0.7 : 0.8;
+      const vertical = Math.abs(ny - 0.52);
+      const center = Math.abs(nx - 0.5);
       const fold = 0.18 * Math.abs(Math.sin(nx * 34 + ny * 18));
-      return Math.max(0.04, Math.min(0.92, Math.min(face, hood, hands, robe) + fold));
+      return Math.max(0.04, Math.min(0.92, 0.32 + vertical * 0.32 + center * 0.22 + fold));
     }
 
     function drawPartialEdge(a, b, progress) {
@@ -862,23 +972,21 @@
       ctx.drawImage(image, sourceX, sourceY, sourceWidth, sourceHeight, x, y, width, height);
     }
 
-    function numPath(width, height) {
+    function personPath(width, height, index) {
       const p = new Path2D();
-      p.moveTo(...knitXY(0, -0.52, width, height));
-      p.bezierCurveTo(...knitXY(-0.22, -0.52, width, height), ...knitXY(-0.34, -0.36, width, height), ...knitXY(-0.31, -0.19, width, height));
-      p.bezierCurveTo(...knitXY(-0.47, -0.02, width, height), ...knitXY(-0.42, 0.3, width, height), ...knitXY(-0.34, 0.5, width, height));
-      p.bezierCurveTo(...knitXY(-0.18, 0.57, width, height), ...knitXY(0.18, 0.57, width, height), ...knitXY(0.34, 0.5, width, height));
-      p.bezierCurveTo(...knitXY(0.42, 0.3, width, height), ...knitXY(0.47, -0.02, width, height), ...knitXY(0.31, -0.19, width, height));
-      p.bezierCurveTo(...knitXY(0.34, -0.36, width, height), ...knitXY(0.22, -0.52, width, height), ...knitXY(0, -0.52, width, height));
-      p.closePath();
-      return p;
-    }
-
-    function handPath(width, height) {
-      const p = new Path2D();
-      p.moveTo(...knitXY(-0.22, 0.03, width, height));
-      p.bezierCurveTo(...knitXY(-0.12, 0.1, width, height), ...knitXY(-0.04, 0.14, width, height), ...knitXY(0, 0.14, width, height));
-      p.bezierCurveTo(...knitXY(0.04, 0.14, width, height), ...knitXY(0.12, 0.1, width, height), ...knitXY(0.22, 0.03, width, height));
+      const masks = personMasks[index] || personMasks[0];
+      for (const polygon of masks) {
+        polygon.forEach(([x, y], pointIndex) => {
+          const px = x * width;
+          const py = y * height;
+          if (pointIndex === 0) {
+            p.moveTo(px, py);
+          } else {
+            p.lineTo(px, py);
+          }
+        });
+        p.closePath();
+      }
       return p;
     }
 
@@ -890,32 +998,34 @@
       ctx.restore();
     }
 
-    function insideNum(nx, ny) {
-      const head = ellipse(nx, ny, 0, -0.22, 0.17, 0.13);
-      const hood = ellipse(nx, ny, 0, -0.23, 0.31, 0.25);
-      const body = ellipse(nx, ny, 0, 0.16, 0.36, 0.46);
-      const robe = ny > -0.08 && ny < 0.56 && Math.abs(nx) < 0.17 + (ny + 0.08) * 0.35;
-      const hands = ellipse(nx, ny, 0, 0.08, 0.2, 0.08);
-      return head || hood || body || robe || hands;
+    function insidePersonMask(index, nx, ny) {
+      const masks = personMasks[index] || personMasks[0];
+      return masks.some((polygon) => pointInPolygon(nx, ny, polygon));
+    }
+
+    function pointInPolygon(x, y, polygon) {
+      let inside = false;
+      for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i, i += 1) {
+        const xi = polygon[i][0];
+        const yi = polygon[i][1];
+        const xj = polygon[j][0];
+        const yj = polygon[j][1];
+        const intersect = ((yi > y) !== (yj > y)) && (x < ((xj - xi) * (y - yi)) / (yj - yi) + xi);
+        if (intersect) inside = !inside;
+      }
+      return inside;
     }
 
     function knitScale(width, height) {
-      return Math.min(width * 0.68, height * 0.98);
+      return Math.min(width, height);
     }
 
     function toKnitScreen(nx, ny, width, height) {
-      const scale = knitScale(width, height);
-      return { x: width / 2 + nx * scale, y: height * 0.51 + ny * scale };
+      return { x: nx * width, y: ny * height };
     }
 
     function fromKnitScreen(x, y, width, height) {
-      const scale = knitScale(width, height);
-      return { nx: (x - width / 2) / scale, ny: (y - height * 0.51) / scale };
-    }
-
-    function knitXY(nx, ny, width, height) {
-      const point = toKnitScreen(nx, ny, width, height);
-      return [point.x, point.y];
+      return { nx: x / width, ny: y / height };
     }
 
     function ellipse(x, y, cx, cy, rx, ry) {
