@@ -59,8 +59,15 @@
     }
 
     .set-layer.is-active {
+      z-index: 1;
       opacity: 1;
       filter: saturate(0.96) brightness(0.82) contrast(1.06);
+    }
+
+    .set-layer.is-pending {
+      z-index: 2;
+      opacity: 0;
+      filter: saturate(0.78) brightness(0.2) contrast(1.18);
     }
 
     .set-light {
@@ -303,8 +310,7 @@
     let pendingIndex = -1;
     let isTransitioning = false;
     let wheelReady = true;
-    let posterCells = [];
-    let knitNodes = [];
+    let knitStitches = [];
 
     setTrack.innerHTML = layers.map((_, index) => `<button class="${index === 0 ? "is-active" : ""}" type="button" aria-label="Show set ${index + 1}"></button>`).join("");
     const ticks = Array.from(setTrack.querySelectorAll("button"));
@@ -314,6 +320,7 @@
       activeIndex = index;
       layers.forEach((layer, layerIndex) => {
         layer.classList.toggle("is-active", layerIndex === index);
+        layer.classList.remove("is-pending");
       });
       ticks.forEach((tick, tickIndex) => {
         tick.classList.toggle("is-active", tickIndex === index);
@@ -331,6 +338,7 @@
     function transitionTo(index) {
       pendingIndex = index;
       isTransitioning = true;
+      layers[index].classList.add("is-pending");
       document.body.classList.add("is-transitioning");
       prepareTransition(index);
       window.requestAnimationFrame((time) => animateTransition(time, time, index));
@@ -395,43 +403,40 @@
       resizeCanvas();
       const width = window.innerWidth;
       const height = window.innerHeight;
-      const cols = 12;
-      const rows = 7;
-      posterCells = [];
-      for (let y = 0; y < rows; y += 1) {
-        for (let x = 0; x < cols; x += 1) {
-          const jitterX = seeded(index, x, y, 1) * 18 - 9;
-          const jitterY = seeded(index, x, y, 2) * 18 - 9;
-          posterCells.push({
-            x: (x / cols) * width + jitterX,
-            y: (y / rows) * height + jitterY,
-            w: width / cols + seeded(index, x, y, 3) * 34,
-            h: height / rows + seeded(index, x, y, 4) * 28,
-            a: 0.08 + seeded(index, x, y, 5) * 0.3,
-            tone: seeded(index, x, y, 6)
+      const cols = Math.max(19, Math.round(width / 54));
+      const rows = Math.max(24, Math.round(height / 34));
+      knitStitches = [];
+
+      for (let row = 0; row < rows; row += 1) {
+        const yNorm = row / (rows - 1);
+        for (let col = 0; col < cols; col += 1) {
+          const xNorm = col / (cols - 1);
+          if (!insideNumFigure(xNorm, yNorm)) continue;
+
+          const jitterX = seeded(index, col, row, 1) * 16 - 8;
+          const jitterY = seeded(index, col, row, 2) * 10 - 5;
+          const rowWave = Math.sin((row * 0.72) + index) * 0.025;
+          knitStitches.push({
+            x: width * (0.5 + (xNorm - 0.5) * 0.58 + rowWave) + jitterX,
+            y: height * (0.1 + yNorm * 0.82) + jitterY,
+            w: 22 + seeded(index, col, row, 3) * 26,
+            h: 7 + seeded(index, col, row, 4) * 8,
+            angle: (seeded(index, col, row, 5) - 0.5) * 0.8,
+            delay: yNorm * 0.56 + Math.abs(xNorm - 0.5) * 0.18 + seeded(index, col, row, 6) * 0.16,
+            tone: seeded(index, col, row, 7)
           });
         }
       }
 
-      knitNodes = [];
-      for (let i = 0; i < 42; i += 1) {
-        const angle = seeded(index, i, 0, 7) * Math.PI * 2;
-        const radius = Math.pow(seeded(index, i, 0, 8), 0.65);
-        knitNodes.push({
-          x: width * (0.5 + Math.cos(angle) * radius * 0.42),
-          y: height * (0.5 + Math.sin(angle) * radius * 0.36),
-          r: 1 + seeded(index, i, 0, 9) * 2.4,
-          delay: seeded(index, i, 0, 10) * 0.34
-        });
-      }
+      knitStitches.sort((a, b) => a.delay - b.delay);
     }
 
     function animateTransition(start, now, index) {
-      const duration = 1180;
+      const duration = 1680;
       const progress = Math.min(1, (now - start) / duration);
       drawTransition(progress, index);
 
-      if (progress > 0.46 && pendingIndex === index) {
+      if (progress > 0.93 && pendingIndex === index) {
         pendingIndex = -1;
         setActiveLayer(index);
       }
@@ -451,69 +456,333 @@
       const height = window.innerHeight;
       ctx.clearRect(0, 0, width, height);
 
-      const posterProgress = smoothstep(0, 0.52, progress);
-      const posterFade = 1 - smoothstep(0.42, 0.78, progress);
+      const wallProgress = smootherstep(0, 0.42, progress);
+      const knitProgress = smoothstep(0.08, 0.98, progress);
+      const knitFade = 1 - smoothstep(0.86, 1, progress);
+
+      drawFourthWall(layers[activeIndex], layers[index], wallProgress, progress, index);
+
       ctx.save();
-      ctx.globalAlpha = posterFade;
-      for (const cell of posterCells) {
-        const appear = Math.min(1, posterProgress * 1.4 - cell.a);
+      ctx.globalAlpha = knitFade;
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+      for (const stitch of knitStitches) {
+        const appear = Math.max(0, Math.min(1, (knitProgress - stitch.delay) / 0.22));
         if (appear <= 0) continue;
-        const fillAlpha = appear * (cell.tone > 0.62 ? 0.12 : 0.22);
-        ctx.fillStyle = cell.tone > 0.62
-          ? `rgba(242, 240, 235, ${fillAlpha})`
-          : `rgba(91, 20, 23, ${fillAlpha})`;
-        ctx.strokeStyle = `rgba(242, 240, 235, ${appear * 0.22})`;
-        ctx.lineWidth = 1;
-        ctx.fillRect(cell.x, cell.y, cell.w * appear, cell.h * appear);
-        ctx.strokeRect(cell.x, cell.y, cell.w * appear, cell.h * appear);
+        drawNumStitch(stitch, appear);
       }
       ctx.restore();
 
-      const knitProgress = smoothstep(0.26, 0.94, progress);
-      const knitFade = 1 - smoothstep(0.82, 1, progress);
       ctx.save();
-      ctx.globalAlpha = knitFade;
-      ctx.lineWidth = 1.2;
-      ctx.strokeStyle = "rgba(132, 24, 33, 0.78)";
-      ctx.fillStyle = "rgba(242, 240, 235, 0.82)";
-      for (let i = 0; i < knitNodes.length; i += 1) {
-        const node = knitNodes[i];
-        const nodeProgress = Math.max(0, Math.min(1, (knitProgress - node.delay) / 0.42));
-        if (nodeProgress <= 0) continue;
-
+      ctx.globalAlpha = knitFade * smoothstep(0.1, 0.7, knitProgress);
+      ctx.lineWidth = 1;
+      for (let i = 0; i < knitStitches.length - 1; i += 2) {
+        const a = knitStitches[i];
+        const b = knitStitches[i + 1];
+        const aProgress = Math.max(0, Math.min(1, (knitProgress - a.delay) / 0.22));
+        const bProgress = Math.max(0, Math.min(1, (knitProgress - b.delay) / 0.22));
+        const lineProgress = Math.min(aProgress, bProgress);
+        if (lineProgress <= 0) continue;
+        ctx.strokeStyle = a.tone > 0.58
+          ? `rgba(242, 240, 235, ${0.28 * lineProgress})`
+          : `rgba(132, 24, 33, ${0.42 * lineProgress})`;
         ctx.beginPath();
-        ctx.arc(node.x, node.y, node.r * nodeProgress, 0, Math.PI * 2);
-        ctx.fill();
-
-        const next = knitNodes[(i + 7) % knitNodes.length];
-        const nextProgress = Math.max(0, Math.min(1, (knitProgress - next.delay) / 0.42));
-        if (nextProgress <= 0) continue;
-        const lineProgress = Math.min(nodeProgress, nextProgress);
-        ctx.beginPath();
-        ctx.moveTo(node.x, node.y);
-        ctx.lineTo(node.x + (next.x - node.x) * lineProgress, node.y + (next.y - node.y) * lineProgress);
+        ctx.moveTo(a.x, a.y);
+        ctx.lineTo(a.x + (b.x - a.x) * lineProgress, a.y + (b.y - a.y) * lineProgress);
         ctx.stroke();
       }
+      ctx.restore();
 
-      ctx.globalAlpha = knitFade * 0.26;
+      const flash = smoothstep(0.82, 1, progress);
+      ctx.save();
+      ctx.globalAlpha = flash * 0.12;
+      ctx.fillStyle = "rgba(242, 240, 235, 1)";
+      ctx.fillRect(0, 0, width, height);
+      ctx.restore();
+    }
+
+    function drawFourthWall(currentImage, nextImage, wallProgress, totalProgress, index) {
+      const width = window.innerWidth;
+      const height = window.innerHeight;
+      const mode = index % 5;
+      const settle = smoothstep(0.26, 0.86, totalProgress);
+
+      ctx.save();
+      ctx.globalAlpha = 0.18 * (1 - settle);
+      drawCoverImage(currentImage, 0, 0, width, height);
+      ctx.fillStyle = "rgba(8, 7, 7, 0.72)";
+      ctx.fillRect(0, 0, width, height);
+      ctx.restore();
+
+      ctx.save();
+      ctx.globalAlpha = 0.18 + settle * 0.22;
+      ctx.filter = `brightness(${0.18 + settle * 0.34}) saturate(0.86) contrast(1.1)`;
+      drawCoverImage(nextImage, 0, 0, width, height);
+      ctx.filter = "none";
+      ctx.fillStyle = "rgba(8, 7, 7, 0.48)";
+      ctx.fillRect(0, 0, width, height);
+      ctx.restore();
+
+      if (mode === 0) drawPanelWall(nextImage, wallProgress, totalProgress);
+      if (mode === 1) drawSplitWall(nextImage, wallProgress, totalProgress);
+      if (mode === 2) drawDiagonalWall(nextImage, wallProgress, totalProgress);
+      if (mode === 3) drawCurtainWall(nextImage, wallProgress, totalProgress);
+      if (mode === 4) drawPushWall(nextImage, wallProgress, totalProgress);
+
+      ctx.save();
+      ctx.globalAlpha = 0.24 + settle * 0.18;
+      ctx.fillStyle = "rgba(8, 7, 7, 0.48)";
+      ctx.fillRect(0, 0, width, height);
+      ctx.restore();
+    }
+
+    function drawPanelWall(nextImage, wallProgress, totalProgress) {
+      const width = window.innerWidth;
+      const height = window.innerHeight;
+      const panelCount = 9;
+      const panelWidth = width / panelCount;
+      const center = (panelCount - 1) / 2;
+
+      ctx.save();
+      ctx.globalAlpha = 0.22 + wallProgress * 0.44;
+      ctx.fillStyle = "rgba(8, 7, 7, 0.86)";
+      ctx.fillRect(0, 0, width, height);
+      ctx.restore();
+
+      for (let i = 0; i < panelCount; i += 1) {
+        const distance = Math.abs(i - center);
+        const panelProgress = Math.max(0, Math.min(1, (wallProgress - distance * 0.05) / 0.28));
+        if (panelProgress <= 0) continue;
+
+        const open = smootherstep(0, 1, panelProgress);
+        const x = i * panelWidth;
+        const direction = i < center ? -1 : 1;
+        const hinge = i === center ? 0 : direction;
+        const push = Math.sin(open * Math.PI) * 42;
+        const fold = (1 - open) * panelWidth * 0.38;
+        const drawX = hinge * fold - push * 0.5;
+        const drawY = (1 - open) * height * 0.07;
+        const drawW = width + push;
+        const drawH = height - drawY * 2;
+
+        ctx.save();
+        ctx.beginPath();
+        ctx.rect(x, 0, panelWidth + 1, height);
+        ctx.clip();
+        ctx.globalAlpha = 0.16 + open * 0.7;
+        ctx.filter = `brightness(${0.24 + open * 0.46}) saturate(${0.76 + open * 0.2}) contrast(1.12)`;
+        drawCoverImage(nextImage, drawX, drawY, drawW, drawH);
+        ctx.filter = "none";
+
+        ctx.globalAlpha = (1 - open) * 0.5 + 0.12;
+        ctx.fillStyle = i % 2 ? "rgba(8, 7, 7, 0.52)" : "rgba(242, 240, 235, 0.05)";
+        ctx.fillRect(x, 0, panelWidth + 1, height);
+
+        ctx.globalAlpha = 0.18 + open * 0.22;
+        ctx.strokeStyle = "rgba(242, 240, 235, 0.28)";
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(x + (direction > 0 ? 0 : panelWidth), height * 0.08);
+        ctx.lineTo(x + (direction > 0 ? 0 : panelWidth), height * 0.92);
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      const aperture = smoothstep(0.35, 1, wallProgress);
+      ctx.save();
+      ctx.globalAlpha = aperture * 0.32;
+      ctx.fillStyle = "rgba(242, 240, 235, 1)";
+      ctx.fillRect(width * (0.5 - aperture * 0.05), 0, width * aperture * 0.1, height);
+      ctx.restore();
+    }
+
+    function drawSplitWall(nextImage, wallProgress) {
+      const width = window.innerWidth;
+      const height = window.innerHeight;
+      const open = smootherstep(0, 1, wallProgress);
+      const slit = width * (0.02 + open * 0.78);
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(width / 2 - slit / 2, 0, slit, height);
+      ctx.clip();
+      ctx.globalAlpha = 0.34 + open * 0.42;
+      ctx.filter = `brightness(${0.28 + open * 0.42}) contrast(1.12)`;
+      drawCoverImage(nextImage, -open * 26, 0, width + open * 52, height);
+      ctx.filter = "none";
+      ctx.restore();
+
+      ctx.save();
+      ctx.globalAlpha = 0.32 * (1 - open);
+      ctx.fillStyle = "rgba(242, 240, 235, 1)";
+      ctx.fillRect(width / 2 - 1, 0, 2, height);
+      ctx.restore();
+    }
+
+    function drawDiagonalWall(nextImage, wallProgress) {
+      const width = window.innerWidth;
+      const height = window.innerHeight;
+      const open = smootherstep(0, 1, wallProgress);
+      const sweep = (width + height) * open;
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(0, height);
+      ctx.lineTo(sweep, height);
+      ctx.lineTo(sweep - height * 0.58, 0);
+      ctx.lineTo(0, 0);
+      ctx.closePath();
+      ctx.clip();
+      ctx.globalAlpha = 0.26 + open * 0.5;
+      ctx.filter = `brightness(${0.24 + open * 0.44}) saturate(0.9) contrast(1.14)`;
+      drawCoverImage(nextImage, -24 + open * 24, 0, width, height);
+      ctx.filter = "none";
+      ctx.restore();
+
+      ctx.save();
+      ctx.globalAlpha = Math.sin(open * Math.PI) * 0.22;
       ctx.strokeStyle = "rgba(242, 240, 235, 0.72)";
       ctx.lineWidth = 1;
       ctx.beginPath();
-      ctx.ellipse(width / 2, height / 2, width * 0.28 * knitProgress, height * 0.38 * knitProgress, 0, 0, Math.PI * 2);
+      ctx.moveTo(sweep - height * 0.58, 0);
+      ctx.lineTo(sweep, height);
       ctx.stroke();
       ctx.restore();
+    }
 
-      const flash = Math.sin(Math.min(1, progress) * Math.PI);
+    function drawCurtainWall(nextImage, wallProgress) {
+      const width = window.innerWidth;
+      const height = window.innerHeight;
+      const open = smootherstep(0, 1, wallProgress);
+      const gap = height * (0.04 + open * 0.78);
+
       ctx.save();
-      ctx.globalAlpha = flash * 0.18;
-      ctx.fillStyle = index % 2 ? "rgba(160, 131, 77, 1)" : "rgba(91, 20, 23, 1)";
-      ctx.fillRect(0, 0, width, height);
+      ctx.beginPath();
+      ctx.rect(0, height / 2 - gap / 2, width, gap);
+      ctx.clip();
+      ctx.globalAlpha = 0.28 + open * 0.46;
+      ctx.filter = `brightness(${0.22 + open * 0.44}) saturate(0.9)`;
+      drawCoverImage(nextImage, 0, -open * 18, width, height + open * 36);
+      ctx.filter = "none";
       ctx.restore();
+
+      ctx.save();
+      ctx.globalAlpha = 0.42 * (1 - open);
+      ctx.fillStyle = "rgba(8, 7, 7, 0.92)";
+      ctx.fillRect(0, 0, width, height / 2 - gap / 2);
+      ctx.fillRect(0, height / 2 + gap / 2, width, height / 2 - gap / 2);
+      ctx.restore();
+    }
+
+    function drawPushWall(nextImage, wallProgress) {
+      const width = window.innerWidth;
+      const height = window.innerHeight;
+      const open = smootherstep(0, 1, wallProgress);
+      const scale = 1.14 - open * 0.14;
+      const insetX = width * (1 - scale) / 2;
+      const insetY = height * (1 - scale) / 2;
+
+      ctx.save();
+      ctx.globalAlpha = 0.18 + open * 0.58;
+      ctx.filter = `brightness(${0.2 + open * 0.5}) saturate(${0.78 + open * 0.14}) contrast(1.16)`;
+      drawCoverImage(nextImage, insetX, insetY, width * scale, height * scale);
+      ctx.filter = "none";
+      ctx.restore();
+
+      ctx.save();
+      ctx.globalAlpha = Math.sin(open * Math.PI) * 0.26;
+      ctx.strokeStyle = "rgba(242, 240, 235, 0.48)";
+      ctx.lineWidth = 1;
+      ctx.strokeRect(width * (0.08 + (1 - open) * 0.1), height * (0.08 + (1 - open) * 0.1), width * (0.84 - (1 - open) * 0.2), height * (0.84 - (1 - open) * 0.2));
+      ctx.restore();
+    }
+
+    function drawNumStitch(stitch, appear) {
+      const length = stitch.w * (0.18 + appear * 0.82);
+      const thickness = stitch.h * (0.55 + appear * 0.45);
+      const light = stitch.tone > 0.52;
+      const core = light ? "rgba(242, 240, 235, 0.88)" : "rgba(188, 170, 138, 0.74)";
+      const shadow = light ? "rgba(132, 24, 33, 0.38)" : "rgba(91, 20, 23, 0.62)";
+
+      ctx.save();
+      ctx.translate(stitch.x, stitch.y);
+      ctx.rotate(stitch.angle);
+
+      ctx.globalAlpha = appear * 0.72;
+      ctx.fillStyle = shadow;
+      roundedPath(-length / 2, -thickness / 2, length, thickness, thickness / 2);
+      ctx.fill();
+
+      ctx.globalAlpha = appear;
+      ctx.fillStyle = core;
+      roundedPath(-length * 0.43, -thickness * 0.27, length * 0.86, thickness * 0.54, thickness * 0.27);
+      ctx.fill();
+
+      ctx.globalAlpha = appear * 0.68;
+      ctx.strokeStyle = light ? "rgba(255, 252, 239, 0.86)" : "rgba(132, 24, 33, 0.78)";
+      ctx.lineWidth = 1.1;
+      ctx.beginPath();
+      ctx.moveTo(-length / 2, 0);
+      ctx.bezierCurveTo(-length / 5, -thickness * 0.82, length / 5, thickness * 0.82, length / 2, 0);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function drawCoverImage(image, x, y, width, height) {
+      if (!image || !image.naturalWidth || !image.naturalHeight) return;
+
+      const imageRatio = image.naturalWidth / image.naturalHeight;
+      const viewRatio = window.innerWidth / window.innerHeight;
+      let sourceX = 0;
+      let sourceY = 0;
+      let sourceWidth = image.naturalWidth;
+      let sourceHeight = image.naturalHeight;
+
+      if (imageRatio > viewRatio) {
+        sourceWidth = image.naturalHeight * viewRatio;
+        sourceX = (image.naturalWidth - sourceWidth) / 2;
+      } else {
+        sourceHeight = image.naturalWidth / viewRatio;
+        sourceY = (image.naturalHeight - sourceHeight) / 2;
+      }
+
+      ctx.drawImage(image, sourceX, sourceY, sourceWidth, sourceHeight, x, y, width, height);
+    }
+
+    function roundedPath(x, y, width, height, radius) {
+      ctx.beginPath();
+      ctx.moveTo(x + radius, y);
+      ctx.lineTo(x + width - radius, y);
+      ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+      ctx.lineTo(x + width, y + height - radius);
+      ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+      ctx.lineTo(x + radius, y + height);
+      ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+      ctx.lineTo(x, y + radius);
+      ctx.quadraticCurveTo(x, y, x + radius, y);
+    }
+
+    function insideNumFigure(x, y) {
+      const head = ellipse(x, y, 0.5, 0.18, 0.17, 0.12);
+      const hood = ellipse(x, y, 0.5, 0.24, 0.25, 0.2);
+      const body = ellipse(x, y, 0.5, 0.57, 0.32, 0.42);
+      const robe = y > 0.4 && y < 0.96 && Math.abs(x - 0.5) < 0.12 + y * 0.28;
+      const hands = ellipse(x, y, 0.5, 0.52, 0.14, 0.09);
+      return head || hood || body || robe || hands;
+    }
+
+    function ellipse(x, y, cx, cy, rx, ry) {
+      return (((x - cx) * (x - cx)) / (rx * rx)) + (((y - cy) * (y - cy)) / (ry * ry)) <= 1;
     }
 
     function smoothstep(edge0, edge1, value) {
       const x = Math.max(0, Math.min(1, (value - edge0) / (edge1 - edge0)));
       return x * x * (3 - 2 * x);
+    }
+
+    function smootherstep(edge0, edge1, value) {
+      const x = Math.max(0, Math.min(1, (value - edge0) / (edge1 - edge0)));
+      return x * x * x * (x * (x * 6 - 15) + 10);
     }
 
     function seeded(a, b, c, d) {
