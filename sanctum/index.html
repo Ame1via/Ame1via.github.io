@@ -6,24 +6,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     :root {
-      --black: #080707;
       --paper: #f2f0eb;
       --dim: #9a958b;
       --blood: #5b1417;
-      --gold: #a0834d;
       --mx: 50%;
-      --my: 50%;
-      --tilt-x: 0deg;
-      --tilt-y: 0deg;
-      --cell-opacity: 0.9;
-      --archive-opacity: 0.18;
-      --threshold-opacity: 0.16;
-      --library-opacity: 0.12;
-      --cloister-opacity: 0.1;
-      --reliquary-opacity: 0.1;
-      --chapel-opacity: 0.1;
-      --manuscript-opacity: 0.1;
-      --cosmic-opacity: 0.1;
+      --pan-x: 0px;
+      --pan-y: 0px;
     }
 
     * { box-sizing: border-box; }
@@ -32,10 +20,7 @@
       margin: 0;
       min-height: 100vh;
       overflow: hidden;
-      background:
-        radial-gradient(circle at var(--mx) var(--my), rgba(91, 20, 23, 0.22), transparent 30%),
-        linear-gradient(180deg, rgba(8, 7, 7, 0.08), rgba(8, 7, 7, 0.78)),
-        #080707;
+      background: #080707;
       color: var(--paper);
       font-family: Georgia, "Times New Roman", "Yu Mincho", "Hiragino Mincho ProN", serif;
     }
@@ -46,49 +31,56 @@
       isolation: isolate;
     }
 
-    .world-backdrop,
-    .world-backdrop::before,
-    .world-backdrop::after,
-    .veil,
-    .grain {
+    .set-gallery,
+    .set-layer,
+    .set-light,
+    .set-vignette,
+    .set-grain,
+    .transition-canvas {
       position: fixed;
       inset: 0;
       pointer-events: none;
     }
 
-    .world-backdrop {
-      z-index: 0;
-      background:
-        linear-gradient(90deg, rgba(8, 7, 7, 0.56), rgba(8, 7, 7, 0.2), rgba(8, 7, 7, 0.64)),
-        url("/assets/sanctum/world-threshold.png") center / cover;
-      opacity: 0.28;
-      transform: scale(1.06);
-      filter: saturate(0.7) brightness(0.62);
+    .set-gallery {
+      z-index: 1;
+      overflow: hidden;
+      background: #080707;
     }
 
-    .world-backdrop::before {
-      content: "";
-      background: url("/assets/sanctum/world-archive.png") calc(50% + (var(--mx-num, 0) * -14px)) center / cover;
-      opacity: 0.22;
+    .set-layer {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0;
+      transform: translate3d(var(--pan-x), var(--pan-y), 0) scale(1.04);
+      filter: saturate(0.84) brightness(0.72) contrast(1.04);
+      transition: opacity 560ms ease, transform 180ms ease-out, filter 560ms ease;
+    }
+
+    .set-layer.is-active {
+      opacity: 1;
+      filter: saturate(0.96) brightness(0.82) contrast(1.06);
+    }
+
+    .set-light {
+      z-index: 2;
+      background:
+        radial-gradient(circle at var(--mx) 48%, rgba(242, 240, 235, 0.16), transparent 22%),
+        radial-gradient(circle at var(--mx) 58%, rgba(91, 20, 23, 0.26), transparent 34%);
       mix-blend-mode: screen;
     }
 
-    .world-backdrop::after {
-      content: "";
-      background: radial-gradient(circle at var(--mx) var(--my), rgba(242, 240, 235, 0.16), transparent 18%);
-      opacity: 0.9;
-    }
-
-    .veil {
-      z-index: 5;
+    .set-vignette {
+      z-index: 3;
       background:
-        radial-gradient(circle at 50% 50%, transparent 34%, rgba(8, 7, 7, 0.68) 82%),
-        linear-gradient(180deg, rgba(8, 7, 7, 0.52), transparent 34%, rgba(8, 7, 7, 0.72));
+        radial-gradient(circle at 50% 48%, transparent 36%, rgba(8, 7, 7, 0.54) 82%),
+        linear-gradient(180deg, rgba(8, 7, 7, 0.3), transparent 30%, rgba(8, 7, 7, 0.76));
     }
 
-    .grain {
-      z-index: 6;
-      opacity: 0.18;
+    .set-grain {
+      z-index: 4;
+      opacity: 0.16;
       background-image:
         linear-gradient(0deg, rgba(242, 240, 235, 0.05) 1px, transparent 1px),
         linear-gradient(90deg, rgba(242, 240, 235, 0.035) 1px, transparent 1px);
@@ -96,206 +88,26 @@
       mask-image: radial-gradient(circle at center, black, transparent 78%);
     }
 
-    .num-stage {
-      position: fixed;
-      inset: 0;
-      z-index: 3;
-      display: grid;
-      place-items: end center;
-      perspective: 1200px;
-    }
-
-    .num-window,
-    .num-figure,
-    .num-glow {
-      position: absolute;
-      left: 50%;
-      bottom: -2vh;
-      width: min(94vw, 118vh);
-      height: 104vh;
-      transform:
-        translateX(-50%)
-        rotateX(var(--tilt-y))
-        rotateY(var(--tilt-x));
-      transform-origin: 50% 62%;
-      transition: transform 120ms ease-out;
-    }
-
-    .num-window {
-      z-index: 2;
-      overflow: hidden;
-      opacity: 0.96;
-      -webkit-mask-image: url("/assets/sanctum/nun-agent-prayer.png");
-      mask-image: url("/assets/sanctum/nun-agent-prayer.png");
-      -webkit-mask-repeat: no-repeat;
-      mask-repeat: no-repeat;
-      -webkit-mask-position: center bottom;
-      mask-position: center bottom;
-      -webkit-mask-size: contain;
-      mask-size: contain;
-      filter: drop-shadow(0 0 26px rgba(160, 131, 77, 0.2));
-    }
-
-    .num-window img {
-      position: absolute;
-      inset: -8%;
-      width: 116%;
-      height: 116%;
-      object-fit: cover;
-      transform: translate3d(var(--pan-x), var(--pan-y), 0) scale(var(--zoom));
-      transition: opacity 160ms ease, transform 120ms ease-out;
-    }
-
-    .num-window .cell {
-      opacity: var(--cell-opacity);
-      --pan-x: calc((50% - var(--mx)) * 0.08);
-      --pan-y: calc((50% - var(--my)) * 0.08);
-      --zoom: 1.08;
-      filter: saturate(0.88) brightness(0.7);
-    }
-
-    .num-window .archive {
-      opacity: var(--archive-opacity);
-      --pan-x: calc((50% - var(--mx)) * -0.11);
-      --pan-y: calc((50% - var(--my)) * -0.06);
-      --zoom: 1.18;
+    .transition-canvas {
+      z-index: 4;
+      width: 100vw;
+      height: 100vh;
+      opacity: 0;
       mix-blend-mode: screen;
-      filter: saturate(0.78) contrast(1.08);
+      transition: opacity 180ms ease;
     }
 
-    .num-window .threshold {
-      opacity: var(--threshold-opacity);
-      --pan-x: calc((50% - var(--mx)) * 0.14);
-      --pan-y: calc((50% - var(--my)) * -0.12);
-      --zoom: 1.22;
-      mix-blend-mode: lighten;
-      filter: saturate(0.95) brightness(0.8);
-    }
-
-    .num-window .library {
-      opacity: var(--library-opacity);
-      --pan-x: calc((50% - var(--mx)) * -0.18);
-      --pan-y: calc((50% - var(--my)) * 0.1);
-      --zoom: 1.24;
-      mix-blend-mode: screen;
-      filter: saturate(0.72) brightness(0.72) contrast(1.12);
-    }
-
-    .num-window .cloister {
-      opacity: var(--cloister-opacity);
-      --pan-x: calc((50% - var(--mx)) * 0.16);
-      --pan-y: calc((50% - var(--my)) * 0.16);
-      --zoom: 1.2;
-      mix-blend-mode: lighten;
-      filter: saturate(0.78) brightness(0.66);
-    }
-
-    .num-window .reliquary {
-      opacity: var(--reliquary-opacity);
-      --pan-x: calc((50% - var(--mx)) * -0.08);
-      --pan-y: calc((50% - var(--my)) * -0.18);
-      --zoom: 1.16;
-      mix-blend-mode: screen;
-      filter: saturate(0.92) brightness(0.7) contrast(1.08);
-    }
-
-    .num-window .chapel {
-      opacity: var(--chapel-opacity);
-      --pan-x: calc((50% - var(--mx)) * 0.2);
-      --pan-y: calc((50% - var(--my)) * -0.08);
-      --zoom: 1.18;
-      mix-blend-mode: lighten;
-      filter: saturate(0.7) brightness(0.68);
-    }
-
-    .num-window .manuscript {
-      opacity: var(--manuscript-opacity);
-      --pan-x: calc((50% - var(--mx)) * -0.22);
-      --pan-y: calc((50% - var(--my)) * 0.2);
-      --zoom: 1.26;
-      mix-blend-mode: screen;
-      filter: saturate(0.74) brightness(0.76);
-    }
-
-    .num-window .cosmic {
-      opacity: var(--cosmic-opacity);
-      --pan-x: calc((50% - var(--mx)) * 0.26);
-      --pan-y: calc((50% - var(--my)) * -0.2);
-      --zoom: 1.3;
-      mix-blend-mode: lighten;
-      filter: saturate(1.05) brightness(0.7) contrast(1.06);
-    }
-
-    .num-window::after {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background:
-        radial-gradient(circle at var(--mx) var(--my), rgba(242, 240, 235, 0.38), transparent 19%),
-        linear-gradient(180deg, rgba(8, 7, 7, 0.06), rgba(91, 20, 23, 0.38));
-      mix-blend-mode: screen;
-    }
-
-    .num-figure {
-      z-index: 3;
-      object-fit: contain;
-      object-position: center bottom;
-      opacity: 0.72;
-      filter:
-        drop-shadow(0 0 18px rgba(242, 240, 235, 0.12))
-        drop-shadow(0 22px 46px rgba(0, 0, 0, 0.74));
-      mix-blend-mode: normal;
-      pointer-events: none;
-    }
-
-    .num-glow {
-      z-index: 1;
-      border-radius: 50%;
-      background:
-        radial-gradient(ellipse at 50% 56%, rgba(160, 131, 77, 0.24), transparent 36%),
-        radial-gradient(ellipse at 50% 54%, rgba(91, 20, 23, 0.34), transparent 48%);
-      filter: blur(24px);
-      opacity: 0.88;
-    }
-
-    .sigil {
-      position: fixed;
-      left: 50%;
-      top: 50%;
-      z-index: 2;
-      width: min(82vmin, 760px);
-      aspect-ratio: 1;
-      border: 1px solid rgba(160, 131, 77, 0.16);
-      border-radius: 50%;
-      transform: translate(-50%, -50%) rotate(calc(var(--mx-num, 0) * 12deg));
-      box-shadow:
-        inset 0 0 42px rgba(91, 20, 23, 0.22),
-        0 0 54px rgba(160, 131, 77, 0.12);
-      opacity: 0.72;
-    }
-
-    .sigil::before,
-    .sigil::after {
-      content: "";
-      position: absolute;
-      inset: 12%;
-      border: 1px solid rgba(242, 240, 235, 0.09);
-      transform: rotate(45deg);
-    }
-
-    .sigil::after {
-      inset: 25%;
-      border-color: rgba(91, 20, 23, 0.28);
-      transform: rotate(-18deg);
+    body.is-transitioning .transition-canvas {
+      opacity: 1;
     }
 
     .sanctum-copy {
       position: fixed;
       left: clamp(22px, 5vw, 70px);
       bottom: clamp(24px, 6vh, 68px);
-      z-index: 8;
-      max-width: 310px;
-      text-shadow: 0 0 20px rgba(8, 7, 7, 0.9);
+      z-index: 5;
+      max-width: 320px;
+      text-shadow: 0 0 24px rgba(8, 7, 7, 0.94);
     }
 
     .sanctum-copy h1 {
@@ -306,18 +118,56 @@
       letter-spacing: 0;
     }
 
-    .sanctum-copy p {
+    .set-index {
       margin: 14px 0 0;
+      color: rgba(242, 240, 235, 0.86);
+      font-size: 12px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+    }
+
+    .set-name {
+      margin: 8px 0 0;
       color: var(--dim);
       font-size: 13px;
       line-height: 1.65;
+    }
+
+    .set-track {
+      position: fixed;
+      left: 50%;
+      bottom: 24px;
+      z-index: 5;
+      display: grid;
+      grid-template-columns: repeat(15, 1fr);
+      gap: 5px;
+      width: min(46vw, 520px);
+      height: 2px;
+      transform: translateX(-50%);
+      pointer-events: auto;
+    }
+
+    .set-track button {
+      appearance: none;
+      padding: 0;
+      border: 0;
+      background: rgba(242, 240, 235, 0.22);
+      cursor: pointer;
+      transition: background 220ms ease, transform 220ms ease;
+    }
+
+    .set-track button.is-active,
+    .set-track button:hover,
+    .set-track button:focus-visible {
+      background: rgba(242, 240, 235, 0.9);
+      transform: scaleY(2.5);
     }
 
     .back {
       position: fixed;
       right: 28px;
       bottom: 24px;
-      z-index: 8;
+      z-index: 5;
       color: var(--dim);
       font-size: 12px;
       letter-spacing: 0.12em;
@@ -333,86 +183,169 @@
       border-color: var(--paper);
     }
 
-    @media (max-width: 720px) {
-      .num-window,
-      .num-figure,
-      .num-glow {
-        width: 138vw;
-        height: 96vh;
-        bottom: 4vh;
-      }
+    .set-controls {
+      position: fixed;
+      right: 28px;
+      top: 24px;
+      z-index: 5;
+      display: flex;
+      gap: 8px;
+      pointer-events: auto;
+    }
 
+    .set-controls button {
+      width: 34px;
+      height: 34px;
+      border: 1px solid rgba(242, 240, 235, 0.18);
+      border-radius: 0;
+      background: rgba(8, 7, 7, 0.42);
+      color: var(--paper);
+      cursor: pointer;
+      font: inherit;
+      transition: border-color 200ms ease, background 200ms ease, transform 200ms ease;
+    }
+
+    .set-controls button:hover,
+    .set-controls button:focus-visible {
+      border-color: rgba(242, 240, 235, 0.46);
+      background: rgba(91, 20, 23, 0.32);
+      transform: translateY(-1px);
+    }
+
+    @media (max-width: 720px) {
       .sanctum-copy {
         left: 20px;
         right: 20px;
-        bottom: 84px;
-        max-width: 240px;
+        bottom: 72px;
+        max-width: 260px;
       }
 
-      .sanctum-copy p {
-        display: none;
+      .set-track {
+        left: 20px;
+        right: 20px;
+        width: auto;
+        transform: none;
       }
     }
 
     @media (prefers-reduced-motion: reduce) {
-      .num-window,
-      .num-figure,
-      .num-glow,
-      .sigil,
-      .num-window img {
+      .set-layer,
+      .set-track button,
+      .transition-canvas {
         transition: none;
-        transform: translateX(-50%);
       }
     }
   </style>
 </head>
 <body>
-  <main class="sanctum-room" aria-label="Sanctum world">
-    <div class="world-backdrop" aria-hidden="true"></div>
-    <div class="sigil" aria-hidden="true"></div>
-    <section class="num-stage" aria-label="Nun Agent sanctum mask">
-      <div class="num-glow" aria-hidden="true"></div>
-      <div class="num-window" aria-hidden="true">
-        <img class="cell" src="/assets/sanctum/world-cell.png" alt="">
-        <img class="archive" src="/assets/sanctum/world-archive.png" alt="">
-        <img class="threshold" src="/assets/sanctum/world-threshold.png" alt="">
-        <img class="library" src="/assets/sanctum/world-library.png" alt="">
-        <img class="cloister" src="/assets/sanctum/world-cloister.png" alt="">
-        <img class="reliquary" src="/assets/sanctum/world-reliquary.png" alt="">
-        <img class="chapel" src="/assets/sanctum/world-chapel.png" alt="">
-        <img class="manuscript" src="/assets/sanctum/world-manuscript.png" alt="">
-        <img class="cosmic" src="/assets/sanctum/world-cosmic.png" alt="">
-      </div>
-      <img class="num-figure" src="/assets/sanctum/nun-agent-prayer.png" alt="Nun Agent praying">
-    </section>
-    <div class="veil" aria-hidden="true"></div>
-    <div class="grain" aria-hidden="true"></div>
+  <main class="sanctum-room" aria-label="Sanctum sets">
+    <div class="set-gallery" aria-hidden="true">
+      <img class="set-layer is-active" src="/assets/sanctum/sets/set-01.png" alt="">
+      <img class="set-layer" src="/assets/sanctum/sets/set-02.png" alt="">
+      <img class="set-layer" src="/assets/sanctum/sets/set-03.png" alt="">
+      <img class="set-layer" src="/assets/sanctum/sets/set-04.png" alt="">
+      <img class="set-layer" src="/assets/sanctum/sets/set-05.png" alt="">
+      <img class="set-layer" src="/assets/sanctum/sets/set-06.png" alt="">
+      <img class="set-layer" src="/assets/sanctum/sets/set-07.png" alt="">
+      <img class="set-layer" src="/assets/sanctum/sets/set-08.png" alt="">
+      <img class="set-layer" src="/assets/sanctum/sets/set-09.png" alt="">
+      <img class="set-layer" src="/assets/sanctum/sets/set-10.png" alt="">
+      <img class="set-layer" src="/assets/sanctum/sets/set-11.png" alt="">
+      <img class="set-layer" src="/assets/sanctum/sets/set-12.png" alt="">
+      <img class="set-layer" src="/assets/sanctum/sets/set-13.png" alt="">
+      <img class="set-layer" src="/assets/sanctum/sets/set-14.png" alt="">
+      <img class="set-layer" src="/assets/sanctum/sets/set-15.png" alt="">
+    </div>
+    <div class="set-light" aria-hidden="true"></div>
+    <canvas class="transition-canvas" id="transitionCanvas" aria-hidden="true"></canvas>
+    <div class="set-vignette" aria-hidden="true"></div>
+    <div class="set-grain" aria-hidden="true"></div>
     <section class="sanctum-copy">
       <h1>Sanctum</h1>
-      <p>A world set for Ame1via: the figure stays still; the room moves through her.</p>
+      <p class="set-index" id="setIndex">Set 01 / 15</p>
+      <p class="set-name" id="setName">Cathedral library</p>
     </section>
+    <div class="set-controls" aria-label="Set controls">
+      <button type="button" id="prevSet" aria-label="Previous set">&lsaquo;</button>
+      <button type="button" id="nextSet" aria-label="Next set">&rsaquo;</button>
+    </div>
+    <div class="set-track" id="setTrack" aria-label="Sanctum set selector"></div>
     <a class="back" href="/">Back</a>
   </main>
   <script>
     const root = document.documentElement;
+    const layers = Array.from(document.querySelectorAll(".set-layer"));
+    const setIndex = document.getElementById("setIndex");
+    const setName = document.getElementById("setName");
+    const setTrack = document.getElementById("setTrack");
+    const prevSet = document.getElementById("prevSet");
+    const nextSet = document.getElementById("nextSet");
+    const canvas = document.getElementById("transitionCanvas");
+    const ctx = canvas.getContext("2d");
+    const names = [
+      "Cathedral library",
+      "Moonlit cloister",
+      "Reliquary table",
+      "Shattered chapel",
+      "Manuscript desk",
+      "Black cosmic room",
+      "Rain threshold",
+      "Bell chamber",
+      "Red doorway",
+      "Archive drawers",
+      "Astrolabe chapel",
+      "Flooded archive",
+      "Vertical library",
+      "Mirror corridor",
+      "Winter garden"
+    ];
+    let activeIndex = -1;
+    let pendingIndex = -1;
+    let isTransitioning = false;
+    let wheelReady = true;
+    let posterCells = [];
+    let knitNodes = [];
+
+    setTrack.innerHTML = layers.map((_, index) => `<button class="${index === 0 ? "is-active" : ""}" type="button" aria-label="Show set ${index + 1}"></button>`).join("");
+    const ticks = Array.from(setTrack.querySelectorAll("button"));
+
+    function setActiveLayer(index) {
+      if (index === activeIndex) return;
+      activeIndex = index;
+      layers.forEach((layer, layerIndex) => {
+        layer.classList.toggle("is-active", layerIndex === index);
+      });
+      ticks.forEach((tick, tickIndex) => {
+        tick.classList.toggle("is-active", tickIndex === index);
+      });
+      setIndex.textContent = `Set ${String(index + 1).padStart(2, "0")} / ${layers.length}`;
+      setName.textContent = names[index];
+    }
+
+    function requestSet(index) {
+      const nextIndex = (index + layers.length) % layers.length;
+      if (nextIndex === activeIndex || isTransitioning) return;
+      transitionTo(nextIndex);
+    }
+
+    function transitionTo(index) {
+      pendingIndex = index;
+      isTransitioning = true;
+      document.body.classList.add("is-transitioning");
+      prepareTransition(index);
+      window.requestAnimationFrame((time) => animateTransition(time, time, index));
+    }
+
+    function stepSet(direction) {
+      requestSet(activeIndex + direction);
+    }
 
     function setPointer(x, y) {
       const nx = Math.max(0, Math.min(1, x / window.innerWidth));
       const ny = Math.max(0, Math.min(1, y / window.innerHeight));
       root.style.setProperty("--mx", `${nx * 100}%`);
-      root.style.setProperty("--my", `${ny * 100}%`);
-      root.style.setProperty("--mx-num", `${(nx - 0.5).toFixed(3)}`);
-      root.style.setProperty("--tilt-x", `${((nx - 0.5) * 7).toFixed(2)}deg`);
-      root.style.setProperty("--tilt-y", `${((0.5 - ny) * 4).toFixed(2)}deg`);
-      root.style.setProperty("--cell-opacity", `${(0.88 - nx * 0.28).toFixed(3)}`);
-      root.style.setProperty("--archive-opacity", `${(0.14 + nx * 0.58).toFixed(3)}`);
-      root.style.setProperty("--threshold-opacity", `${(0.16 + ny * 0.5).toFixed(3)}`);
-      root.style.setProperty("--library-opacity", `${(0.08 + Math.max(0, 0.55 - Math.abs(nx - 0.16)) * 0.9).toFixed(3)}`);
-      root.style.setProperty("--cloister-opacity", `${(0.06 + Math.max(0, 0.52 - Math.abs(ny - 0.18)) * 0.72).toFixed(3)}`);
-      root.style.setProperty("--reliquary-opacity", `${(0.08 + Math.max(0, 0.55 - Math.abs(nx - 0.42)) * 0.76).toFixed(3)}`);
-      root.style.setProperty("--chapel-opacity", `${(0.06 + Math.max(0, 0.55 - Math.abs(ny - 0.48)) * 0.74).toFixed(3)}`);
-      root.style.setProperty("--manuscript-opacity", `${(0.06 + Math.max(0, 0.5 - Math.abs(nx - 0.72)) * 0.78).toFixed(3)}`);
-      root.style.setProperty("--cosmic-opacity", `${(0.08 + Math.max(0, 0.56 - Math.abs(ny - 0.82)) * 0.82).toFixed(3)}`);
+      root.style.setProperty("--pan-x", `${((0.5 - nx) * 22).toFixed(2)}px`);
+      root.style.setProperty("--pan-y", `${((0.5 - ny) * 14).toFixed(2)}px`);
     }
 
     window.addEventListener("pointermove", (event) => {
@@ -423,7 +356,170 @@
       setPointer(window.innerWidth / 2, window.innerHeight / 2);
     });
 
+    ticks.forEach((tick, index) => {
+      tick.addEventListener("click", () => requestSet(index));
+    });
+
+    prevSet.addEventListener("click", () => stepSet(-1));
+    nextSet.addEventListener("click", () => stepSet(1));
+
+    window.addEventListener("keydown", (event) => {
+      if (event.key === "ArrowLeft") stepSet(-1);
+      if (event.key === "ArrowRight") stepSet(1);
+    });
+
+    window.addEventListener("wheel", (event) => {
+      if (!wheelReady || Math.abs(event.deltaY) < 18) return;
+      wheelReady = false;
+      stepSet(event.deltaY > 0 ? 1 : -1);
+      window.setTimeout(() => {
+        wheelReady = true;
+      }, 420);
+    }, { passive: true });
+
     setPointer(window.innerWidth / 2, window.innerHeight / 2);
+    setActiveLayer(0);
+    resizeCanvas();
+    window.addEventListener("resize", resizeCanvas);
+
+    function resizeCanvas() {
+      const ratio = window.devicePixelRatio || 1;
+      canvas.width = Math.round(window.innerWidth * ratio);
+      canvas.height = Math.round(window.innerHeight * ratio);
+      canvas.style.width = `${window.innerWidth}px`;
+      canvas.style.height = `${window.innerHeight}px`;
+      ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+    }
+
+    function prepareTransition(index) {
+      resizeCanvas();
+      const width = window.innerWidth;
+      const height = window.innerHeight;
+      const cols = 12;
+      const rows = 7;
+      posterCells = [];
+      for (let y = 0; y < rows; y += 1) {
+        for (let x = 0; x < cols; x += 1) {
+          const jitterX = seeded(index, x, y, 1) * 18 - 9;
+          const jitterY = seeded(index, x, y, 2) * 18 - 9;
+          posterCells.push({
+            x: (x / cols) * width + jitterX,
+            y: (y / rows) * height + jitterY,
+            w: width / cols + seeded(index, x, y, 3) * 34,
+            h: height / rows + seeded(index, x, y, 4) * 28,
+            a: 0.08 + seeded(index, x, y, 5) * 0.3,
+            tone: seeded(index, x, y, 6)
+          });
+        }
+      }
+
+      knitNodes = [];
+      for (let i = 0; i < 42; i += 1) {
+        const angle = seeded(index, i, 0, 7) * Math.PI * 2;
+        const radius = Math.pow(seeded(index, i, 0, 8), 0.65);
+        knitNodes.push({
+          x: width * (0.5 + Math.cos(angle) * radius * 0.42),
+          y: height * (0.5 + Math.sin(angle) * radius * 0.36),
+          r: 1 + seeded(index, i, 0, 9) * 2.4,
+          delay: seeded(index, i, 0, 10) * 0.34
+        });
+      }
+    }
+
+    function animateTransition(start, now, index) {
+      const duration = 1180;
+      const progress = Math.min(1, (now - start) / duration);
+      drawTransition(progress, index);
+
+      if (progress > 0.46 && pendingIndex === index) {
+        pendingIndex = -1;
+        setActiveLayer(index);
+      }
+
+      if (progress < 1) {
+        window.requestAnimationFrame((time) => animateTransition(start, time, index));
+        return;
+      }
+
+      ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+      document.body.classList.remove("is-transitioning");
+      isTransitioning = false;
+    }
+
+    function drawTransition(progress, index) {
+      const width = window.innerWidth;
+      const height = window.innerHeight;
+      ctx.clearRect(0, 0, width, height);
+
+      const posterProgress = smoothstep(0, 0.52, progress);
+      const posterFade = 1 - smoothstep(0.42, 0.78, progress);
+      ctx.save();
+      ctx.globalAlpha = posterFade;
+      for (const cell of posterCells) {
+        const appear = Math.min(1, posterProgress * 1.4 - cell.a);
+        if (appear <= 0) continue;
+        const fillAlpha = appear * (cell.tone > 0.62 ? 0.12 : 0.22);
+        ctx.fillStyle = cell.tone > 0.62
+          ? `rgba(242, 240, 235, ${fillAlpha})`
+          : `rgba(91, 20, 23, ${fillAlpha})`;
+        ctx.strokeStyle = `rgba(242, 240, 235, ${appear * 0.22})`;
+        ctx.lineWidth = 1;
+        ctx.fillRect(cell.x, cell.y, cell.w * appear, cell.h * appear);
+        ctx.strokeRect(cell.x, cell.y, cell.w * appear, cell.h * appear);
+      }
+      ctx.restore();
+
+      const knitProgress = smoothstep(0.26, 0.94, progress);
+      const knitFade = 1 - smoothstep(0.82, 1, progress);
+      ctx.save();
+      ctx.globalAlpha = knitFade;
+      ctx.lineWidth = 1.2;
+      ctx.strokeStyle = "rgba(132, 24, 33, 0.78)";
+      ctx.fillStyle = "rgba(242, 240, 235, 0.82)";
+      for (let i = 0; i < knitNodes.length; i += 1) {
+        const node = knitNodes[i];
+        const nodeProgress = Math.max(0, Math.min(1, (knitProgress - node.delay) / 0.42));
+        if (nodeProgress <= 0) continue;
+
+        ctx.beginPath();
+        ctx.arc(node.x, node.y, node.r * nodeProgress, 0, Math.PI * 2);
+        ctx.fill();
+
+        const next = knitNodes[(i + 7) % knitNodes.length];
+        const nextProgress = Math.max(0, Math.min(1, (knitProgress - next.delay) / 0.42));
+        if (nextProgress <= 0) continue;
+        const lineProgress = Math.min(nodeProgress, nextProgress);
+        ctx.beginPath();
+        ctx.moveTo(node.x, node.y);
+        ctx.lineTo(node.x + (next.x - node.x) * lineProgress, node.y + (next.y - node.y) * lineProgress);
+        ctx.stroke();
+      }
+
+      ctx.globalAlpha = knitFade * 0.26;
+      ctx.strokeStyle = "rgba(242, 240, 235, 0.72)";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.ellipse(width / 2, height / 2, width * 0.28 * knitProgress, height * 0.38 * knitProgress, 0, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.restore();
+
+      const flash = Math.sin(Math.min(1, progress) * Math.PI);
+      ctx.save();
+      ctx.globalAlpha = flash * 0.18;
+      ctx.fillStyle = index % 2 ? "rgba(160, 131, 77, 1)" : "rgba(91, 20, 23, 1)";
+      ctx.fillRect(0, 0, width, height);
+      ctx.restore();
+    }
+
+    function smoothstep(edge0, edge1, value) {
+      const x = Math.max(0, Math.min(1, (value - edge0) / (edge1 - edge0)));
+      return x * x * (3 - 2 * x);
+    }
+
+    function seeded(a, b, c, d) {
+      const value = Math.sin((a + 1) * 12.9898 + (b + 1) * 78.233 + (c + 1) * 37.719 + d * 19.19) * 43758.5453;
+      return value - Math.floor(value);
+    }
   </script>
 </body>
 </html>
