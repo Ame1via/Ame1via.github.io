@@ -175,8 +175,11 @@ function build() {
   for (const file of readdirSync(join(root, "assets", "sanctum", "layers", "backgrounds")).filter((item) => item.endsWith(".png"))) {
     copy(`assets/sanctum/layers/backgrounds/${file}`);
   }
-  for (const file of readdirSync(join(root, "assets", "sanctum", "layers", "figures")).filter((item) => item.endsWith(".png"))) {
-    copy(`assets/sanctum/layers/figures/${file}`);
+  const figureLayerDir = join(root, "assets", "sanctum", "layers", "figures");
+  if (existsSync(figureLayerDir)) {
+    for (const file of readdirSync(figureLayerDir).filter((item) => item.endsWith(".png"))) {
+      copy(`assets/sanctum/layers/figures/${file}`);
+    }
   }
   copy("assets/nun-agent-room-bg.png");
   copy("assets/nun-agent/nun-agent-idle.gif");
@@ -197,6 +200,7 @@ function build() {
   write("index.html", read("index.html"));
   write("concept/index.html", read("concept/index.html"));
   write("sanctum/index.html", read("sanctum/index.html"));
+  write("sanctum/architecture.html", read("sanctum/architecture.html"));
   write("hidden/index.html", read("hidden/index.html"));
   write("atlas/index.html", read("atlas/index.html"));
   write("study/index.html", read("study/index.html"));

@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Sanctum Architecture - Ame1via</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    :root {
+      --paper: #f2f0eb;
+      --dim: #9a958b;
+      --blood: #5b1417;
+      --gold: #b88b4a;
+      --rx: 62deg;
+      --ry: -38deg;
+      --zoom: 0.72;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      overflow: hidden;
+      background: #070605;
+      color: var(--paper);
+      font-family: Georgia, "Times New Roman", "Yu Mincho", "Hiragino Mincho ProN", serif;
+    }
+
+    .model-room {
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(circle at 50% 20%, rgba(242, 240, 235, 0.12), transparent 28%),
+        radial-gradient(circle at 78% 54%, rgba(91, 20, 23, 0.34), transparent 32%),
+        linear-gradient(180deg, #11100f, #050505 64%);
+      perspective: 1200px;
+      perspective-origin: 50% 42%;
+      cursor: grab;
+      user-select: none;
+    }
+
+    .model-room:active { cursor: grabbing; }
+
+    .viewport {
+      position: absolute;
+      inset: 0;
+      transform-style: preserve-3d;
+    }
+
+    .world {
+      position: absolute;
+      left: 50%;
+      top: 54%;
+      width: 1px;
+      height: 1px;
+      transform-style: preserve-3d;
+      transform: translate3d(0, 0, 0) rotateX(var(--rx)) rotateZ(var(--ry)) scale(var(--zoom));
+      transition: transform 80ms ease-out;
+    }
+
+    .plane,
+    .surface,
+    .roof,
+    .arch,
+    .spire {
+      position: absolute;
+      left: 0;
+      top: 0;
+      transform-style: preserve-3d;
+      backface-visibility: hidden;
+      border: 1px solid rgba(242, 240, 235, 0.11);
+      box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.58), 0 0 28px rgba(0, 0, 0, 0.48);
+    }
+
+    .plane {
+      width: 1320px;
+      height: 1020px;
+      margin-left: -660px;
+      margin-top: -510px;
+      background:
+        linear-gradient(90deg, rgba(184, 139, 74, 0.1) 1px, transparent 1px),
+        linear-gradient(0deg, rgba(242, 240, 235, 0.07) 1px, transparent 1px),
+        radial-gradient(circle at center, rgba(91, 20, 23, 0.34), transparent 58%),
+        #100d0b;
+      background-size: 44px 44px, 44px 44px, auto, auto;
+      transform: rotateX(90deg) translateZ(-2px);
+    }
+
+    .surface {
+      overflow: hidden;
+      background-color: #15100d;
+      background-image:
+        linear-gradient(180deg, rgba(242, 240, 235, 0.08), rgba(8, 7, 7, 0.72)),
+        var(--tex);
+      background-size: cover;
+      background-position: center;
+      filter: saturate(0.92) brightness(0.84) contrast(1.08);
+    }
+
+    .surface::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(90deg, rgba(242, 240, 235, 0.08) 1px, transparent 1px),
+        linear-gradient(0deg, rgba(184, 139, 74, 0.09) 1px, transparent 1px),
+        radial-gradient(circle at 50% 12%, rgba(242, 240, 235, 0.22), transparent 24%);
+      background-size: 72px 100%, 100% 70px, auto;
+      mix-blend-mode: screen;
+      opacity: 0.62;
+    }
+
+    .roof {
+      background:
+        linear-gradient(135deg, rgba(184, 139, 74, 0.18), transparent 28%),
+        linear-gradient(180deg, #19110e, #080706);
+    }
+
+    .arch {
+      border-color: rgba(184, 139, 74, 0.28);
+      background:
+        radial-gradient(ellipse at 50% 18%, rgba(242, 240, 235, 0.18), transparent 34%),
+        linear-gradient(180deg, rgba(91, 20, 23, 0.28), rgba(8, 7, 7, 0.84));
+      border-radius: 50% 50% 4px 4px / 38% 38% 4px 4px;
+      box-shadow: inset 0 0 30px rgba(184, 139, 74, 0.14), 0 0 24px rgba(91, 20, 23, 0.22);
+    }
+
+    .spire {
+      width: 0;
+      height: 0;
+      border-left: 44px solid transparent;
+      border-right: 44px solid transparent;
+      border-bottom: 170px solid rgba(22, 14, 11, 0.96);
+      filter: drop-shadow(0 0 18px rgba(91, 20, 23, 0.28));
+      box-shadow: none;
+    }
+
+    .node {
+      position: absolute;
+      width: 9px;
+      height: 9px;
+      margin: -4px 0 0 -4px;
+      border-radius: 999px;
+      background: rgba(235, 45, 54, 0.92);
+      box-shadow: 0 0 16px rgba(235, 45, 54, 0.9), 0 0 36px rgba(184, 139, 74, 0.36);
+      transform: translateZ(16px);
+    }
+
+    .axis {
+      position: absolute;
+      height: 2px;
+      transform-origin: 0 50%;
+      background: linear-gradient(90deg, transparent, rgba(184, 139, 74, 0.52), transparent);
+      box-shadow: 0 0 12px rgba(184, 139, 74, 0.18);
+    }
+
+    .veil {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(circle at 50% 48%, transparent 38%, rgba(7, 6, 5, 0.62) 86%),
+        linear-gradient(180deg, rgba(7, 6, 5, 0.3), transparent 36%, rgba(7, 6, 5, 0.72));
+      z-index: 5;
+    }
+
+    .grain {
+      position: fixed;
+      inset: 0;
+      z-index: 6;
+      pointer-events: none;
+      opacity: 0.13;
+      background-image:
+        linear-gradient(0deg, rgba(242, 240, 235, 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(242, 240, 235, 0.04) 1px, transparent 1px);
+      background-size: 41px 41px, 67px 67px;
+    }
+
+    .title {
+      position: fixed;
+      left: clamp(22px, 5vw, 70px);
+      bottom: clamp(24px, 6vh, 68px);
+      z-index: 7;
+      max-width: 360px;
+      text-shadow: 0 0 24px rgba(8, 7, 7, 0.94);
+      pointer-events: none;
+    }
+
+    .title h1 {
+      margin: 0;
+      font-size: clamp(38px, 7vw, 86px);
+      font-weight: 400;
+      line-height: 0.9;
+      letter-spacing: 0;
+    }
+
+    .title p {
+      margin: 12px 0 0;
+      color: var(--dim);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .nav {
+      position: fixed;
+      right: 28px;
+      top: 24px;
+      z-index: 7;
+      display: flex;
+      gap: 8px;
+    }
+
+    .nav a,
+    .nav button {
+      min-width: 38px;
+      height: 34px;
+      padding: 0 12px;
+      border: 1px solid rgba(242, 240, 235, 0.2);
+      border-radius: 0;
+      background: rgba(8, 7, 7, 0.48);
+      color: var(--paper);
+      font: inherit;
+      font-size: 12px;
+      letter-spacing: 0.1em;
+      text-decoration: none;
+      text-transform: uppercase;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 180ms ease, border-color 180ms ease, transform 180ms ease;
+    }
+
+    .nav a:hover,
+    .nav button:hover,
+    .nav a:focus-visible,
+    .nav button:focus-visible {
+      background: rgba(91, 20, 23, 0.36);
+      border-color: rgba(242, 240, 235, 0.48);
+      transform: translateY(-1px);
+    }
+
+    @media (max-width: 720px) {
+      :root {
+        --zoom: 0.48;
+      }
+
+      .title {
+        left: 20px;
+        right: 20px;
+        bottom: 24px;
+      }
+
+      .title p {
+        display: none;
+      }
+
+      .nav {
+        right: 16px;
+        top: 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="model-room" id="modelRoom" aria-label="Sanctum architecture model">
+    <div class="viewport">
+      <div class="world" id="world" aria-hidden="true">
+        <div class="plane"></div>
+      </div>
+    </div>
+  </main>
+  <div class="veil" aria-hidden="true"></div>
+  <div class="grain" aria-hidden="true"></div>
+  <section class="title">
+    <h1>Sanctum</h1>
+  </section>
+  <nav class="nav" aria-label="Sanctum navigation">
+    <button type="button" id="resetView" aria-label="Reset view">0</button>
+    <a href="/sanctum/" aria-label="Back to Sanctum gallery">Set</a>
+    <a href="/" aria-label="Back home">Back</a>
+  </nav>
+  <script>
+    const root = document.documentElement;
+    const room = document.getElementById("modelRoom");
+    const world = document.getElementById("world");
+    const resetView = document.getElementById("resetView");
+    const textures = Array.from({ length: 20 }, (_, index) => `/assets/sanctum/layers/backgrounds/background-${String(index + 1).padStart(2, "0")}.png`);
+    let rotateX = 62;
+    let rotateZ = -38;
+    let zoom = window.matchMedia("(max-width: 720px)").matches ? 0.48 : 0.72;
+    let dragging = false;
+    let lastX = 0;
+    let lastY = 0;
+
+    const spaces = [
+      { name: "nave", x: 0, y: 0, z: 0, w: 300, d: 760, h: 210, tex: 1 },
+      { name: "archive", x: -300, y: -120, z: 0, w: 250, d: 420, h: 160, tex: 10 },
+      { name: "manuscript", x: 300, y: -120, z: 0, w: 250, d: 420, h: 160, tex: 5 },
+      { name: "cloister", x: -360, y: 250, z: 0, w: 180, d: 500, h: 130, tex: 2 },
+      { name: "mirror", x: 360, y: 250, z: 0, w: 180, d: 500, h: 130, tex: 14 },
+      { name: "observatory", x: -190, y: -520, z: 0, w: 240, d: 230, h: 190, tex: 17 },
+      { name: "winter", x: 190, y: -520, z: 0, w: 240, d: 230, h: 150, tex: 15 },
+      { name: "throne", x: 0, y: 480, z: 0, w: 360, d: 260, h: 230, tex: 20 }
+    ];
+
+    function applyView() {
+      root.style.setProperty("--rx", `${rotateX}deg`);
+      root.style.setProperty("--ry", `${rotateZ}deg`);
+      root.style.setProperty("--zoom", zoom.toFixed(3));
+    }
+
+    function surface(className, width, height, transform, texIndex) {
+      const element = document.createElement("div");
+      element.className = className;
+      element.style.width = `${width}px`;
+      element.style.height = `${height}px`;
+      element.style.marginLeft = `${-width / 2}px`;
+      element.style.marginTop = `${-height / 2}px`;
+      element.style.transform = transform;
+      if (texIndex) {
+        element.style.setProperty("--tex", `url("${textures[(texIndex - 1) % textures.length]}")`);
+      }
+      world.appendChild(element);
+      return element;
+    }
+
+    function box(space) {
+      const { x, y, w, d, h, tex } = space;
+      surface("surface", w, h, `translate3d(${x}px, ${y - d / 2}px, ${h / 2}px) rotateX(90deg)`, tex);
+      surface("surface", w, h, `translate3d(${x}px, ${y + d / 2}px, ${h / 2}px) rotateX(90deg) rotateY(180deg)`, tex + 1);
+      surface("surface", d, h, `translate3d(${x - w / 2}px, ${y}px, ${h / 2}px) rotateX(90deg) rotateY(-90deg)`, tex + 2);
+      surface("surface", d, h, `translate3d(${x + w / 2}px, ${y}px, ${h / 2}px) rotateX(90deg) rotateY(90deg)`, tex + 3);
+      surface("roof", w, d, `translate3d(${x}px, ${y}px, ${h}px)`, tex);
+    }
+
+    function arch(x, y, z, width, height, rotate, texIndex) {
+      surface("arch", width, height, `translate3d(${x}px, ${y}px, ${z}px) rotateX(90deg) rotateY(${rotate}deg)`, texIndex);
+    }
+
+    function spire(x, y, z, rotate) {
+      const element = document.createElement("div");
+      element.className = "spire";
+      element.style.transform = `translate3d(${x}px, ${y}px, ${z}px) rotateX(90deg) rotateY(${rotate}deg)`;
+      world.appendChild(element);
+    }
+
+    function node(x, y) {
+      const element = document.createElement("div");
+      element.className = "node";
+      element.style.transform = `translate3d(${x}px, ${y}px, 18px)`;
+      world.appendChild(element);
+    }
+
+    function axis(x1, y1, x2, y2) {
+      const length = Math.hypot(x2 - x1, y2 - y1);
+      const angle = Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI;
+      const element = document.createElement("div");
+      element.className = "axis";
+      element.style.width = `${length}px`;
+      element.style.transform = `translate3d(${x1}px, ${y1}px, 20px) rotateZ(${angle}deg)`;
+      world.appendChild(element);
+    }
+
+    spaces.forEach(box);
+
+    [
+      [-128, -330, 80, 72, 130, 0, 6],
+      [0, -330, 90, 82, 150, 0, 7],
+      [128, -330, 80, 72, 130, 0, 8],
+      [-128, -80, 80, 72, 130, 0, 11],
+      [0, -80, 90, 82, 150, 0, 12],
+      [128, -80, 80, 72, 130, 0, 13],
+      [-128, 180, 80, 72, 130, 0, 16],
+      [0, 180, 90, 82, 150, 0, 18],
+      [128, 180, 80, 72, 130, 0, 20],
+      [-250, 20, 70, 70, 115, 90, 3],
+      [250, 20, 70, 70, 115, 90, 4]
+    ].forEach((item) => arch(...item));
+
+    [
+      [-460, -420, 165, -20],
+      [460, -420, 165, 20],
+      [-460, 480, 150, -20],
+      [460, 480, 150, 20],
+      [0, 610, 235, 0],
+      [0, -630, 195, 0]
+    ].forEach((item) => spire(...item));
+
+    [[0, 0], [-300, -120], [300, -120], [-360, 250], [360, 250], [-190, -520], [190, -520], [0, 480]].forEach((item) => node(...item));
+    axis(0, 0, -300, -120);
+    axis(0, 0, 300, -120);
+    axis(0, 0, -360, 250);
+    axis(0, 0, 360, 250);
+    axis(0, 0, -190, -520);
+    axis(0, 0, 190, -520);
+    axis(0, 0, 0, 480);
+
+    room.addEventListener("pointerdown", (event) => {
+      dragging = true;
+      lastX = event.clientX;
+      lastY = event.clientY;
+      room.setPointerCapture(event.pointerId);
+    });
+
+    room.addEventListener("pointermove", (event) => {
+      if (!dragging) return;
+      const dx = event.clientX - lastX;
+      const dy = event.clientY - lastY;
+      rotateZ += dx * 0.24;
+      rotateX = Math.max(42, Math.min(78, rotateX - dy * 0.18));
+      lastX = event.clientX;
+      lastY = event.clientY;
+      applyView();
+    });
+
+    room.addEventListener("pointerup", () => {
+      dragging = false;
+    });
+
+    room.addEventListener("wheel", (event) => {
+      event.preventDefault();
+      zoom = Math.max(0.42, Math.min(1.18, zoom - event.deltaY * 0.0008));
+      applyView();
+    }, { passive: false });
+
+    window.addEventListener("keydown", (event) => {
+      if (event.key === "ArrowLeft") rotateZ -= 5;
+      if (event.key === "ArrowRight") rotateZ += 5;
+      if (event.key === "ArrowUp") rotateX = Math.min(78, rotateX + 4);
+      if (event.key === "ArrowDown") rotateX = Math.max(42, rotateX - 4);
+      applyView();
+    });
+
+    resetView.addEventListener("click", () => {
+      rotateX = 62;
+      rotateZ = -38;
+      zoom = window.matchMedia("(max-width: 720px)").matches ? 0.48 : 0.72;
+      applyView();
+    });
+
+    applyView();
+  </script>
+</body>
+</html>

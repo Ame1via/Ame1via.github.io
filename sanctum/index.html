@@ -176,6 +176,26 @@
       border-color: var(--paper);
     }
 
+    .model-link {
+      position: fixed;
+      right: 28px;
+      bottom: 58px;
+      z-index: 7;
+      color: var(--paper);
+      font-size: 12px;
+      letter-spacing: 0.12em;
+      text-decoration: none;
+      text-transform: uppercase;
+      border-bottom: 1px solid rgba(184, 139, 74, 0.72);
+      transition: color 200ms ease, border-color 200ms ease;
+    }
+
+    .model-link:hover,
+    .model-link:focus-visible {
+      color: var(--paper);
+      border-color: var(--paper);
+    }
+
     .set-controls {
       position: fixed;
       right: 28px;
@@ -266,6 +286,7 @@
       <button type="button" id="nextSet" aria-label="Next set">&rsaquo;</button>
     </div>
     <div class="set-track" id="setTrack" aria-label="Sanctum set selector"></div>
+    <a class="model-link" href="/sanctum/architecture.html">3D</a>
     <a class="back" href="/">Back</a>
   </main>
   <script>
