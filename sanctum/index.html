@@ -33,12 +33,9 @@
 
     .set-gallery,
     .set-layer,
-    .figure-gallery,
-    .figure-layer,
     .set-light,
     .set-vignette,
-    .set-grain,
-    .transition-canvas {
+    .set-grain {
       position: fixed;
       inset: 0;
       pointer-events: none;
@@ -57,7 +54,7 @@
       opacity: 0;
       transform: translate3d(var(--pan-x), var(--pan-y), 0) scale(1.04);
       filter: saturate(0.9) brightness(0.82) contrast(1.04);
-      transition: opacity 560ms ease, transform 180ms ease-out, filter 560ms ease;
+      transition: opacity 260ms ease, transform 180ms ease-out, filter 260ms ease;
     }
 
     .set-layer.is-active {
@@ -70,28 +67,6 @@
       z-index: 2;
       opacity: 0;
       filter: saturate(0.82) brightness(0.28) contrast(1.16);
-    }
-
-    .figure-gallery {
-      z-index: 2;
-      overflow: hidden;
-    }
-
-    .figure-layer {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      opacity: 0;
-      transform: translate3d(var(--pan-x), var(--pan-y), 0) scale(1.04);
-      transition: opacity 480ms ease, transform 180ms ease-out;
-    }
-
-    .figure-layer.is-active {
-      opacity: 1;
-    }
-
-    body.is-transitioning .figure-layer {
-      opacity: 0;
     }
 
     .set-light {
@@ -117,19 +92,6 @@
         linear-gradient(90deg, rgba(242, 240, 235, 0.035) 1px, transparent 1px);
       background-size: 37px 37px, 53px 53px;
       mask-image: radial-gradient(circle at center, black, transparent 78%);
-    }
-
-    .transition-canvas {
-      z-index: 6;
-      width: 100vw;
-      height: 100vh;
-      opacity: 0;
-      mix-blend-mode: screen;
-      transition: opacity 180ms ease;
-    }
-
-    body.is-transitioning .transition-canvas {
-      opacity: 1;
     }
 
     .sanctum-copy {
@@ -261,8 +223,7 @@
 
     @media (prefers-reduced-motion: reduce) {
       .set-layer,
-      .set-track button,
-      .transition-canvas {
+      .set-track button {
         transition: none;
       }
     }
@@ -292,30 +253,7 @@
       <img class="set-layer" src="/assets/sanctum/layers/backgrounds/background-19.png" alt="">
       <img class="set-layer" src="/assets/sanctum/layers/backgrounds/background-20.png" alt="">
     </div>
-    <div class="figure-gallery" aria-hidden="true">
-      <img class="figure-layer is-active" src="/assets/sanctum/layers/figures/figure-01.png" alt="">
-      <img class="figure-layer" src="/assets/sanctum/layers/figures/figure-02.png" alt="">
-      <img class="figure-layer" src="/assets/sanctum/layers/figures/figure-03.png" alt="">
-      <img class="figure-layer" src="/assets/sanctum/layers/figures/figure-04.png" alt="">
-      <img class="figure-layer" src="/assets/sanctum/layers/figures/figure-05.png" alt="">
-      <img class="figure-layer" src="/assets/sanctum/layers/figures/figure-06.png" alt="">
-      <img class="figure-layer" src="/assets/sanctum/layers/figures/figure-07.png" alt="">
-      <img class="figure-layer" src="/assets/sanctum/layers/figures/figure-08.png" alt="">
-      <img class="figure-layer" src="/assets/sanctum/layers/figures/figure-09.png" alt="">
-      <img class="figure-layer" src="/assets/sanctum/layers/figures/figure-10.png" alt="">
-      <img class="figure-layer" src="/assets/sanctum/layers/figures/figure-11.png" alt="">
-      <img class="figure-layer" src="/assets/sanctum/layers/figures/figure-12.png" alt="">
-      <img class="figure-layer" src="/assets/sanctum/layers/figures/figure-13.png" alt="">
-      <img class="figure-layer" src="/assets/sanctum/layers/figures/figure-14.png" alt="">
-      <img class="figure-layer" src="/assets/sanctum/layers/figures/figure-15.png" alt="">
-      <img class="figure-layer" src="/assets/sanctum/layers/figures/figure-16.png" alt="">
-      <img class="figure-layer" src="/assets/sanctum/layers/figures/figure-17.png" alt="">
-      <img class="figure-layer" src="/assets/sanctum/layers/figures/figure-18.png" alt="">
-      <img class="figure-layer" src="/assets/sanctum/layers/figures/figure-19.png" alt="">
-      <img class="figure-layer" src="/assets/sanctum/layers/figures/figure-20.png" alt="">
-    </div>
     <div class="set-light" aria-hidden="true"></div>
-    <canvas class="transition-canvas" id="transitionCanvas" aria-hidden="true"></canvas>
     <div class="set-vignette" aria-hidden="true"></div>
     <div class="set-grain" aria-hidden="true"></div>
     <section class="sanctum-copy">
@@ -333,19 +271,11 @@
   <script>
     const root = document.documentElement;
     const layers = Array.from(document.querySelectorAll(".set-layer"));
-    const figureDisplays = Array.from(document.querySelectorAll(".figure-layer"));
     const setIndex = document.getElementById("setIndex");
     const setName = document.getElementById("setName");
     const setTrack = document.getElementById("setTrack");
     const prevSet = document.getElementById("prevSet");
     const nextSet = document.getElementById("nextSet");
-    const canvas = document.getElementById("transitionCanvas");
-    const ctx = canvas.getContext("2d");
-    const figureLayers = Array.from({ length: layers.length }, (_, index) => {
-      const image = new Image();
-      image.src = `/assets/sanctum/layers/figures/figure-${String(index + 1).padStart(2, "0")}.png`;
-      return image;
-    });
     const names = [
       "Cathedral library",
       "Moonlit cloister",
@@ -369,75 +299,35 @@
       "Throne nave"
     ];
     let activeIndex = -1;
-    let pendingIndex = -1;
-    let isTransitioning = false;
     let wheelReady = true;
-    let knitPoints = [];
-    let knitEdges = [];
-    let knitDegrees = [];
-    const personMasks = [
-      [[[0.43,0.07],[0.57,0.07],[0.61,0.38],[0.58,0.88],[0.53,0.96],[0.46,0.96],[0.40,0.88],[0.38,0.38]],[[0.45,0.17],[0.55,0.17],[0.58,0.88],[0.42,0.88]],[[0.45,0.28],[0.55,0.28],[0.56,0.39],[0.44,0.39]]],
-      [[[0.42,0.09],[0.55,0.08],[0.64,0.35],[0.67,0.9],[0.54,0.97],[0.43,0.93],[0.34,0.56]],[[0.45,0.2],[0.55,0.2],[0.6,0.9],[0.42,0.9]],[[0.55,0.34],[0.68,0.42],[0.66,0.52],[0.55,0.45]]],
-      [[[0.36,0.04],[0.60,0.05],[0.65,0.32],[0.61,0.58],[0.48,0.74],[0.28,0.91],[0.18,0.78],[0.21,0.48]],[[0.43,0.22],[0.59,0.24],[0.62,0.57],[0.50,0.72],[0.36,0.60]],[[0.50,0.56],[0.66,0.56],[0.65,0.66],[0.50,0.68]]],
-      [[[0.39,0.09],[0.58,0.09],[0.66,0.34],[0.70,0.72],[0.61,0.93],[0.39,0.93],[0.29,0.72],[0.33,0.34]],[[0.43,0.18],[0.55,0.18],[0.60,0.88],[0.40,0.88]],[[0.25,0.34],[0.38,0.42],[0.35,0.57],[0.25,0.52]],[[0.60,0.42],[0.73,0.34],[0.72,0.52],[0.63,0.57]]],
-      [[[0.42,0.08],[0.59,0.08],[0.64,0.32],[0.62,0.62],[0.55,0.82],[0.40,0.77],[0.34,0.55],[0.35,0.26]],[[0.45,0.22],[0.58,0.22],[0.59,0.58],[0.45,0.58]],[[0.58,0.55],[0.66,0.56],[0.66,0.66],[0.55,0.66]]],
-      [[[0.45,0.16],[0.55,0.16],[0.67,0.45],[0.72,0.88],[0.54,0.97],[0.37,0.92],[0.28,0.64],[0.34,0.36]],[[0.46,0.24],[0.54,0.24],[0.58,0.82],[0.43,0.82]]],
-      [[[0.37,0.11],[0.52,0.12],[0.60,0.38],[0.58,0.9],[0.43,0.96],[0.30,0.86],[0.27,0.42]],[[0.39,0.21],[0.51,0.21],[0.53,0.84],[0.36,0.84]]],
-      [[[0.41,0.07],[0.56,0.08],[0.62,0.36],[0.62,0.9],[0.48,0.97],[0.34,0.86],[0.35,0.30]],[[0.26,0.34],[0.36,0.28],[0.38,0.44],[0.29,0.49]],[[0.43,0.20],[0.55,0.20],[0.57,0.84],[0.40,0.84]]],
-      [[[0.35,0.22],[0.62,0.22],[0.72,0.55],[0.66,0.86],[0.51,0.96],[0.33,0.88],[0.23,0.58]],[[0.41,0.30],[0.56,0.30],[0.60,0.76],[0.39,0.76]],[[0.34,0.72],[0.49,0.78],[0.45,0.91],[0.30,0.86]],[[0.52,0.78],[0.67,0.72],[0.70,0.86],[0.55,0.91]]],
-      [[[0.10,0.08],[0.34,0.08],[0.39,0.37],[0.36,0.80],[0.25,0.94],[0.10,0.86],[0.05,0.45]],[[0.18,0.20],[0.34,0.20],[0.35,0.72],[0.16,0.72]],[[0.30,0.34],[0.43,0.42],[0.41,0.55],[0.31,0.50]]],
-      [[[0.44,0.17],[0.56,0.17],[0.66,0.43],[0.71,0.88],[0.55,0.97],[0.43,0.92],[0.32,0.58],[0.38,0.34]],[[0.45,0.27],[0.55,0.27],[0.59,0.84],[0.41,0.84]],[[0.57,0.36],[0.70,0.26],[0.73,0.42],[0.61,0.48]]],
-      [[[0.39,0.11],[0.58,0.11],[0.65,0.38],[0.62,0.90],[0.46,0.97],[0.35,0.80],[0.35,0.36]],[[0.43,0.23],[0.56,0.23],[0.57,0.82],[0.39,0.82]],[[0.41,0.62],[0.60,0.62],[0.63,0.78],[0.38,0.78]]],
-      [[[0.13,0.08],[0.34,0.07],[0.40,0.34],[0.38,0.82],[0.26,0.96],[0.11,0.86],[0.06,0.48]],[[0.18,0.19],[0.34,0.19],[0.35,0.72],[0.16,0.72]],[[0.30,0.50],[0.42,0.58],[0.40,0.70],[0.28,0.62]]],
-      [[[0.45,0.11],[0.60,0.12],[0.65,0.40],[0.63,0.92],[0.49,0.98],[0.38,0.80],[0.37,0.32]],[[0.27,0.36],[0.37,0.28],[0.39,0.44],[0.30,0.50]],[[0.46,0.23],[0.58,0.23],[0.58,0.78],[0.42,0.78]]],
-      [[[0.43,0.11],[0.58,0.11],[0.69,0.42],[0.71,0.90],[0.55,0.97],[0.40,0.92],[0.29,0.49],[0.35,0.27]],[[0.46,0.22],[0.57,0.22],[0.60,0.84],[0.42,0.84]],[[0.34,0.43],[0.45,0.52],[0.42,0.68],[0.31,0.60]],[[0.58,0.52],[0.70,0.43],[0.73,0.60],[0.62,0.68]]]
-    ];
 
     setTrack.innerHTML = layers.map((_, index) => `<button class="${index === 0 ? "is-active" : ""}" type="button" aria-label="Show set ${index + 1}"></button>`).join("");
     const ticks = Array.from(setTrack.querySelectorAll("button"));
 
     function setActiveLayer(index) {
-      if (index === activeIndex) return;
-      activeIndex = index;
+      const nextIndex = (index + layers.length) % layers.length;
+      if (nextIndex === activeIndex) return;
+      activeIndex = nextIndex;
       layers.forEach((layer, layerIndex) => {
-        layer.classList.toggle("is-active", layerIndex === index);
-        layer.classList.remove("is-pending");
-      });
-      figureDisplays.forEach((figure, figureIndex) => {
-        figure.classList.toggle("is-active", figureIndex === index);
+        layer.classList.toggle("is-active", layerIndex === nextIndex);
       });
       ticks.forEach((tick, tickIndex) => {
-        tick.classList.toggle("is-active", tickIndex === index);
+        tick.classList.toggle("is-active", tickIndex === nextIndex);
       });
-      setIndex.textContent = `Set ${String(index + 1).padStart(2, "0")} / ${layers.length}`;
-      setName.textContent = names[index];
-    }
-
-    function requestSet(index) {
-      const nextIndex = (index + layers.length) % layers.length;
-      if (nextIndex === activeIndex || isTransitioning) return;
-      transitionTo(nextIndex);
-    }
-
-    function transitionTo(index) {
-      pendingIndex = index;
-      isTransitioning = true;
-      layers[index].classList.add("is-pending");
-      document.body.classList.add("is-transitioning");
-      prepareTransition(index);
-      window.requestAnimationFrame((time) => animateTransition(time, time, index));
+      setIndex.textContent = `Set ${String(nextIndex + 1).padStart(2, "0")} / ${layers.length}`;
+      setName.textContent = names[nextIndex];
     }
 
     function stepSet(direction) {
-      requestSet(activeIndex + direction);
+      setActiveLayer(activeIndex + direction);
     }
 
     function setPointer(x, y) {
       const nx = Math.max(0, Math.min(1, x / window.innerWidth));
       const ny = Math.max(0, Math.min(1, y / window.innerHeight));
       root.style.setProperty("--mx", `${nx * 100}%`);
-      root.style.setProperty("--pan-x", `${((0.5 - nx) * 22).toFixed(2)}px`);
-      root.style.setProperty("--pan-y", `${((0.5 - ny) * 14).toFixed(2)}px`);
+      root.style.setProperty("--pan-x", `${((0.5 - nx) * 16).toFixed(2)}px`);
+      root.style.setProperty("--pan-y", `${((0.5 - ny) * 10).toFixed(2)}px`);
     }
 
     window.addEventListener("pointermove", (event) => {
@@ -449,7 +339,7 @@
     });
 
     ticks.forEach((tick, index) => {
-      tick.addEventListener("click", () => requestSet(index));
+      tick.addEventListener("click", () => setActiveLayer(index));
     });
 
     prevSet.addEventListener("click", () => stepSet(-1));
@@ -458,650 +348,21 @@
     window.addEventListener("keydown", (event) => {
       if (event.key === "ArrowLeft") stepSet(-1);
       if (event.key === "ArrowRight") stepSet(1);
+      if (event.key === "Home") setActiveLayer(0);
+      if (event.key === "End") setActiveLayer(layers.length - 1);
     });
 
     window.addEventListener("wheel", (event) => {
-      if (!wheelReady || Math.abs(event.deltaY) < 18) return;
+      if (!wheelReady || Math.abs(event.deltaY) < 14) return;
       wheelReady = false;
       stepSet(event.deltaY > 0 ? 1 : -1);
       window.setTimeout(() => {
         wheelReady = true;
-      }, 420);
+      }, 120);
     }, { passive: true });
 
     setPointer(window.innerWidth / 2, window.innerHeight / 2);
     setActiveLayer(0);
-    resizeCanvas();
-    window.addEventListener("resize", resizeCanvas);
-
-    function resizeCanvas() {
-      const ratio = window.devicePixelRatio || 1;
-      canvas.width = Math.round(window.innerWidth * ratio);
-      canvas.height = Math.round(window.innerHeight * ratio);
-      canvas.style.width = `${window.innerWidth}px`;
-      canvas.style.height = `${window.innerHeight}px`;
-      ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
-    }
-
-    function prepareTransition(index) {
-      resizeCanvas();
-      const width = window.innerWidth;
-      const height = window.innerHeight;
-      knitPoints = generateKnitPoints(index, width, height, figureLayers[index]);
-      relaxKnitPoints(width, height, 4);
-      knitEdges = generateKnitEdges(index, width, height);
-      knitDegrees = new Array(knitPoints.length).fill(0);
-      for (const edge of knitEdges) {
-        knitDegrees[edge.a.id] += 1;
-        knitDegrees[edge.b.id] += 1;
-      }
-      knitPoints.sort((a, b) => a.brightness - b.brightness);
-    }
-
-    function animateTransition(start, now, index) {
-      const duration = 1680;
-      const progress = Math.min(1, (now - start) / duration);
-      drawTransition(progress, index);
-
-      if (progress > 0.93 && pendingIndex === index) {
-        pendingIndex = -1;
-        setActiveLayer(index);
-      }
-
-      if (progress < 1) {
-        window.requestAnimationFrame((time) => animateTransition(start, time, index));
-        return;
-      }
-
-      ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
-      document.body.classList.remove("is-transitioning");
-      isTransitioning = false;
-    }
-
-    function drawTransition(progress, index) {
-      const width = window.innerWidth;
-      const height = window.innerHeight;
-      ctx.clearRect(0, 0, width, height);
-
-      const wallProgress = smootherstep(0, 0.42, progress);
-      const knitProgress = smoothstep(0.18, 0.98, progress);
-      const knitFade = 1 - smoothstep(0.86, 1, progress);
-
-      drawFourthWall(layers[activeIndex], layers[index], wallProgress, progress, index);
-      drawKnitMesh(knitProgress, knitFade, figureLayers[index], index);
-
-      const flash = smoothstep(0.82, 1, progress);
-      ctx.save();
-      ctx.globalAlpha = flash * 0.12;
-      ctx.fillStyle = "rgba(242, 240, 235, 1)";
-      ctx.fillRect(0, 0, width, height);
-      ctx.restore();
-    }
-
-    function drawFourthWall(currentImage, nextImage, wallProgress, totalProgress, index) {
-      const width = window.innerWidth;
-      const height = window.innerHeight;
-      const mode = index % 5;
-      const settle = smoothstep(0.08, 0.54, totalProgress);
-
-      ctx.save();
-      ctx.globalAlpha = 0.08 * (1 - settle);
-      drawCoverImage(currentImage, 0, 0, width, height);
-      ctx.fillStyle = "rgba(8, 7, 7, 0.72)";
-      ctx.fillRect(0, 0, width, height);
-      ctx.restore();
-
-      ctx.save();
-      ctx.globalAlpha = 0.34 + settle * 0.38;
-      ctx.filter = `brightness(${0.26 + settle * 0.46}) saturate(0.92) contrast(1.08)`;
-      drawCoverImage(nextImage, 0, 0, width, height);
-      ctx.filter = "none";
-      ctx.fillStyle = "rgba(8, 7, 7, 0.36)";
-      ctx.fillRect(0, 0, width, height);
-      ctx.restore();
-
-      if (mode === 0) drawPanelWall(nextImage, wallProgress, totalProgress);
-      if (mode === 1) drawSplitWall(nextImage, wallProgress, totalProgress);
-      if (mode === 2) drawDiagonalWall(nextImage, wallProgress, totalProgress);
-      if (mode === 3) drawCurtainWall(nextImage, wallProgress, totalProgress);
-      if (mode === 4) drawPushWall(nextImage, wallProgress, totalProgress);
-
-      ctx.save();
-      ctx.globalAlpha = 0.24 + settle * 0.18;
-      ctx.fillStyle = "rgba(8, 7, 7, 0.48)";
-      ctx.fillRect(0, 0, width, height);
-      ctx.restore();
-    }
-
-    function drawPanelWall(nextImage, wallProgress, totalProgress) {
-      const width = window.innerWidth;
-      const height = window.innerHeight;
-      const panelCount = 9;
-      const panelWidth = width / panelCount;
-      const center = (panelCount - 1) / 2;
-
-      ctx.save();
-      ctx.globalAlpha = 0.22 + wallProgress * 0.44;
-      ctx.fillStyle = "rgba(8, 7, 7, 0.86)";
-      ctx.fillRect(0, 0, width, height);
-      ctx.restore();
-
-      for (let i = 0; i < panelCount; i += 1) {
-        const distance = Math.abs(i - center);
-        const panelProgress = Math.max(0, Math.min(1, (wallProgress - distance * 0.05) / 0.28));
-        if (panelProgress <= 0) continue;
-
-        const open = smootherstep(0, 1, panelProgress);
-        const x = i * panelWidth;
-        const direction = i < center ? -1 : 1;
-        const hinge = i === center ? 0 : direction;
-        const push = Math.sin(open * Math.PI) * 42;
-        const fold = (1 - open) * panelWidth * 0.38;
-        const drawX = hinge * fold - push * 0.5;
-        const drawY = (1 - open) * height * 0.07;
-        const drawW = width + push;
-        const drawH = height - drawY * 2;
-
-        ctx.save();
-        ctx.beginPath();
-        ctx.rect(x, 0, panelWidth + 1, height);
-        ctx.clip();
-        ctx.globalAlpha = 0.24 + open * 0.68;
-        ctx.filter = `brightness(${0.32 + open * 0.5}) saturate(${0.82 + open * 0.18}) contrast(1.1)`;
-        drawCoverImage(nextImage, drawX, drawY, drawW, drawH);
-        ctx.filter = "none";
-
-        ctx.globalAlpha = (1 - open) * 0.5 + 0.12;
-        ctx.fillStyle = i % 2 ? "rgba(8, 7, 7, 0.52)" : "rgba(242, 240, 235, 0.05)";
-        ctx.fillRect(x, 0, panelWidth + 1, height);
-
-        ctx.globalAlpha = 0.18 + open * 0.22;
-        ctx.strokeStyle = "rgba(242, 240, 235, 0.28)";
-        ctx.lineWidth = 1;
-        ctx.beginPath();
-        ctx.moveTo(x + (direction > 0 ? 0 : panelWidth), height * 0.08);
-        ctx.lineTo(x + (direction > 0 ? 0 : panelWidth), height * 0.92);
-        ctx.stroke();
-        ctx.restore();
-      }
-
-      const aperture = smoothstep(0.35, 1, wallProgress);
-      ctx.save();
-      ctx.globalAlpha = aperture * 0.32;
-      ctx.fillStyle = "rgba(242, 240, 235, 1)";
-      ctx.fillRect(width * (0.5 - aperture * 0.05), 0, width * aperture * 0.1, height);
-      ctx.restore();
-    }
-
-    function drawSplitWall(nextImage, wallProgress) {
-      const width = window.innerWidth;
-      const height = window.innerHeight;
-      const open = smootherstep(0, 1, wallProgress);
-      const slit = width * (0.02 + open * 0.78);
-
-      ctx.save();
-      ctx.beginPath();
-      ctx.rect(width / 2 - slit / 2, 0, slit, height);
-      ctx.clip();
-      ctx.globalAlpha = 0.4 + open * 0.42;
-      ctx.filter = `brightness(${0.36 + open * 0.46}) contrast(1.1)`;
-      drawCoverImage(nextImage, -open * 26, 0, width + open * 52, height);
-      ctx.filter = "none";
-      ctx.restore();
-
-      ctx.save();
-      ctx.globalAlpha = 0.32 * (1 - open);
-      ctx.fillStyle = "rgba(242, 240, 235, 1)";
-      ctx.fillRect(width / 2 - 1, 0, 2, height);
-      ctx.restore();
-    }
-
-    function drawDiagonalWall(nextImage, wallProgress) {
-      const width = window.innerWidth;
-      const height = window.innerHeight;
-      const open = smootherstep(0, 1, wallProgress);
-      const sweep = (width + height) * open;
-
-      ctx.save();
-      ctx.beginPath();
-      ctx.moveTo(0, height);
-      ctx.lineTo(sweep, height);
-      ctx.lineTo(sweep - height * 0.58, 0);
-      ctx.lineTo(0, 0);
-      ctx.closePath();
-      ctx.clip();
-      ctx.globalAlpha = 0.34 + open * 0.5;
-      ctx.filter = `brightness(${0.32 + open * 0.48}) saturate(0.96) contrast(1.1)`;
-      drawCoverImage(nextImage, -24 + open * 24, 0, width, height);
-      ctx.filter = "none";
-      ctx.restore();
-
-      ctx.save();
-      ctx.globalAlpha = Math.sin(open * Math.PI) * 0.22;
-      ctx.strokeStyle = "rgba(242, 240, 235, 0.72)";
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.moveTo(sweep - height * 0.58, 0);
-      ctx.lineTo(sweep, height);
-      ctx.stroke();
-      ctx.restore();
-    }
-
-    function drawCurtainWall(nextImage, wallProgress) {
-      const width = window.innerWidth;
-      const height = window.innerHeight;
-      const open = smootherstep(0, 1, wallProgress);
-      const gap = height * (0.04 + open * 0.78);
-
-      ctx.save();
-      ctx.beginPath();
-      ctx.rect(0, height / 2 - gap / 2, width, gap);
-      ctx.clip();
-      ctx.globalAlpha = 0.36 + open * 0.46;
-      ctx.filter = `brightness(${0.3 + open * 0.48}) saturate(0.96)`;
-      drawCoverImage(nextImage, 0, -open * 18, width, height + open * 36);
-      ctx.filter = "none";
-      ctx.restore();
-
-      ctx.save();
-      ctx.globalAlpha = 0.42 * (1 - open);
-      ctx.fillStyle = "rgba(8, 7, 7, 0.92)";
-      ctx.fillRect(0, 0, width, height / 2 - gap / 2);
-      ctx.fillRect(0, height / 2 + gap / 2, width, height / 2 - gap / 2);
-      ctx.restore();
-    }
-
-    function drawPushWall(nextImage, wallProgress) {
-      const width = window.innerWidth;
-      const height = window.innerHeight;
-      const open = smootherstep(0, 1, wallProgress);
-      const scale = 1.14 - open * 0.14;
-      const insetX = width * (1 - scale) / 2;
-      const insetY = height * (1 - scale) / 2;
-
-      ctx.save();
-      ctx.globalAlpha = 0.28 + open * 0.58;
-      ctx.filter = `brightness(${0.3 + open * 0.54}) saturate(${0.84 + open * 0.14}) contrast(1.12)`;
-      drawCoverImage(nextImage, insetX, insetY, width * scale, height * scale);
-      ctx.filter = "none";
-      ctx.restore();
-
-      ctx.save();
-      ctx.globalAlpha = Math.sin(open * Math.PI) * 0.26;
-      ctx.strokeStyle = "rgba(242, 240, 235, 0.48)";
-      ctx.lineWidth = 1;
-      ctx.strokeRect(width * (0.08 + (1 - open) * 0.1), height * (0.08 + (1 - open) * 0.1), width * (0.84 - (1 - open) * 0.2), height * (0.84 - (1 - open) * 0.2));
-      ctx.restore();
-    }
-
-    function drawKnitMesh(progress, fade, image, index) {
-      const width = window.innerWidth;
-      const height = window.innerHeight;
-      const scale = Math.min(width, height);
-      const visibleCount = Math.floor(knitPoints.length * smootherstep(0, 1, progress));
-      const visible = new Set();
-      for (let i = 0; i < visibleCount; i += 1) {
-        visible.add(knitPoints[i].id);
-      }
-
-      ctx.save();
-      ctx.globalAlpha = fade;
-      ctx.fillStyle = "rgba(242, 240, 235, 0.035)";
-      ctx.fillRect(0, 0, width, height);
-      ctx.restore();
-
-      ctx.save();
-      ctx.globalAlpha = fade * smoothstep(0.12, 0.92, progress) * 0.74;
-      ctx.filter = `brightness(${0.3 + progress * 0.76}) saturate(${0.78 + progress * 0.2}) contrast(1.08)`;
-      drawCoverImage(image, 0, 0, width, height);
-      ctx.filter = "none";
-      ctx.fillStyle = `rgba(6, 5, 5, ${0.42 * (1 - progress)})`;
-      ctx.fillRect(0, 0, width, height);
-      ctx.restore();
-
-      ctx.save();
-      ctx.lineCap = "round";
-      ctx.lineJoin = "round";
-
-      for (const edge of knitEdges) {
-        const aVisible = visible.has(edge.a.id);
-        const bVisible = visible.has(edge.b.id);
-        if (!aVisible && !bVisible) continue;
-
-        const local = Math.max(0, Math.min(1, (progress - edge.delay) / 0.24));
-        if (local <= 0) continue;
-
-        const lineProgress = aVisible && bVisible ? 1 : local;
-        const alpha = fade * local * (0.18 + (1 - edge.brightness) * 0.58);
-        ctx.globalAlpha = alpha;
-        ctx.strokeStyle = edge.color;
-        ctx.lineWidth = edge.brightness < 0.34 ? 0.9 : 0.68;
-        ctx.shadowColor = edge.glow;
-        ctx.shadowBlur = 8;
-        drawPartialEdge(edge.a, edge.b, lineProgress);
-      }
-      ctx.restore();
-
-      ctx.save();
-      ctx.globalAlpha = fade * smoothstep(0.7, 1, progress) * 0.58;
-      for (let i = 0; i < visibleCount; i += 1) {
-        const point = knitPoints[i];
-        if (knitDegrees[point.id] < 4) continue;
-        ctx.fillStyle = point.nodeColor;
-        ctx.beginPath();
-        ctx.arc(point.x, point.y, 1.05, 0, Math.PI * 2);
-        ctx.fill();
-      }
-      ctx.restore();
-
-    }
-
-    function generateKnitPoints(index, width, height, image) {
-      const result = [];
-      const scale = knitScale(width, height);
-      const setVariance = 0.86 + seeded(index, 88, 1, 0) * 0.34;
-      const target = Math.round((scale * scale) / (1000 / setVariance));
-      let attempts = 0;
-
-      while (result.length < target && attempts < target * 80) {
-        attempts += 1;
-        const nx = seeded(index, attempts, 1, 0);
-        const ny = seeded(index, attempts, 2, 0);
-        if (!insideFigureAlpha(image, nx, ny)) continue;
-
-        const tone = sampleSetKnitTone(image, nx, ny, width, height);
-        const shapeBrightness = syntheticKnitBrightness(nx, ny);
-        const brightness = Math.max(0.04, Math.min(0.92, tone.brightness * 0.64 + shapeBrightness * 0.36));
-        const contrast = 4.7 + seeded(index, 91, 2, 0) * 2.4;
-        const probability = Math.max(0.006, Math.pow(1 - brightness, contrast));
-        if (seeded(index, attempts, 3, 0) > probability) continue;
-
-        const point = toKnitScreen(
-          nx + (seeded(index, attempts, 4, 0) - 0.5) * 0.01,
-          ny + (seeded(index, attempts, 5, 0) - 0.5) * 0.01,
-          width,
-          height
-        );
-        point.nx = nx;
-        point.ny = ny;
-        point.brightness = brightness;
-        point.color = tone.color;
-        point.nodeColor = tone.nodeColor;
-        point.glow = tone.glow;
-        point.id = result.length;
-        result.push(point);
-      }
-
-      return result;
-    }
-
-    function relaxKnitPoints(width, height, iterations) {
-      const scale = knitScale(width, height);
-      const maxDistance = scale * 0.095;
-
-      for (let iter = 0; iter < iterations; iter += 1) {
-        const moved = knitPoints.map((point) => ({ x: point.x, y: point.y, count: 1 }));
-
-        for (let i = 0; i < knitPoints.length; i += 1) {
-          for (let j = i + 1; j < knitPoints.length; j += 1) {
-            const a = knitPoints[i];
-            const b = knitPoints[j];
-            const distance = Math.hypot(a.x - b.x, a.y - b.y);
-            if (distance > maxDistance) continue;
-            moved[i].x += b.x;
-            moved[i].y += b.y;
-            moved[i].count += 1;
-            moved[j].x += a.x;
-            moved[j].y += a.y;
-            moved[j].count += 1;
-          }
-        }
-
-        for (let i = 0; i < knitPoints.length; i += 1) {
-          const avgX = moved[i].x / moved[i].count;
-          const avgY = moved[i].y / moved[i].count;
-          knitPoints[i].x += (avgX - knitPoints[i].x) * 0.22;
-          knitPoints[i].y += (avgY - knitPoints[i].y) * 0.22;
-        }
-      }
-    }
-
-    function generateKnitEdges(index, width, height) {
-      const result = [];
-      const used = new Set();
-      const maxDistance = knitScale(width, height) * 0.082;
-
-      for (let i = 0; i < knitPoints.length; i += 1) {
-        const candidates = [];
-        for (let j = 0; j < knitPoints.length; j += 1) {
-          if (i === j) continue;
-          const distance = Math.hypot(knitPoints[i].x - knitPoints[j].x, knitPoints[i].y - knitPoints[j].y);
-          if (distance > maxDistance) continue;
-          const mid = fromKnitScreen((knitPoints[i].x + knitPoints[j].x) / 2, (knitPoints[i].y + knitPoints[j].y) / 2, width, height);
-          if (!insideFigureAlpha(figureLayers[index], mid.nx, mid.ny)) continue;
-          candidates.push({ point: knitPoints[j], distance });
-        }
-
-        candidates
-          .sort((a, b) => a.distance - b.distance)
-          .slice(0, 4)
-          .forEach(({ point, distance }) => {
-            const a = Math.min(knitPoints[i].id, point.id);
-            const b = Math.max(knitPoints[i].id, point.id);
-            const key = `${a}:${b}`;
-            if (used.has(key)) return;
-            used.add(key);
-            result.push({
-              a: knitPoints[i],
-              b: point,
-              distance,
-              brightness: Math.max(knitPoints[i].brightness, point.brightness),
-              color: mixThreadColor(knitPoints[i], point),
-              glow: mixThreadGlow(knitPoints[i], point),
-              delay: Math.min(knitPoints[i].brightness, point.brightness) * 0.56 + distance / maxDistance * 0.12
-            });
-          });
-      }
-
-      return result.sort((a, b) => a.delay - b.delay);
-    }
-
-    function sampleSetKnitTone(image, nx, ny, width, height) {
-      const fallbackBrightness = syntheticKnitBrightness(nx, ny);
-      if (!image || !image.complete || !image.naturalWidth || !image.naturalHeight) {
-        return {
-          brightness: fallbackBrightness,
-          color: "rgba(238, 231, 210, 0.86)",
-          nodeColor: "rgba(242, 240, 235, 0.82)",
-          glow: "rgba(242, 240, 235, 0.16)"
-        };
-      }
-
-      const screen = toKnitScreen(nx, ny, width, height);
-      const sample = sampleCoverImageColor(image, screen.x, screen.y, width, height);
-      const brightness = (0.299 * sample.r + 0.587 * sample.g + 0.114 * sample.b) / 255;
-      const warm = Math.max(sample.r - sample.b, 0) / 255;
-      const pale = brightness > 0.58;
-      const r = Math.round(sample.r * 0.62 + (pale ? 242 : 145) * 0.38);
-      const g = Math.round(sample.g * 0.62 + (pale ? 231 : 31) * 0.38);
-      const b = Math.round(sample.b * 0.62 + (pale ? 210 : 40) * 0.38);
-      const alpha = pale ? 0.88 : 0.72 + warm * 0.12;
-
-      return {
-        brightness,
-        color: `rgba(${r}, ${g}, ${b}, ${alpha.toFixed(2)})`,
-        nodeColor: `rgba(${Math.min(255, r + 18)}, ${Math.min(255, g + 18)}, ${Math.min(255, b + 18)}, 0.82)`,
-        glow: pale ? "rgba(242, 240, 235, 0.16)" : "rgba(132, 24, 33, 0.22)"
-      };
-    }
-
-    function sampleCoverImageColor(image, x, y, width, height) {
-      const imageRatio = image.naturalWidth / image.naturalHeight;
-      const viewRatio = width / height;
-      let sourceX = 0;
-      let sourceY = 0;
-      let sourceWidth = image.naturalWidth;
-      let sourceHeight = image.naturalHeight;
-
-      if (imageRatio > viewRatio) {
-        sourceWidth = image.naturalHeight * viewRatio;
-        sourceX = (image.naturalWidth - sourceWidth) / 2;
-      } else {
-        sourceHeight = image.naturalWidth / viewRatio;
-        sourceY = (image.naturalHeight - sourceHeight) / 2;
-      }
-
-      const ix = Math.max(0, Math.min(image.naturalWidth - 1, Math.floor(sourceX + (x / width) * sourceWidth)));
-      const iy = Math.max(0, Math.min(image.naturalHeight - 1, Math.floor(sourceY + (y / height) * sourceHeight)));
-      const sampler = sampleCoverImageColor.canvas || (sampleCoverImageColor.canvas = document.createElement("canvas"));
-      const samplerCtx = sampleCoverImageColor.ctx || (sampleCoverImageColor.ctx = sampler.getContext("2d", { willReadFrequently: true }));
-      const key = `${image.currentSrc || image.src}:${image.naturalWidth}x${image.naturalHeight}`;
-      if (sampleCoverImageColor.key !== key) {
-        sampler.width = image.naturalWidth;
-        sampler.height = image.naturalHeight;
-        samplerCtx.clearRect(0, 0, sampler.width, sampler.height);
-        samplerCtx.drawImage(image, 0, 0);
-        sampleCoverImageColor.key = key;
-      }
-      const data = samplerCtx.getImageData(ix, iy, 1, 1).data;
-      return { r: data[0], g: data[1], b: data[2] };
-    }
-
-    function insideFigureAlpha(image, nx, ny) {
-      if (!image || !image.complete || !image.naturalWidth || !image.naturalHeight) return false;
-      const sampler = insideFigureAlpha.canvas || (insideFigureAlpha.canvas = document.createElement("canvas"));
-      const samplerCtx = insideFigureAlpha.ctx || (insideFigureAlpha.ctx = sampler.getContext("2d", { willReadFrequently: true }));
-      const key = `${image.currentSrc || image.src}:${image.naturalWidth}x${image.naturalHeight}`;
-      if (insideFigureAlpha.key !== key) {
-        sampler.width = image.naturalWidth;
-        sampler.height = image.naturalHeight;
-        samplerCtx.clearRect(0, 0, sampler.width, sampler.height);
-        samplerCtx.drawImage(image, 0, 0);
-        insideFigureAlpha.key = key;
-      }
-      const x = Math.max(0, Math.min(image.naturalWidth - 1, Math.floor(nx * image.naturalWidth)));
-      const y = Math.max(0, Math.min(image.naturalHeight - 1, Math.floor(ny * image.naturalHeight)));
-      return samplerCtx.getImageData(x, y, 1, 1).data[3] > 36;
-    }
-
-    function mixThreadColor(a, b) {
-      return a.brightness < b.brightness ? a.color : b.color;
-    }
-
-    function mixThreadGlow(a, b) {
-      return a.brightness < b.brightness ? a.glow : b.glow;
-    }
-
-    function syntheticKnitBrightness(nx, ny) {
-      const vertical = Math.abs(ny - 0.52);
-      const center = Math.abs(nx - 0.5);
-      const fold = 0.18 * Math.abs(Math.sin(nx * 34 + ny * 18));
-      return Math.max(0.04, Math.min(0.92, 0.32 + vertical * 0.32 + center * 0.22 + fold));
-    }
-
-    function drawPartialEdge(a, b, progress) {
-      const eased = smootherstep(0, 1, progress);
-      ctx.beginPath();
-      ctx.moveTo(a.x, a.y);
-      ctx.lineTo(a.x + (b.x - a.x) * eased, a.y + (b.y - a.y) * eased);
-      ctx.stroke();
-    }
-
-    function drawCoverImage(image, x, y, width, height) {
-      if (!image || !image.naturalWidth || !image.naturalHeight) return;
-
-      const imageRatio = image.naturalWidth / image.naturalHeight;
-      const viewRatio = window.innerWidth / window.innerHeight;
-      let sourceX = 0;
-      let sourceY = 0;
-      let sourceWidth = image.naturalWidth;
-      let sourceHeight = image.naturalHeight;
-
-      if (imageRatio > viewRatio) {
-        sourceWidth = image.naturalHeight * viewRatio;
-        sourceX = (image.naturalWidth - sourceWidth) / 2;
-      } else {
-        sourceHeight = image.naturalWidth / viewRatio;
-        sourceY = (image.naturalHeight - sourceHeight) / 2;
-      }
-
-      ctx.drawImage(image, sourceX, sourceY, sourceWidth, sourceHeight, x, y, width, height);
-    }
-
-    function personPath(width, height, index) {
-      const p = new Path2D();
-      const masks = personMasks[index] || personMasks[0];
-      for (const polygon of masks) {
-        polygon.forEach(([x, y], pointIndex) => {
-          const px = x * width;
-          const py = y * height;
-          if (pointIndex === 0) {
-            p.moveTo(px, py);
-          } else {
-            p.lineTo(px, py);
-          }
-        });
-        p.closePath();
-      }
-      return p;
-    }
-
-    function strokeDashedPath(path, progress, scale) {
-      ctx.save();
-      ctx.setLineDash([scale * 3, scale * 3]);
-      ctx.lineDashOffset = scale * 3 * (1 - progress);
-      ctx.stroke(path);
-      ctx.restore();
-    }
-
-    function insidePersonMask(index, nx, ny) {
-      const masks = personMasks[index] || personMasks[0];
-      return masks.some((polygon) => pointInPolygon(nx, ny, polygon));
-    }
-
-    function pointInPolygon(x, y, polygon) {
-      let inside = false;
-      for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i, i += 1) {
-        const xi = polygon[i][0];
-        const yi = polygon[i][1];
-        const xj = polygon[j][0];
-        const yj = polygon[j][1];
-        const intersect = ((yi > y) !== (yj > y)) && (x < ((xj - xi) * (y - yi)) / (yj - yi) + xi);
-        if (intersect) inside = !inside;
-      }
-      return inside;
-    }
-
-    function knitScale(width, height) {
-      return Math.min(width, height);
-    }
-
-    function toKnitScreen(nx, ny, width, height) {
-      return { x: nx * width, y: ny * height };
-    }
-
-    function fromKnitScreen(x, y, width, height) {
-      return { nx: x / width, ny: y / height };
-    }
-
-    function ellipse(x, y, cx, cy, rx, ry) {
-      return (((x - cx) * (x - cx)) / (rx * rx)) + (((y - cy) * (y - cy)) / (ry * ry)) <= 1;
-    }
-
-    function smoothstep(edge0, edge1, value) {
-      const x = Math.max(0, Math.min(1, (value - edge0) / (edge1 - edge0)));
-      return x * x * (3 - 2 * x);
-    }
-
-    function smootherstep(edge0, edge1, value) {
-      const x = Math.max(0, Math.min(1, (value - edge0) / (edge1 - edge0)));
-      return x * x * x * (x * (x * 6 - 15) + 10);
-    }
-
-    function seeded(a, b, c, d) {
-      const value = Math.sin((a + 1) * 12.9898 + (b + 1) * 78.233 + (c + 1) * 37.719 + d * 19.19) * 43758.5453;
-      return value - Math.floor(value);
-    }
   </script>
 </body>
 </html>
