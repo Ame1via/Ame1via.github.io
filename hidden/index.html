@@ -11,6 +11,9 @@
       --paper: #f2f0eb;
       --dim: #8b8781;
       --blood: #5b1417;
+      --amber: #a0834d;
+      --mx: 50%;
+      --my: 46%;
     }
 
     * {
@@ -20,14 +23,81 @@
     body {
       margin: 0;
       min-height: 100vh;
+      overflow: hidden;
       background:
-        radial-gradient(circle at 50% 46%, rgba(91, 20, 23, 0.18), transparent 28%),
+        radial-gradient(circle at var(--mx) var(--my), rgba(91, 20, 23, 0.22), transparent 28%),
+        radial-gradient(circle at 18% 18%, rgba(160, 131, 77, 0.08), transparent 24%),
+        radial-gradient(circle at 78% 72%, rgba(91, 20, 23, 0.14), transparent 28%),
         var(--black);
       color: var(--paper);
       font-family: Georgia, "Times New Roman", serif;
     }
 
+    .stage-field,
+    .stage-field::before,
+    .stage-field::after,
+    .stage-grid,
+    .stage-vignette {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+    }
+
+    .stage-field {
+      z-index: 0;
+      overflow: hidden;
+      opacity: 0.82;
+      mix-blend-mode: screen;
+    }
+
+    .stage-field::before,
+    .stage-field::after {
+      content: "";
+      width: 62vmax;
+      height: 62vmax;
+      border-radius: 50%;
+      filter: blur(48px);
+      opacity: 0.22;
+      animation: spectralDrift 28s ease-in-out infinite alternate;
+    }
+
+    .stage-field::before {
+      left: -22vmax;
+      top: -18vmax;
+      background:
+        radial-gradient(circle at 44% 50%, rgba(160, 131, 77, 0.62), transparent 38%),
+        radial-gradient(circle at 62% 58%, rgba(91, 20, 23, 0.66), transparent 44%);
+    }
+
+    .stage-field::after {
+      right: -24vmax;
+      bottom: -22vmax;
+      background:
+        radial-gradient(circle at 42% 46%, rgba(102, 125, 137, 0.32), transparent 36%),
+        radial-gradient(circle at 58% 54%, rgba(91, 20, 23, 0.7), transparent 46%);
+      animation-delay: -9s;
+    }
+
+    .stage-grid {
+      z-index: 1;
+      opacity: 0.18;
+      background-image:
+        linear-gradient(rgba(242, 240, 235, 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(242, 240, 235, 0.045) 1px, transparent 1px);
+      background-size: 44px 44px;
+      mask-image: radial-gradient(circle at center, black, transparent 72%);
+    }
+
+    .stage-vignette {
+      z-index: 2;
+      background:
+        radial-gradient(circle at 50% 48%, transparent 28%, rgba(13, 12, 12, 0.56) 78%),
+        linear-gradient(180deg, rgba(13, 12, 12, 0.66), transparent 34%, rgba(13, 12, 12, 0.8));
+    }
+
     main {
+      position: relative;
+      z-index: 3;
       min-height: 100vh;
       display: grid;
       place-items: center;
@@ -35,8 +105,49 @@
     }
 
     .stage {
+      position: relative;
       width: min(100%, 720px);
       text-align: center;
+    }
+
+    .stage::before,
+    .stage::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      width: min(82vw, 620px);
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(242, 240, 235, 0.18), rgba(91, 20, 23, 0.44), transparent);
+      transform: translateX(-50%);
+      opacity: 0.74;
+    }
+
+    .stage::before {
+      top: -42px;
+    }
+
+    .stage::after {
+      bottom: -42px;
+    }
+
+    .stage-kicker,
+    .stage-index {
+      position: fixed;
+      z-index: 4;
+      color: rgba(139, 135, 129, 0.78);
+      font-size: 11px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    .stage-kicker {
+      left: clamp(18px, 4vw, 46px);
+      top: clamp(18px, 4vw, 38px);
+    }
+
+    .stage-index {
+      right: clamp(18px, 4vw, 46px);
+      top: clamp(18px, 4vw, 38px);
     }
 
     p {
@@ -212,6 +323,177 @@
       border-color: var(--dim);
     }
 
+    .threshold-button {
+      position: fixed;
+      left: 50%;
+      bottom: clamp(30px, 7vh, 68px);
+      z-index: 4;
+      display: inline-grid;
+      grid-auto-flow: column;
+      align-items: center;
+      gap: 10px;
+      border: 1px solid rgba(242, 240, 235, 0.16);
+      padding: 10px 14px;
+      background: rgba(13, 12, 12, 0.38);
+      color: rgba(242, 240, 235, 0.78);
+      font: 11px/1 Georgia, "Times New Roman", serif;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      transform: translateX(-50%);
+      cursor: pointer;
+      transition: color 220ms ease, border-color 220ms ease, background 220ms ease, transform 220ms ease;
+    }
+
+    .threshold-button::before {
+      content: "";
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--blood);
+      box-shadow: 0 0 18px rgba(91, 20, 23, 0.82);
+    }
+
+    .threshold-button:hover,
+    .threshold-button:focus-visible {
+      color: var(--paper);
+      border-color: rgba(160, 131, 77, 0.54);
+      background: rgba(91, 20, 23, 0.22);
+      transform: translate(-50%, -2px);
+    }
+
+    .threshold-panel {
+      position: fixed;
+      inset: 0;
+      z-index: 10;
+      display: grid;
+      place-items: center;
+      padding: 28px;
+      background:
+        radial-gradient(circle at var(--mx) var(--my), rgba(91, 20, 23, 0.24), transparent 28%),
+        #080707;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(18px);
+      transition: opacity 280ms ease, transform 280ms ease;
+    }
+
+    body.threshold-open .threshold-panel {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateY(0);
+    }
+
+    .threshold-card {
+      position: relative;
+      width: min(100%, 720px);
+      border-top: 1px solid rgba(242, 240, 235, 0.2);
+      border-bottom: 1px solid rgba(242, 240, 235, 0.16);
+      padding: clamp(34px, 7vw, 72px) 0;
+      text-align: center;
+    }
+
+    .threshold-card p {
+      margin-bottom: 22px;
+      font-size: clamp(28px, 6vw, 74px);
+      line-height: 1.05;
+    }
+
+    .threshold-words {
+      display: inline-grid;
+      position: relative;
+      width: 4.7em;
+      height: 1.1em;
+      overflow: hidden;
+      vertical-align: bottom;
+    }
+
+    .threshold-words span {
+      grid-area: 1 / 1;
+      position: absolute;
+      inset: 0;
+      color: var(--paper);
+      opacity: 0;
+      transform: translateY(0.8em);
+      animation: wordTurn 12s ease-in-out infinite;
+    }
+
+    .threshold-words span:nth-child(2) {
+      animation-delay: 3s;
+    }
+
+    .threshold-words span:nth-child(3) {
+      animation-delay: 6s;
+    }
+
+    .threshold-words span:nth-child(4) {
+      animation-delay: 9s;
+    }
+
+    .threshold-card small {
+      display: block;
+      margin-top: 18px;
+      color: var(--dim);
+      font-size: 12px;
+      letter-spacing: 0.12em;
+      line-height: 1.8;
+      text-transform: uppercase;
+    }
+
+    .threshold-actions {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      margin-top: 30px;
+      flex-wrap: wrap;
+    }
+
+    .threshold-actions a,
+    .threshold-actions button {
+      color: rgba(242, 240, 235, 0.84);
+      border: 0;
+      border-bottom: 1px solid rgba(91, 20, 23, 0.86);
+      padding: 0 0 5px;
+      background: transparent;
+      font: 12px/1 Georgia, "Times New Roman", serif;
+      letter-spacing: 0.11em;
+      text-decoration: none;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: color 220ms ease, border-color 220ms ease;
+    }
+
+    .threshold-actions a:hover,
+    .threshold-actions a:focus-visible,
+    .threshold-actions button:hover,
+    .threshold-actions button:focus-visible {
+      color: var(--paper);
+      border-color: rgba(160, 131, 77, 0.74);
+    }
+
+    @keyframes spectralDrift {
+      from {
+        transform: translate3d(0, 0, 0) rotate(0deg) scale(1);
+      }
+      to {
+        transform: translate3d(7vw, 5vh, 0) rotate(18deg) scale(1.08);
+      }
+    }
+
+    @keyframes wordTurn {
+      0%, 17% {
+        opacity: 0;
+        transform: translateY(0.8em);
+      }
+      22%, 35% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+      40%, 100% {
+        opacity: 0;
+        transform: translateY(-0.8em);
+      }
+    }
+
     @media (max-width: 640px) {
       .stage-agent {
         right: 16px;
@@ -219,11 +501,39 @@
         width: 64px;
         height: 70px;
       }
+
+      .stage-kicker,
+      .stage-index {
+        display: none;
+      }
+
+      .threshold-button {
+        bottom: 24px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .stage-field::before,
+      .stage-field::after,
+      .threshold-words span {
+        animation: none;
+      }
+
+      .threshold-words span:first-child {
+        opacity: 1;
+        transform: none;
+      }
     }
   </style>
 </head>
 
 <body>
+  <div class="stage-field" aria-hidden="true"></div>
+  <div class="stage-grid" aria-hidden="true"></div>
+  <div class="stage-vignette" aria-hidden="true"></div>
+  <div class="stage-kicker" aria-hidden="true">Ame1via / hidden room</div>
+  <div class="stage-index" aria-hidden="true">threshold 02</div>
+
   <main>
     <div class="stage">
       <p>
@@ -241,12 +551,68 @@
     </button>
   </main>
 
+  <button class="threshold-button" type="button" aria-expanded="false" aria-controls="threshold-panel">Discover</button>
+
+  <section class="threshold-panel" id="threshold-panel" aria-hidden="true">
+    <div class="threshold-card">
+      <p>
+        let the room
+        <span class="threshold-words">
+          <span>listen</span>
+          <span>darken</span>
+          <span>answer</span>
+          <span>remain</span>
+        </span>
+      </p>
+      <small>stage light / language trace / quiet route</small>
+      <div class="threshold-actions">
+        <a href="/atlas/">Enter Atlas</a>
+        <a href="/room/nun-agent/">Enter Cell</a>
+        <button type="button" class="threshold-close">Close</button>
+      </div>
+    </div>
+  </section>
+
   <script>
     const speaker = document.querySelector(".speaker-link");
+    const thresholdButton = document.querySelector(".threshold-button");
+    const thresholdPanel = document.querySelector(".threshold-panel");
+    const thresholdClose = document.querySelector(".threshold-close");
+
     speaker.addEventListener("mouseenter", () => document.body.classList.add("speaker-shift"));
     speaker.addEventListener("mouseleave", () => document.body.classList.remove("speaker-shift"));
     speaker.addEventListener("focus", () => document.body.classList.add("speaker-shift"));
     speaker.addEventListener("blur", () => document.body.classList.remove("speaker-shift"));
+
+    function setThreshold(open) {
+      document.body.classList.toggle("threshold-open", open);
+      thresholdButton.setAttribute("aria-expanded", String(open));
+      thresholdPanel.setAttribute("aria-hidden", String(!open));
+
+      if (open) {
+        thresholdClose.focus();
+      } else {
+        thresholdButton.focus();
+      }
+    }
+
+    window.addEventListener("pointermove", (event) => {
+      document.body.style.setProperty("--mx", `${(event.clientX / window.innerWidth) * 100}%`);
+      document.body.style.setProperty("--my", `${(event.clientY / window.innerHeight) * 100}%`);
+    });
+
+    thresholdButton.addEventListener("click", () => setThreshold(true));
+    thresholdClose.addEventListener("click", () => setThreshold(false));
+    thresholdPanel.addEventListener("click", (event) => {
+      if (event.target === thresholdPanel) {
+        setThreshold(false);
+      }
+    });
+    window.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && document.body.classList.contains("threshold-open")) {
+        setThreshold(false);
+      }
+    });
   </script>
 </body>
 </html>
