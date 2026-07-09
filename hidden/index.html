@@ -97,9 +97,8 @@
       content: "";
       z-index: 2;
       background:
-        repeating-linear-gradient(180deg, rgba(242, 240, 235, 0.035) 0 1px, transparent 1px 7px),
-        radial-gradient(circle at 50% 48%, transparent 28%, rgba(13, 12, 12, 0.62) 78%),
-        linear-gradient(180deg, rgba(13, 12, 12, 0.7), transparent 34%, rgba(13, 12, 12, 0.82));
+        radial-gradient(circle at 50% 48%, transparent 30%, rgba(13, 12, 12, 0.64) 80%),
+        linear-gradient(180deg, rgba(13, 12, 12, 0.72), transparent 36%, rgba(13, 12, 12, 0.84));
     }
 
     .corner {
@@ -181,6 +180,21 @@
       isolation: isolate;
     }
 
+    .noise-text::before,
+    .noise-text::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      width: min(72vw, 720px);
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(242, 240, 235, 0.18), transparent);
+      transform: translateX(-50%);
+      opacity: 0.58;
+    }
+
+    .noise-text::before { top: 28%; }
+    .noise-text::after { bottom: 30%; }
+
     .noise-text span {
       grid-area: 1 / 1;
       color: var(--paper);
@@ -188,44 +202,44 @@
       font-size: clamp(42px, 9vw, 116px);
       font-weight: 400;
       line-height: 1;
-      letter-spacing: 0.08em;
+      letter-spacing: 0.06em;
       white-space: nowrap;
     }
 
     .noise-text .base {
-      opacity: 0.4;
-      filter: blur(7px);
+      opacity: 0.34;
+      filter: blur(5px);
       text-shadow:
-        0 0 18px rgba(242, 240, 235, 0.24),
-        0 0 46px rgba(91, 20, 23, 0.4);
-      animation: unreadablePulse 3.8s ease-in-out infinite;
+        0 0 18px rgba(242, 240, 235, 0.16),
+        0 0 42px rgba(91, 20, 23, 0.28);
+      animation: unreadablePulse 5.6s ease-in-out infinite;
     }
 
     .noise-text .ghost-a {
-      opacity: 0.22;
-      color: rgba(160, 131, 77, 0.72);
-      filter: blur(3px);
-      transform: translate(-12px, -8px) skewX(-8deg);
+      opacity: 0.12;
+      color: rgba(160, 131, 77, 0.62);
+      filter: blur(3.5px);
+      transform: translate(-7px, -5px);
       mix-blend-mode: screen;
-      animation: textDriftA 4.2s ease-in-out infinite;
+      animation: textDriftA 7s ease-in-out infinite;
     }
 
     .noise-text .ghost-b {
-      opacity: 0.18;
-      color: rgba(91, 20, 23, 0.9);
-      filter: blur(2px);
-      transform: translate(14px, 9px) skewX(10deg);
+      opacity: 0.11;
+      color: rgba(91, 20, 23, 0.78);
+      filter: blur(3px);
+      transform: translate(8px, 6px);
       mix-blend-mode: screen;
-      animation: textDriftB 3.7s ease-in-out infinite;
+      animation: textDriftB 6.4s ease-in-out infinite;
     }
 
     .noise-text .cuts {
-      opacity: 0.18;
-      color: rgba(242, 240, 235, 0.88);
-      clip-path: polygon(0 12%, 100% 12%, 100% 24%, 0 24%, 0 46%, 100% 46%, 100% 56%, 0 56%, 0 76%, 100% 76%, 100% 84%, 0 84%);
-      filter: blur(1px);
-      transform: translateY(2px);
-      animation: cutSlip 1.7s steps(2, end) infinite;
+      opacity: 0.08;
+      color: rgba(242, 240, 235, 0.72);
+      clip-path: polygon(0 18%, 100% 18%, 100% 27%, 0 27%, 0 64%, 100% 64%, 100% 72%, 0 72%);
+      filter: blur(1.8px);
+      transform: translateY(1px);
+      animation: cutSlip 4.8s steps(2, end) infinite;
     }
 
     .decode-card {
@@ -245,10 +259,10 @@
 
     .broken-line {
       margin: 24px 0 0;
-      color: rgba(242, 240, 235, 0.58);
-      font-size: clamp(18px, 3vw, 28px);
-      letter-spacing: 0.08em;
-      filter: blur(1.3px);
+      color: rgba(242, 240, 235, 0.52);
+      font-size: clamp(17px, 2.6vw, 25px);
+      letter-spacing: 0.04em;
+      filter: blur(0.8px);
     }
 
     .stage-actions {
@@ -332,23 +346,23 @@
     }
 
     @keyframes unreadablePulse {
-      0%, 100% { opacity: 0.32; filter: blur(8px); }
-      50% { opacity: 0.48; filter: blur(5px); }
+      0%, 100% { opacity: 0.28; filter: blur(6px); }
+      50% { opacity: 0.4; filter: blur(4px); }
     }
 
     @keyframes textDriftA {
-      0%, 100% { transform: translate(-12px, -8px) skewX(-8deg); }
-      50% { transform: translate(-4px, -13px) skewX(-3deg); }
+      0%, 100% { transform: translate(-7px, -5px); }
+      50% { transform: translate(-3px, -8px); }
     }
 
     @keyframes textDriftB {
-      0%, 100% { transform: translate(14px, 9px) skewX(10deg); }
-      50% { transform: translate(6px, 4px) skewX(4deg); }
+      0%, 100% { transform: translate(8px, 6px); }
+      50% { transform: translate(4px, 3px); }
     }
 
     @keyframes cutSlip {
-      0%, 100% { transform: translate(0, 2px); }
-      50% { transform: translate(10px, -2px); }
+      0%, 100% { transform: translate(0, 1px); }
+      50% { transform: translate(5px, -1px); }
     }
 
     @media (max-width: 720px) {
@@ -387,11 +401,11 @@
 <body>
   <div class="field" aria-hidden="true"></div>
   <div class="corner left">Ame1via / stage</div>
-  <div class="corner right">signal damaged</div>
+  <div class="corner right">partly erased</div>
   <nav class="stage-rail" aria-label="Stage sections">
     <a href="#signal" class="is-active">Signal</a>
-    <a href="#decode">Decode</a>
-    <a href="#exit">Exit</a>
+    <a href="#decode">Interval</a>
+    <a href="#exit">Return</a>
   </nav>
 
   <main>
@@ -406,8 +420,8 @@
 
     <section class="stage-panel" id="decode" data-stage-section>
       <div class="decode-card">
-        <h1>not quite text</h1>
-        <p class="broken-line">wo men / jie gou / the rest slips</p>
+        <h1>held apart</h1>
+        <p class="broken-line">the sentence keeps its distance</p>
         <nav class="stage-actions" aria-label="Stage routes">
           <a href="/atlas/">Atlas</a>
           <a href="/blog/">Fragments</a>
@@ -418,8 +432,8 @@
 
     <section class="stage-panel" id="exit" data-stage-section>
       <div class="exit-card">
-        <h1>remain</h1>
-        <p>The room keeps the sentence. The site keeps the routes.</p>
+        <h1>return</h1>
+        <p>A quiet page for a line that refuses to settle.</p>
         <nav class="stage-actions" aria-label="Exit routes">
           <a href="/">Home</a>
           <a href="/atlas/">Atlas</a>
