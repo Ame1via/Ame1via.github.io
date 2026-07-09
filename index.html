@@ -15,18 +15,16 @@
       --blue: #667d89;
       --green: #5c755f;
       --violet: #6d5f83;
-      --line: rgba(242, 240, 235, 0.14);
       --mx: 54%;
       --my: 38%;
     }
 
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     html {
       background: var(--black);
       scroll-behavior: smooth;
+      scroll-snap-type: y mandatory;
     }
 
     body {
@@ -73,6 +71,7 @@
     .corner {
       position: fixed;
       z-index: 8;
+      top: clamp(18px, 4vw, 38px);
       color: rgba(139, 135, 129, 0.78);
       font-size: 11px;
       letter-spacing: 0.14em;
@@ -80,15 +79,8 @@
       pointer-events: none;
     }
 
-    .corner.left {
-      left: clamp(18px, 4vw, 46px);
-      top: clamp(18px, 4vw, 38px);
-    }
-
-    .corner.right {
-      right: clamp(18px, 4vw, 46px);
-      top: clamp(18px, 4vw, 38px);
-    }
+    .corner.left { left: clamp(18px, 4vw, 46px); }
+    .corner.right { right: clamp(18px, 4vw, 46px); }
 
     .scroll-rail {
       position: fixed;
@@ -126,11 +118,8 @@
       width: min(100%, 1120px);
       margin: 0 auto;
       padding: clamp(72px, 11vh, 118px) clamp(26px, 7vw, 92px);
-    }
-
-    .hero {
-      grid-template-columns: minmax(0, 1fr);
-      isolation: isolate;
+      scroll-snap-align: start;
+      scroll-snap-stop: always;
     }
 
     .hero::before,
@@ -147,6 +136,7 @@
 
     .hero-copy {
       max-width: 820px;
+      opacity: 0;
       transform: translateY(10px);
       animation: riseIn 900ms ease forwards;
     }
@@ -222,23 +212,15 @@
       transition: opacity 180ms ease;
     }
 
-    .agent-widget .wave {
-      opacity: 0;
-    }
-
+    .agent-widget .wave { opacity: 0; }
     .agent-widget:hover .idle,
-    .agent-widget:focus-within .idle {
-      opacity: 0;
-    }
-
+    .agent-widget:focus-within .idle { opacity: 0; }
     .agent-widget:hover .wave,
-    .agent-widget:focus-within .wave {
-      opacity: 1;
-    }
+    .agent-widget:focus-within .wave { opacity: 1; }
 
     .room-section {
       --tone: var(--blood);
-      grid-template-columns: minmax(0, 0.75fr) minmax(280px, 1fr);
+      grid-template-columns: minmax(0, 0.66fr) minmax(300px, 0.9fr);
       gap: clamp(30px, 8vw, 96px);
     }
 
@@ -254,7 +236,6 @@
     }
 
     .room-meta {
-      align-self: center;
       color: color-mix(in srgb, var(--tone) 68%, var(--dim));
       font-size: 12px;
       letter-spacing: 0.16em;
@@ -303,7 +284,6 @@
     }
 
     .room-link {
-      position: relative;
       display: inline-block;
       margin-top: 34px;
       color: var(--paper);
@@ -323,6 +303,57 @@
       transform: translateY(-2px);
     }
 
+    .room-preview {
+      position: absolute;
+      right: clamp(26px, 7vw, 92px);
+      top: clamp(100px, 16vh, 150px);
+      width: min(32vw, 280px);
+      border-top: 1px solid color-mix(in srgb, var(--tone) 46%, rgba(242, 240, 235, 0.12));
+      padding-top: 14px;
+      color: rgba(242, 240, 235, 0.62);
+      font-size: 12px;
+      line-height: 1.7;
+      letter-spacing: 0.05em;
+      opacity: 0;
+      transform: translateY(18px);
+      transition: opacity 760ms ease 120ms, transform 760ms ease 120ms;
+    }
+
+    .room-section.is-visible .room-preview {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .room-preview b {
+      display: block;
+      margin-bottom: 8px;
+      color: color-mix(in srgb, var(--tone) 48%, var(--paper));
+      font-weight: 400;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    .room-preview span {
+      display: block;
+      color: var(--dim);
+    }
+
+    .preview-terms {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    .preview-terms i {
+      border: 1px solid rgba(242, 240, 235, 0.12);
+      padding: 4px 7px;
+      color: rgba(242, 240, 235, 0.68);
+      font-style: normal;
+      font-size: 11px;
+      letter-spacing: 0.08em;
+    }
+
     .fragments { --tone: var(--blood); }
     .study { --tone: var(--gold); }
     .sanctum { --tone: var(--blue); }
@@ -331,28 +362,17 @@
     .cell { --tone: var(--green); }
 
     @keyframes riseIn {
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+      to { opacity: 1; transform: translateY(0); }
     }
 
     @keyframes cueDrop {
-      0%, 100% {
-        transform: scaleY(0.62);
-        opacity: 0.48;
-      }
-      50% {
-        transform: scaleY(1);
-        opacity: 1;
-      }
+      0%, 100% { transform: scaleY(0.62); opacity: 0.48; }
+      50% { transform: scaleY(1); opacity: 1; }
     }
 
     @media (max-width: 820px) {
       .corner,
-      .scroll-rail {
-        display: none;
-      }
+      .scroll-rail { display: none; }
 
       .hero,
       .room-section {
@@ -365,9 +385,15 @@
         gap: 22px;
       }
 
-      .room-card {
-        padding-left: 22px;
+      .room-preview {
+        position: relative;
+        right: auto;
+        top: auto;
+        width: 100%;
+        margin-top: 24px;
       }
+
+      .room-card { padding-left: 22px; }
 
       .agent-widget {
         right: 22px;
@@ -380,10 +406,12 @@
     @media (prefers-reduced-motion: reduce) {
       html {
         scroll-behavior: auto;
+        scroll-snap-type: none;
       }
 
       .hero-copy,
       .room-card,
+      .room-preview,
       .scroll-cue::after {
         animation: none;
         opacity: 1;
@@ -428,6 +456,11 @@
         <p class="room-note">Short pieces. Kept in dim light.</p>
         <a class="room-link" href="/blog/">Enter</a>
       </div>
+      <aside class="room-preview" aria-label="Fragments preview">
+        <b>latest trace</b>
+        object petit a
+        <span>lack / value / language failure</span>
+      </aside>
     </section>
 
     <section class="room-section study" id="study" data-section>
@@ -437,6 +470,14 @@
         <p class="room-note">Law, Japanese, economics. Repeated until useful.</p>
         <a class="room-link" href="/study/">Enter</a>
       </div>
+      <aside class="room-preview" aria-label="Study preview">
+        <b>current drills</b>
+        <div class="preview-terms">
+          <i>law</i>
+          <i>nihongo</i>
+          <i>econ</i>
+        </div>
+      </aside>
     </section>
 
     <section class="room-section sanctum" id="sanctum" data-section>
@@ -446,6 +487,11 @@
         <p class="room-note">A visual archive behind the rooms.</p>
         <a class="room-link" href="/sanctum/">Enter</a>
       </div>
+      <aside class="room-preview" aria-label="Sanctum preview">
+        <b>set light</b>
+        cloister / library / threshold
+        <span>figures held behind glass</span>
+      </aside>
     </section>
 
     <section class="room-section atlas" id="atlas" data-section>
@@ -455,15 +501,29 @@
         <p class="room-note">Repeated terms, sorted into a readable shape.</p>
         <a class="room-link" href="/atlas/">Enter</a>
       </div>
+      <aside class="room-preview" aria-label="Atlas preview">
+        <b>mapped terms</b>
+        <div class="preview-terms">
+          <i>place</i>
+          <i>time</i>
+          <i>body</i>
+          <i>state</i>
+        </div>
+      </aside>
     </section>
 
     <section class="room-section stage" id="stage" data-section>
       <div class="room-meta"><span></span>05 / threshold</div>
       <div class="room-card">
         <h2 class="room-title">Stage</h2>
-        <p class="room-note">我们来解构这一切吧。</p>
+        <p class="room-note">The sentence is no longer stable.</p>
         <a class="room-link" href="/hidden/">Enter</a>
       </div>
+      <aside class="room-preview" aria-label="Stage preview">
+        <b>signal damaged</b>
+        wo men / jie gou / noise
+        <span>blur / drift / residue</span>
+      </aside>
     </section>
 
     <section class="room-section cell" id="cell" data-section>
@@ -473,17 +533,29 @@
         <p class="room-note">Nun Agent, waiting in the small room.</p>
         <a class="room-link" href="/room/nun-agent/">Enter</a>
       </div>
+      <aside class="room-preview" aria-label="Cell preview">
+        <b>agent state</b>
+        idle -> reading -> compiling
+        <span>small machine, low light</span>
+      </aside>
     </section>
   </main>
 
   <script>
     const sections = Array.from(document.querySelectorAll("[data-section]"));
     const railLinks = Array.from(document.querySelectorAll(".scroll-rail a"));
+    let wheelLocked = false;
 
     window.addEventListener("pointermove", (event) => {
       document.body.style.setProperty("--mx", `${(event.clientX / window.innerWidth) * 100}%`);
       document.body.style.setProperty("--my", `${(event.clientY / window.innerHeight) * 100}%`);
     });
+
+    function setActive(section) {
+      railLinks.forEach((link) => {
+        link.classList.toggle("is-active", link.getAttribute("href") === `#${section.id}`);
+      });
+    }
 
     if ("IntersectionObserver" in window) {
       const observer = new IntersectionObserver(
@@ -496,11 +568,7 @@
             .filter((entry) => entry.isIntersecting)
             .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
 
-          if (active) {
-            railLinks.forEach((link) => {
-              link.classList.toggle("is-active", link.getAttribute("href") === `#${active.target.id}`);
-            });
-          }
+          if (active) setActive(active.target);
         },
         { threshold: [0.35, 0.58, 0.78] }
       );
@@ -509,6 +577,24 @@
     } else {
       sections.forEach((section) => section.classList.add("is-visible"));
     }
+
+    window.addEventListener("wheel", (event) => {
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches || Math.abs(event.deltaY) < 18) return;
+      event.preventDefault();
+      if (wheelLocked) return;
+
+      const current = sections.reduce((best, section) => {
+        const distance = Math.abs(section.getBoundingClientRect().top);
+        return distance < best.distance ? { section, distance } : best;
+      }, { section: sections[0], distance: Infinity }).section;
+      const currentIndex = sections.indexOf(current);
+      const nextIndex = Math.min(sections.length - 1, Math.max(0, currentIndex + (event.deltaY > 0 ? 1 : -1)));
+
+      wheelLocked = true;
+      sections[nextIndex].scrollIntoView({ behavior: "smooth", block: "start" });
+      setActive(sections[nextIndex]);
+      window.setTimeout(() => { wheelLocked = false; }, 760);
+    }, { passive: false });
   </script>
 </body>
 </html>

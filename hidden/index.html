@@ -11,25 +11,25 @@
       --paper: #f2f0eb;
       --dim: #8b8781;
       --blood: #5b1417;
-      --amber: #a0834d;
+      --gold: #a0834d;
       --mx: 50%;
       --my: 46%;
     }
 
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     html {
       background: var(--black);
+      scroll-behavior: smooth;
+      scroll-snap-type: y mandatory;
     }
 
     body {
       margin: 0;
       min-height: 100vh;
-      overflow: hidden;
+      overflow-x: hidden;
       background:
-        radial-gradient(circle at var(--mx) var(--my), rgba(91, 20, 23, 0.22), transparent 28%),
+        radial-gradient(circle at var(--mx) var(--my), rgba(91, 20, 23, 0.24), transparent 28%),
         radial-gradient(circle at 18% 18%, rgba(160, 131, 77, 0.08), transparent 24%),
         radial-gradient(circle at 78% 72%, rgba(91, 20, 23, 0.14), transparent 28%),
         var(--black);
@@ -37,182 +37,231 @@
       font-family: Georgia, "Times New Roman", serif;
     }
 
-    .stage-field,
-    .stage-field::before,
-    .stage-field::after,
-    .stage-grid,
-    .stage-vignette {
+    body::before,
+    body::after,
+    .field,
+    .field::before,
+    .field::after {
       position: fixed;
       inset: 0;
       pointer-events: none;
     }
 
-    .stage-field {
+    .field {
       z-index: 0;
       overflow: hidden;
-      opacity: 0.82;
+      opacity: 0.88;
       mix-blend-mode: screen;
     }
 
-    .stage-field::before,
-    .stage-field::after {
+    .field::before,
+    .field::after {
       content: "";
       width: 62vmax;
       height: 62vmax;
       border-radius: 50%;
-      filter: blur(48px);
+      filter: blur(52px);
       opacity: 0.22;
       animation: spectralDrift 28s ease-in-out infinite alternate;
     }
 
-    .stage-field::before {
-      left: -22vmax;
+    .field::before {
+      left: -24vmax;
       top: -18vmax;
       background:
-        radial-gradient(circle at 44% 50%, rgba(160, 131, 77, 0.62), transparent 38%),
-        radial-gradient(circle at 62% 58%, rgba(91, 20, 23, 0.66), transparent 44%);
+        radial-gradient(circle at 44% 50%, rgba(160, 131, 77, 0.6), transparent 38%),
+        radial-gradient(circle at 62% 58%, rgba(91, 20, 23, 0.72), transparent 44%);
     }
 
-    .stage-field::after {
+    .field::after {
       right: -24vmax;
       bottom: -22vmax;
       background:
-        radial-gradient(circle at 42% 46%, rgba(102, 125, 137, 0.32), transparent 36%),
+        radial-gradient(circle at 42% 46%, rgba(102, 125, 137, 0.28), transparent 36%),
         radial-gradient(circle at 58% 54%, rgba(91, 20, 23, 0.7), transparent 46%);
       animation-delay: -9s;
     }
 
-    .stage-grid {
+    body::before {
+      content: "";
       z-index: 1;
-      opacity: 0.18;
       background-image:
         linear-gradient(rgba(242, 240, 235, 0.05) 1px, transparent 1px),
         linear-gradient(90deg, rgba(242, 240, 235, 0.045) 1px, transparent 1px);
       background-size: 44px 44px;
       mask-image: radial-gradient(circle at center, black, transparent 72%);
+      opacity: 0.2;
     }
 
-    .stage-vignette {
+    body::after {
+      content: "";
       z-index: 2;
       background:
-        radial-gradient(circle at 50% 48%, transparent 28%, rgba(13, 12, 12, 0.56) 78%),
-        linear-gradient(180deg, rgba(13, 12, 12, 0.66), transparent 34%, rgba(13, 12, 12, 0.8));
+        repeating-linear-gradient(180deg, rgba(242, 240, 235, 0.035) 0 1px, transparent 1px 7px),
+        radial-gradient(circle at 50% 48%, transparent 28%, rgba(13, 12, 12, 0.62) 78%),
+        linear-gradient(180deg, rgba(13, 12, 12, 0.7), transparent 34%, rgba(13, 12, 12, 0.82));
+    }
+
+    .corner {
+      position: fixed;
+      z-index: 8;
+      top: clamp(18px, 4vw, 38px);
+      color: rgba(139, 135, 129, 0.78);
+      font-size: 11px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      pointer-events: none;
+    }
+
+    .corner.left { left: clamp(18px, 4vw, 46px); }
+    .corner.right { right: clamp(18px, 4vw, 46px); }
+
+    .stage-rail {
+      position: fixed;
+      left: clamp(18px, 4vw, 46px);
+      top: 50%;
+      z-index: 8;
+      display: grid;
+      gap: 14px;
+      transform: translateY(-50%);
+    }
+
+    .stage-rail a {
+      width: 8px;
+      height: 8px;
+      border: 1px solid rgba(242, 240, 235, 0.24);
+      border-radius: 50%;
+      background: rgba(13, 12, 12, 0.72);
+      text-indent: -999px;
+      overflow: hidden;
+      transition: background 220ms ease, transform 220ms ease;
+    }
+
+    .stage-rail a.is-active {
+      background: var(--paper);
+      transform: scale(1.28);
     }
 
     main {
       position: relative;
       z-index: 3;
+    }
+
+    .stage-panel {
       min-height: 100vh;
       display: grid;
       place-items: center;
-      padding: 28px;
-    }
-
-    .stage {
+      padding: clamp(54px, 10vh, 108px) clamp(24px, 7vw, 92px);
+      scroll-snap-align: start;
+      scroll-snap-stop: always;
       position: relative;
-      width: min(100%, 760px);
-      text-align: center;
+      overflow: hidden;
     }
 
-    .stage::before,
-    .stage::after {
+    .stage-panel::before,
+    .stage-panel::after {
       content: "";
       position: absolute;
-      left: 50%;
-      width: min(82vw, 620px);
+      left: clamp(24px, 7vw, 92px);
+      right: clamp(24px, 7vw, 92px);
       height: 1px;
-      background: linear-gradient(90deg, transparent, rgba(242, 240, 235, 0.18), rgba(91, 20, 23, 0.44), transparent);
-      transform: translateX(-50%);
-      opacity: 0.74;
+      background: linear-gradient(90deg, transparent, rgba(242, 240, 235, 0.16), rgba(91, 20, 23, 0.46), transparent);
+      opacity: 0.8;
     }
 
-    .stage::before {
-      top: -48px;
+    .stage-panel::before { top: clamp(40px, 8vh, 82px); }
+    .stage-panel::after { bottom: clamp(40px, 8vh, 82px); }
+
+    .noise-text {
+      position: relative;
+      width: min(100%, 980px);
+      min-height: 280px;
+      display: grid;
+      place-items: center;
+      isolation: isolate;
     }
 
-    .stage::after {
-      bottom: -48px;
-    }
-
-    .stage-kicker,
-    .stage-index {
-      position: fixed;
-      z-index: 4;
-      color: rgba(139, 135, 129, 0.78);
-      font-size: 11px;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-    }
-
-    .stage-kicker {
-      left: clamp(18px, 4vw, 46px);
-      top: clamp(18px, 4vw, 38px);
-    }
-
-    .stage-index {
-      right: clamp(18px, 4vw, 46px);
-      top: clamp(18px, 4vw, 38px);
-    }
-
-    .stage-line {
-      margin: 0;
+    .noise-text span {
+      grid-area: 1 / 1;
       color: var(--paper);
       font-family: "Yu Mincho", "Hiragino Mincho ProN", "Songti SC", "SimSun", Georgia, serif;
-      font-size: clamp(26px, 5vw, 58px);
+      font-size: clamp(42px, 9vw, 116px);
       font-weight: 400;
-      line-height: 1.45;
-      letter-spacing: 0.04em;
-    }
-
-    .stage-word {
-      position: relative;
-      display: inline-block;
-      color: var(--paper);
-      text-decoration: none;
-      border-bottom: 1px solid rgba(91, 20, 23, 0.8);
-      transition: color 220ms ease, border-color 220ms ease, transform 220ms ease;
-    }
-
-    .stage-word:hover,
-    .stage-word:focus-visible {
-      color: #fffaf0;
-      border-color: rgba(160, 131, 77, 0.8);
-      transform: translateY(-2px);
-    }
-
-    .stage-word::after {
-      content: attr(data-note);
-      position: absolute;
-      left: 50%;
-      top: calc(100% + 12px);
-      color: var(--dim);
-      font: 12px/1.4 Georgia, "Times New Roman", serif;
+      line-height: 1;
       letter-spacing: 0.08em;
       white-space: nowrap;
-      opacity: 0;
-      transform: translate(-50%, 6px);
-      transition: opacity 220ms ease, transform 220ms ease;
-      pointer-events: none;
     }
 
-    .stage-word:hover::after,
-    .stage-word:focus-visible::after {
-      opacity: 0.9;
-      transform: translate(-50%, 0);
+    .noise-text .base {
+      opacity: 0.4;
+      filter: blur(7px);
+      text-shadow:
+        0 0 18px rgba(242, 240, 235, 0.24),
+        0 0 46px rgba(91, 20, 23, 0.4);
+      animation: unreadablePulse 3.8s ease-in-out infinite;
+    }
+
+    .noise-text .ghost-a {
+      opacity: 0.22;
+      color: rgba(160, 131, 77, 0.72);
+      filter: blur(3px);
+      transform: translate(-12px, -8px) skewX(-8deg);
+      mix-blend-mode: screen;
+      animation: textDriftA 4.2s ease-in-out infinite;
+    }
+
+    .noise-text .ghost-b {
+      opacity: 0.18;
+      color: rgba(91, 20, 23, 0.9);
+      filter: blur(2px);
+      transform: translate(14px, 9px) skewX(10deg);
+      mix-blend-mode: screen;
+      animation: textDriftB 3.7s ease-in-out infinite;
+    }
+
+    .noise-text .cuts {
+      opacity: 0.18;
+      color: rgba(242, 240, 235, 0.88);
+      clip-path: polygon(0 12%, 100% 12%, 100% 24%, 0 24%, 0 46%, 100% 46%, 100% 56%, 0 56%, 0 76%, 100% 76%, 100% 84%, 0 84%);
+      filter: blur(1px);
+      transform: translateY(2px);
+      animation: cutSlip 1.7s steps(2, end) infinite;
+    }
+
+    .decode-card {
+      width: min(100%, 760px);
+      border-left: 1px solid rgba(242, 240, 235, 0.18);
+      padding-left: clamp(24px, 5vw, 58px);
+    }
+
+    .decode-card h1,
+    .exit-card h1 {
+      margin: 0;
+      font-size: clamp(56px, 11vw, 132px);
+      font-weight: 400;
+      line-height: 0.88;
+      letter-spacing: 0;
+    }
+
+    .broken-line {
+      margin: 24px 0 0;
+      color: rgba(242, 240, 235, 0.58);
+      font-size: clamp(18px, 3vw, 28px);
+      letter-spacing: 0.08em;
+      filter: blur(1.3px);
     }
 
     .stage-actions {
       display: flex;
-      justify-content: center;
       gap: 18px;
-      margin-top: 44px;
+      margin-top: 36px;
       flex-wrap: wrap;
     }
 
     .stage-actions a {
-      color: rgba(242, 240, 235, 0.82);
-      border-bottom: 1px solid rgba(91, 20, 23, 0.82);
-      padding-bottom: 5px;
+      color: rgba(242, 240, 235, 0.84);
+      border-bottom: 1px solid rgba(91, 20, 23, 0.86);
+      padding-bottom: 6px;
       font-size: 12px;
       letter-spacing: 0.12em;
       text-decoration: none;
@@ -223,14 +272,28 @@
     .stage-actions a:hover,
     .stage-actions a:focus-visible {
       color: var(--paper);
-      border-color: rgba(160, 131, 77, 0.74);
+      border-color: var(--gold);
       transform: translateY(-2px);
+    }
+
+    .exit-card {
+      width: min(100%, 760px);
+      text-align: center;
+    }
+
+    .exit-card p {
+      margin: 22px auto 0;
+      max-width: 320px;
+      color: var(--dim);
+      font-size: 14px;
+      line-height: 1.8;
     }
 
     .stage-agent {
       position: fixed;
       right: 26px;
       bottom: 22px;
+      z-index: 8;
       width: 82px;
       height: 90px;
       border: 0;
@@ -242,8 +305,7 @@
     }
 
     .stage-agent:hover,
-    .stage-agent:focus-visible,
-    body.speaker-shift .stage-agent {
+    .stage-agent:focus-visible {
       opacity: 0.96;
       transform: translateY(-4px);
       filter: drop-shadow(0 0 18px rgba(91, 20, 23, 0.42));
@@ -258,39 +320,45 @@
       transition: opacity 180ms ease;
     }
 
-    .stage-agent .wave {
-      opacity: 0;
-    }
-
+    .stage-agent .wave { opacity: 0; }
     .stage-agent:hover .idle,
-    .stage-agent:focus-visible .idle,
-    body.speaker-shift .stage-agent .idle {
-      opacity: 0;
-    }
-
+    .stage-agent:focus-visible .idle { opacity: 0; }
     .stage-agent:hover .wave,
-    .stage-agent:focus-visible .wave,
-    body.speaker-shift .stage-agent .wave {
-      opacity: 1;
-    }
+    .stage-agent:focus-visible .wave { opacity: 1; }
 
     @keyframes spectralDrift {
-      from {
-        transform: translate3d(0, 0, 0) rotate(0deg) scale(1);
-      }
-      to {
-        transform: translate3d(7vw, 5vh, 0) rotate(18deg) scale(1.08);
-      }
+      from { transform: translate3d(0, 0, 0) rotate(0deg) scale(1); }
+      to { transform: translate3d(7vw, 5vh, 0) rotate(18deg) scale(1.08); }
     }
 
-    @media (max-width: 640px) {
-      .stage-kicker,
-      .stage-index {
-        display: none;
-      }
+    @keyframes unreadablePulse {
+      0%, 100% { opacity: 0.32; filter: blur(8px); }
+      50% { opacity: 0.48; filter: blur(5px); }
+    }
 
-      .stage-line {
-        font-size: clamp(27px, 8vw, 38px);
+    @keyframes textDriftA {
+      0%, 100% { transform: translate(-12px, -8px) skewX(-8deg); }
+      50% { transform: translate(-4px, -13px) skewX(-3deg); }
+    }
+
+    @keyframes textDriftB {
+      0%, 100% { transform: translate(14px, 9px) skewX(10deg); }
+      50% { transform: translate(6px, 4px) skewX(4deg); }
+    }
+
+    @keyframes cutSlip {
+      0%, 100% { transform: translate(0, 2px); }
+      50% { transform: translate(10px, -2px); }
+    }
+
+    @media (max-width: 720px) {
+      .corner,
+      .stage-rail { display: none; }
+
+      .noise-text span {
+        font-size: clamp(34px, 12vw, 58px);
+        white-space: normal;
+        text-align: center;
       }
 
       .stage-agent {
@@ -302,8 +370,14 @@
     }
 
     @media (prefers-reduced-motion: reduce) {
-      .stage-field::before,
-      .stage-field::after {
+      html {
+        scroll-behavior: auto;
+        scroll-snap-type: none;
+      }
+
+      .field::before,
+      .field::after,
+      .noise-text span {
         animation: none;
       }
     }
@@ -311,44 +385,101 @@
 </head>
 
 <body>
-  <div class="stage-field" aria-hidden="true"></div>
-  <div class="stage-grid" aria-hidden="true"></div>
-  <div class="stage-vignette" aria-hidden="true"></div>
-  <div class="stage-kicker" aria-hidden="true">Ame1via / stage</div>
-  <div class="stage-index" aria-hidden="true">threshold 02</div>
+  <div class="field" aria-hidden="true"></div>
+  <div class="corner left">Ame1via / stage</div>
+  <div class="corner right">signal damaged</div>
+  <nav class="stage-rail" aria-label="Stage sections">
+    <a href="#signal" class="is-active">Signal</a>
+    <a href="#decode">Decode</a>
+    <a href="#exit">Exit</a>
+  </nav>
 
   <main>
-    <div class="stage">
-      <p class="stage-line">
-        我们来
-        <a class="stage-word" href="/atlas/" data-note="Atlas">解构</a>
-        这一切吧
-      </p>
-      <nav class="stage-actions" aria-label="Stage routes">
-        <a href="/">Home</a>
-        <a href="/blog/">Fragments</a>
-        <a href="/room/nun-agent/">Cell</a>
-      </nav>
-    </div>
+    <section class="stage-panel" id="signal" data-stage-section>
+      <div class="noise-text" aria-label="Obscured sentence">
+        <span class="base">&#25105;&#20204;&#26469;&#35299;&#26500;&#36825;&#19968;&#20999;&#21543;</span>
+        <span class="ghost-a" aria-hidden="true">&#25105;&#20204;&#26469;&#35299;&#26500;&#36825;&#19968;&#20999;&#21543;</span>
+        <span class="ghost-b" aria-hidden="true">&#25105;&#20204;&#26469;&#35299;&#26500;&#36825;&#19968;&#20999;&#21543;</span>
+        <span class="cuts" aria-hidden="true">&#25105;&#20204;&#26469;&#35299;&#26500;&#36825;&#19968;&#20999;&#21543;</span>
+      </div>
+    </section>
 
-    <button class="stage-agent" type="button" aria-label="Enter Cell" onclick="location.href='/room/nun-agent/'">
-      <img class="idle" src="/assets/nun-agent/nun-agent-idle.gif" alt="Nun Agent">
-      <img class="wave" src="/assets/nun-agent/nun-agent-waving.gif" alt="">
-    </button>
+    <section class="stage-panel" id="decode" data-stage-section>
+      <div class="decode-card">
+        <h1>not quite text</h1>
+        <p class="broken-line">wo men / jie gou / the rest slips</p>
+        <nav class="stage-actions" aria-label="Stage routes">
+          <a href="/atlas/">Atlas</a>
+          <a href="/blog/">Fragments</a>
+          <a href="/room/nun-agent/">Cell</a>
+        </nav>
+      </div>
+    </section>
+
+    <section class="stage-panel" id="exit" data-stage-section>
+      <div class="exit-card">
+        <h1>remain</h1>
+        <p>The room keeps the sentence. The site keeps the routes.</p>
+        <nav class="stage-actions" aria-label="Exit routes">
+          <a href="/">Home</a>
+          <a href="/atlas/">Atlas</a>
+        </nav>
+      </div>
+    </section>
   </main>
 
-  <script>
-    const stageWord = document.querySelector(".stage-word");
+  <button class="stage-agent" type="button" aria-label="Enter Cell" onclick="location.href='/room/nun-agent/'">
+    <img class="idle" src="/assets/nun-agent/nun-agent-idle.gif" alt="Nun Agent">
+    <img class="wave" src="/assets/nun-agent/nun-agent-waving.gif" alt="">
+  </button>
 
-    stageWord.addEventListener("mouseenter", () => document.body.classList.add("speaker-shift"));
-    stageWord.addEventListener("mouseleave", () => document.body.classList.remove("speaker-shift"));
-    stageWord.addEventListener("focus", () => document.body.classList.add("speaker-shift"));
-    stageWord.addEventListener("blur", () => document.body.classList.remove("speaker-shift"));
+  <script>
+    const stageSections = Array.from(document.querySelectorAll("[data-stage-section]"));
+    const stageLinks = Array.from(document.querySelectorAll(".stage-rail a"));
+    let stageWheelLocked = false;
 
     window.addEventListener("pointermove", (event) => {
       document.body.style.setProperty("--mx", `${(event.clientX / window.innerWidth) * 100}%`);
       document.body.style.setProperty("--my", `${(event.clientY / window.innerHeight) * 100}%`);
     });
+
+    function setStageActive(section) {
+      stageLinks.forEach((link) => {
+        link.classList.toggle("is-active", link.getAttribute("href") === `#${section.id}`);
+      });
+    }
+
+    if ("IntersectionObserver" in window) {
+      const observer = new IntersectionObserver(
+        (entries) => {
+          const active = entries
+            .filter((entry) => entry.isIntersecting)
+            .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+          if (active) setStageActive(active.target);
+        },
+        { threshold: [0.45, 0.7] }
+      );
+
+      stageSections.forEach((section) => observer.observe(section));
+    }
+
+    window.addEventListener("wheel", (event) => {
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches || Math.abs(event.deltaY) < 18) return;
+      event.preventDefault();
+      if (stageWheelLocked) return;
+
+      const current = stageSections.reduce((best, section) => {
+        const distance = Math.abs(section.getBoundingClientRect().top);
+        return distance < best.distance ? { section, distance } : best;
+      }, { section: stageSections[0], distance: Infinity }).section;
+      const index = stageSections.indexOf(current);
+      const nextIndex = Math.min(stageSections.length - 1, Math.max(0, index + (event.deltaY > 0 ? 1 : -1)));
+
+      stageWheelLocked = true;
+      stageSections[nextIndex].scrollIntoView({ behavior: "smooth", block: "start" });
+      setStageActive(stageSections[nextIndex]);
+      window.setTimeout(() => { stageWheelLocked = false; }, 760);
+    }, { passive: false });
   </script>
 </body>
 </html>
