@@ -10,7 +10,7 @@
       --black: #0d0c0c;
       --paper: #f2f0eb;
       --dim: #8d867d;
-      --faint: rgba(242, 240, 235, 0.13);
+      --line: rgba(242, 240, 235, 0.14);
       --blood: #62181d;
       --wine: #8c2631;
       --gold: #a0834d;
@@ -19,184 +19,171 @@
       --violet: #6d5f83;
     }
 
-    * { box-sizing: border-box; }
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      background: #090808;
+    }
 
     body {
       margin: 0;
       min-height: 100vh;
       overflow-x: hidden;
       background:
-        radial-gradient(circle at 50% 56%, rgba(98, 24, 29, 0.2), transparent 34%),
-        radial-gradient(circle at 22% 18%, rgba(160, 131, 77, 0.12), transparent 25%),
-        radial-gradient(circle at 82% 20%, rgba(102, 125, 137, 0.11), transparent 26%),
+        radial-gradient(circle at 48% 28%, rgba(98, 24, 29, 0.18), transparent 30%),
+        radial-gradient(circle at 16% 18%, rgba(160, 131, 77, 0.11), transparent 25%),
+        radial-gradient(circle at 84% 22%, rgba(102, 125, 137, 0.11), transparent 26%),
         linear-gradient(180deg, #100f0f 0%, #090808 100%);
       color: var(--paper);
       font-family: Georgia, "Times New Roman", serif;
     }
 
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      background-image:
+        linear-gradient(rgba(242, 240, 235, 0.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(242, 240, 235, 0.028) 1px, transparent 1px);
+      background-size: 44px 44px;
+      mask-image: radial-gradient(circle at center, black, transparent 78%);
+      pointer-events: none;
+    }
+
     main {
-      width: min(100%, 1180px);
+      position: relative;
+      z-index: 1;
+      width: min(100%, 1160px);
       margin: 0 auto;
-      padding: clamp(22px, 4vw, 54px);
+      padding: clamp(24px, 5vw, 64px);
     }
 
     .top {
-      display: flex;
-      justify-content: space-between;
-      gap: 20px;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(240px, 360px);
+      gap: clamp(24px, 6vw, 76px);
       align-items: end;
-      margin-bottom: 20px;
+      min-height: 28vh;
+      padding-bottom: 34px;
+      border-bottom: 1px solid var(--line);
     }
 
     h1 {
       margin: 0;
-      font-size: clamp(48px, 10vw, 128px);
+      font-size: clamp(58px, 12vw, 148px);
       font-weight: 400;
-      line-height: 0.9;
+      line-height: 0.86;
       letter-spacing: 0;
     }
 
     .method {
-      margin: 0 0 9px;
+      margin: 0;
       color: var(--dim);
-      font-size: 12px;
-      letter-spacing: 0.09em;
+      font-size: 13px;
+      line-height: 1.8;
+    }
+
+    .method span {
+      display: block;
+      margin-bottom: 10px;
+      color: rgba(242, 240, 235, 0.7);
+      font-size: 11px;
+      letter-spacing: 0.14em;
       text-transform: uppercase;
     }
 
-    .tree {
+    .atlas-map {
+      display: grid;
+      gap: 0;
+      margin-top: 38px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .axis-row {
+      --tone: var(--dim);
+      display: grid;
+      grid-template-columns: minmax(120px, 180px) minmax(0, 1fr);
+      gap: clamp(18px, 4vw, 46px);
+      align-items: stretch;
+      border-top: 1px solid var(--line);
+      min-height: 124px;
+      padding: 20px 0;
+    }
+
+    .axis-name {
       position: relative;
-      min-height: 680px;
-      margin: 0 auto;
-      isolation: isolate;
-    }
-
-    .tree svg {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      z-index: 0;
-      overflow: visible;
-    }
-
-    .tree path {
-      fill: none;
-      stroke: rgba(242, 240, 235, 0.18);
-      stroke-width: 1;
-      stroke-linecap: round;
-    }
-
-    .tree path.strong {
-      stroke: rgba(98, 24, 29, 0.5);
-    }
-
-    .mobile-branches {
-      display: none;
-    }
-
-    .root,
-    .axis,
-    .leaf,
-    .ghost {
-      position: absolute;
-      z-index: 1;
-      transform: translate(-50%, -50%);
-    }
-
-    .root {
-      left: 50%;
-      top: 54%;
-      display: grid;
-      place-items: center;
-      width: clamp(118px, 18vw, 176px);
-      aspect-ratio: 1;
-      border: 1px solid rgba(242, 240, 235, 0.24);
-      border-radius: 50%;
-      background:
-        radial-gradient(circle, rgba(98, 24, 29, 0.22), rgba(13, 12, 12, 0.86) 64%),
-        rgba(13, 12, 12, 0.92);
-      box-shadow: 0 0 55px rgba(98, 24, 29, 0.2);
-      font-size: clamp(20px, 3.5vw, 42px);
-      letter-spacing: 0;
-    }
-
-    .root small {
-      position: absolute;
-      bottom: 24%;
-      color: var(--dim);
-      font-size: 10px;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-    }
-
-    .axis {
-      --tone: var(--dim);
-      display: grid;
-      place-items: center;
-      width: 76px;
-      height: 76px;
-      border: 1px solid color-mix(in srgb, var(--tone) 55%, rgba(242, 240, 235, 0.12));
-      border-radius: 50%;
-      background: rgba(13, 12, 12, 0.84);
+      display: flex;
+      align-items: center;
+      gap: 12px;
       color: var(--paper);
-      font-size: 12px;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      box-shadow: 0 0 28px color-mix(in srgb, var(--tone) 24%, transparent);
+      font-size: clamp(24px, 4vw, 42px);
+      line-height: 1;
     }
 
-    .leaf {
-      --tone: var(--dim);
-      min-width: 82px;
-      max-width: 142px;
-      padding: 9px 11px;
-      border: 1px solid rgba(242, 240, 235, 0.13);
-      background: rgba(13, 12, 12, 0.72);
-      color: var(--paper);
-      font-size: 12px;
-      line-height: 1.18;
-      text-align: center;
-      transition: transform 220ms ease, border-color 220ms ease, background 220ms ease;
-    }
-
-    .leaf::before {
+    .axis-name::before {
       content: "";
-      position: absolute;
-      left: 50%;
-      top: -4px;
-      width: 7px;
-      height: 7px;
+      width: 9px;
+      height: 9px;
       border-radius: 50%;
       background: var(--tone);
-      box-shadow: 0 0 16px var(--tone);
-      transform: translate(-50%, -50%);
-      opacity: 0.82;
+      box-shadow: 0 0 18px var(--tone);
+      flex: 0 0 auto;
     }
 
-    .leaf span {
+    .axis-name small {
       display: block;
-      margin-top: 5px;
+      margin-top: 10px;
       color: var(--dim);
       font-size: 10px;
-      letter-spacing: 0.06em;
+      letter-spacing: 0.12em;
       text-transform: uppercase;
     }
 
-    .leaf:hover {
-      transform: translate(-50%, -54%);
+    .terms {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      align-content: center;
+    }
+
+    .term {
+      position: relative;
+      min-height: 72px;
+      border: 1px solid rgba(242, 240, 235, 0.12);
+      padding: 13px 14px;
+      background:
+        linear-gradient(135deg, color-mix(in srgb, var(--tone) 10%, transparent), transparent 64%),
+        rgba(13, 12, 12, 0.54);
+      color: var(--paper);
+      transition: border-color 220ms ease, background 220ms ease, transform 220ms ease;
+    }
+
+    .term:hover,
+    .term:focus-within {
       border-color: color-mix(in srgb, var(--tone) 58%, rgba(242, 240, 235, 0.18));
-      background: color-mix(in srgb, var(--tone) 15%, rgba(13, 12, 12, 0.84));
+      background:
+        linear-gradient(135deg, color-mix(in srgb, var(--tone) 18%, transparent), transparent 64%),
+        rgba(13, 12, 12, 0.68);
+      transform: translateY(-2px);
     }
 
-    .ghost {
-      left: 50%;
-      top: 96%;
-      color: rgba(242, 240, 235, 0.34);
+    .term b {
+      display: block;
+      font-size: 15px;
+      font-weight: 400;
+      line-height: 1.25;
+    }
+
+    .term span {
+      display: block;
+      margin-top: 8px;
+      color: var(--dim);
       font-size: 11px;
-      letter-spacing: 0.18em;
+      letter-spacing: 0.08em;
       text-transform: uppercase;
-      white-space: nowrap;
     }
 
     .place { --tone: var(--green); }
@@ -205,36 +192,21 @@
     .state { --tone: var(--wine); }
     .theory { --tone: var(--violet); }
 
-    .p-axis { left: 17%; top: 42%; }
-    .t-axis { left: 34%; top: 18%; }
-    .b-axis { left: 66%; top: 18%; }
-    .s-axis { left: 83%; top: 42%; }
-    .th-axis { left: 50%; top: 16%; }
-
-    .l1 { left: 9%; top: 25%; }
-    .l2 { left: 9%; top: 52%; }
-    .l3 { left: 21%; top: 65%; }
-    .l4 { left: 24%; top: 8%; }
-    .l5 { left: 36%; top: 5%; }
-    .l6 { left: 42%; top: 22%; }
-    .l7 { left: 62%; top: 5%; }
-    .l8 { left: 76%; top: 8%; }
-    .l9 { left: 92%; top: 25%; }
-    .l10 { left: 92%; top: 52%; }
-    .l11 { left: 79%; top: 65%; }
-    .l12 { left: 50%; top: 34%; }
-    .l13 { left: 38%; top: 77%; }
-    .l14 { left: 62%; top: 77%; }
-    .l15 { left: 50%; top: 84%; }
+    .footer {
+      display: flex;
+      justify-content: space-between;
+      gap: 18px;
+      align-items: center;
+      margin-top: 24px;
+      color: var(--dim);
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
 
     .back {
-      display: inline-block;
-      margin-top: 18px;
       color: var(--dim);
-      font-size: 12px;
-      letter-spacing: 0.12em;
       text-decoration: none;
-      text-transform: uppercase;
       border-bottom: 1px solid var(--blood);
       transition: color 180ms ease, border-color 180ms ease;
     }
@@ -245,89 +217,32 @@
       border-color: var(--paper);
     }
 
-    @media (max-width: 760px) {
+    @media (max-width: 780px) {
       main {
-        padding: 20px 14px 28px;
+        padding: 24px 18px 34px;
+      }
+
+      .top,
+      .axis-row {
+        grid-template-columns: 1fr;
       }
 
       .top {
-        align-items: start;
-        flex-direction: column;
-        margin-bottom: 8px;
+        min-height: 0;
       }
 
-      .tree {
-        min-height: 860px;
-      }
-
-      .tree svg {
-        display: none;
-      }
-
-      .tree > .axis,
-      .tree > .leaf {
-        display: none;
-      }
-
-      .root {
-        left: 50%;
-        top: 9%;
-        width: 126px;
-      }
-
-      .axis,
-      .leaf {
-        position: relative;
-        left: auto;
-        top: auto;
-        transform: none;
-      }
-
-      .mobile-branches {
-        position: absolute;
-        left: 0;
-        right: 0;
-        top: 180px;
-        display: grid;
+      .axis-row {
         gap: 16px;
+        min-height: 0;
       }
 
-      .branch {
-        display: grid;
-        grid-template-columns: 74px minmax(0, 1fr);
-        gap: 12px;
-        align-items: start;
+      .terms {
+        grid-template-columns: 1fr;
       }
 
-      .axis {
-        width: 66px;
-        height: 66px;
-      }
-
-      .branch-leaves {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-        padding-top: 3px;
-      }
-
-      .leaf {
-        min-width: 76px;
-        max-width: 128px;
-      }
-
-      .leaf:hover {
-        transform: translateY(-2px);
-      }
-
-      .leaf::before {
-        left: -2px;
-        top: 50%;
-      }
-
-      .ghost {
-        top: auto;
-        bottom: 4px;
+      .footer {
+        align-items: flex-start;
+        flex-direction: column;
       }
     }
   </style>
@@ -337,113 +252,60 @@
   <main>
     <header class="top">
       <h1>Atlas</h1>
-      <p class="method">retroconstructive</p>
+      <p class="method"><span>retroconstructive index</span>A readable map of the site's repeated places, states, substances, and ideas. Less ornament, more orientation.</p>
     </header>
 
-    <section class="tree" aria-label="Atlas tree">
-      <svg viewBox="0 0 1000 680" preserveAspectRatio="none" aria-hidden="true">
-        <path class="strong" d="M500 370 C425 340 285 310 170 285" />
-        <path class="strong" d="M500 370 C455 270 390 165 340 120" />
-        <path class="strong" d="M500 370 C545 270 610 165 660 120" />
-        <path class="strong" d="M500 370 C575 340 715 310 830 285" />
-        <path class="strong" d="M500 370 C500 260 500 150 500 108" />
-
-        <path d="M170 285 C120 210 92 176 90 170" />
-        <path d="M170 285 C115 338 95 356 90 354" />
-        <path d="M170 285 C176 390 200 438 210 442" />
-
-        <path d="M340 120 C300 68 260 54 240 54" />
-        <path d="M340 120 C360 54 370 36 360 34" />
-        <path d="M340 120 C382 134 414 148 420 150" />
-
-        <path d="M660 120 C620 58 620 38 620 34" />
-        <path d="M660 120 C704 70 742 56 760 54" />
-
-        <path d="M830 285 C880 206 912 176 920 170" />
-        <path d="M830 285 C878 340 910 354 920 354" />
-        <path d="M830 285 C820 394 792 438 790 442" />
-
-        <path d="M500 108 C500 150 500 190 500 230" />
-        <path d="M500 370 C444 438 390 512 380 524" />
-        <path d="M500 370 C556 438 610 512 620 524" />
-        <path d="M500 370 C500 474 500 560 500 572" />
-      </svg>
-
-      <div class="root">Atlas<small>a outside</small></div>
-
-      <div class="axis place p-axis">place</div>
-      <div class="axis time t-axis">time</div>
-      <div class="axis body b-axis">body</div>
-      <div class="axis state s-axis">state</div>
-      <div class="axis theory th-axis">theory</div>
-
-      <div class="mobile-branches">
-        <div class="branch">
-          <div class="axis place">place</div>
-          <div class="branch-leaves">
-            <div class="leaf place">stage<span>threshold</span></div>
-            <div class="leaf place">cell<span>manager</span></div>
-            <div class="leaf place">archive<span>stored</span></div>
-          </div>
+    <section class="atlas-map" aria-label="Atlas index">
+      <article class="axis-row place">
+        <h2 class="axis-name">place<small>where things happen</small></h2>
+        <div class="terms">
+          <div class="term"><b>stage</b><span>threshold</span></div>
+          <div class="term"><b>cell</b><span>manager</span></div>
+          <div class="term"><b>archive</b><span>stored</span></div>
         </div>
-        <div class="branch">
-          <div class="axis time">time</div>
-          <div class="branch-leaves">
-            <div class="leaf time">day 1<span>Utop1a</span></div>
-            <div class="leaf time">timeless<span>Elysium</span></div>
-            <div class="leaf time">loop<span>GEB</span></div>
-          </div>
+      </article>
+
+      <article class="axis-row time">
+        <h2 class="axis-name">time<small>when the loop appears</small></h2>
+        <div class="terms">
+          <div class="term"><b>day 1</b><span>Utop1a</span></div>
+          <div class="term"><b>timeless</b><span>Elysium</span></div>
+          <div class="term"><b>loop</b><span>GEB</span></div>
         </div>
-        <div class="branch">
-          <div class="axis body">body</div>
-          <div class="branch-leaves">
-            <div class="leaf body">wine<span>Elysium</span></div>
-            <div class="leaf body">nicotine<span>cool</span></div>
-            <div class="leaf body">DXM / LSD<span>&#12452;&#12522;&#12531;&#12463;&#12473;</span></div>
-          </div>
+      </article>
+
+      <article class="axis-row body">
+        <h2 class="axis-name">body<small>substances and sensation</small></h2>
+        <div class="terms">
+          <div class="term"><b>wine</b><span>Elysium</span></div>
+          <div class="term"><b>nicotine</b><span>cool</span></div>
+          <div class="term"><b>DXM / LSD</b><span>ilinx</span></div>
         </div>
-        <div class="branch">
-          <div class="axis state">state</div>
-          <div class="branch-leaves">
-            <div class="leaf state">lack<span>object a</span></div>
-            <div class="leaf state">vertigo<span>ilinx</span></div>
-            <div class="leaf state">unreachable<span>MIU</span></div>
-          </div>
+      </article>
+
+      <article class="axis-row state">
+        <h2 class="axis-name">state<small>failure modes</small></h2>
+        <div class="terms">
+          <div class="term"><b>lack</b><span>object a</span></div>
+          <div class="term"><b>vertigo</b><span>ilinx</span></div>
+          <div class="term"><b>unreachable</b><span>MIU</span></div>
         </div>
-        <div class="branch">
-          <div class="axis theory">theory</div>
-          <div class="branch-leaves">
-            <div class="leaf theory">language<span>failure</span></div>
-            <div class="leaf theory">commodity<span>value</span></div>
-            <div class="leaf theory">rule<span>GEB</span></div>
-          </div>
+      </article>
+
+      <article class="axis-row theory">
+        <h2 class="axis-name">theory<small>what keeps returning</small></h2>
+        <div class="terms">
+          <div class="term"><b>language</b><span>failure</span></div>
+          <div class="term"><b>commodity</b><span>value</span></div>
+          <div class="term"><b>rule</b><span>GEB</span></div>
         </div>
-      </div>
-
-      <div class="leaf place l1">stage<span>threshold</span></div>
-      <div class="leaf place l2">cell<span>manager</span></div>
-      <div class="leaf place l3">archive<span>stored</span></div>
-
-      <div class="leaf time l4">day 1<span>Utop1a</span></div>
-      <div class="leaf time l5">timeless<span>Elysium</span></div>
-      <div class="leaf time l6">loop<span>GEB</span></div>
-
-      <div class="leaf body l7">wine<span>Elysium</span></div>
-      <div class="leaf body l8">nicotine<span>cool</span></div>
-
-      <div class="leaf state l9">lack<span>object a</span></div>
-      <div class="leaf state l10">vertigo<span>ilinx</span></div>
-      <div class="leaf state l11">unreachable<span>MIU</span></div>
-
-      <div class="leaf theory l12">language<span>failure</span></div>
-      <div class="leaf theory l13">commodity<span>value</span></div>
-      <div class="leaf theory l14">rule<span>GEB</span></div>
-      <div class="leaf body l15">DXM / LSD<span>&#12452;&#12522;&#12531;&#12463;&#12473;</span></div>
-
-      <div class="ghost">remainder not mapped</div>
+      </article>
     </section>
 
-    <a class="back" href="/hidden/">Back to Stage</a>
+    <footer class="footer">
+      <a class="back" href="/hidden/">Back to Stage</a>
+      <span>remainder not mapped</span>
+    </footer>
   </main>
 </body>
 </html>

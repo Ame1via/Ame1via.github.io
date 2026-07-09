@@ -1,336 +1,346 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Ame1via</title>
+  <title>Ame1via</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    :root {
+      --black: #0d0c0c;
+      --paper: #f2f0eb;
+      --dim: #8b8781;
+      --blood: #5b1417;
+      --gold: #a0834d;
+      --blue: #667d89;
+      --line: rgba(242, 240, 235, 0.14);
+    }
 
-    <style>
-        :root {
-            --black: #0d0c0c;
-            --white: #f2f0eb;
-            --dim: #8b8781;
-            --red: #5b1417;
-        }
+    * {
+      box-sizing: border-box;
+    }
 
-        * {
-            box-sizing: border-box;
-        }
+    html {
+      background: var(--black);
+    }
 
-        body {
-            margin: 0;
-            min-height: 100vh;
-            background:
-                radial-gradient(circle at 50% 50%, rgba(91, 20, 23, 0.12), transparent 34%),
-                var(--black);
-            color: var(--white);
-            font-family: Georgia, "Times New Roman", serif;
-        }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      overflow-x: hidden;
+      background:
+        radial-gradient(circle at 72% 26%, rgba(91, 20, 23, 0.2), transparent 30%),
+        radial-gradient(circle at 18% 76%, rgba(160, 131, 77, 0.1), transparent 28%),
+        linear-gradient(180deg, #111010 0%, var(--black) 58%, #080707 100%);
+      color: var(--paper);
+      font-family: Georgia, "Times New Roman", serif;
+    }
 
-        main {
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 32px;
-        }
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      background-image:
+        linear-gradient(rgba(242, 240, 235, 0.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(242, 240, 235, 0.028) 1px, transparent 1px);
+      background-size: 46px 46px;
+      mask-image: radial-gradient(circle at center, black, transparent 78%);
+      pointer-events: none;
+    }
 
-        .room {
-            width: min(100%, 520px);
-            text-align: center;
-        }
+    main {
+      position: relative;
+      z-index: 1;
+      min-height: 100vh;
+      width: min(100%, 1120px);
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: minmax(260px, 0.9fr) minmax(320px, 1.1fr);
+      gap: clamp(34px, 7vw, 88px);
+      align-items: center;
+      padding: clamp(28px, 6vw, 76px);
+    }
 
-        .mark {
-            margin: 0 0 44px;
-            color: var(--dim);
-            font-size: 28px;
-            line-height: 1;
-            cursor: default;
-            user-select: none;
-            transition: color 220ms ease, transform 220ms ease;
-        }
+    .identity {
+      position: relative;
+      min-height: 430px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
 
-        .mark:hover {
-            color: var(--white);
-            transform: translateY(-1px);
-        }
+    .identity::before,
+    .identity::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 12%;
+      height: 1px;
+      background: linear-gradient(90deg, rgba(91, 20, 23, 0.62), rgba(242, 240, 235, 0.18), transparent);
+    }
 
-        .gate {
-            position: relative;
-            display: inline-block;
-            color: var(--white);
-            text-decoration: none;
-            border-bottom: 1px solid var(--red);
-            font-size: 16px;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            transition: color 220ms ease, border-color 220ms ease, transform 220ms ease;
-        }
+    .identity::before {
+      top: 0;
+    }
 
-        .gate:hover {
-            color: var(--dim);
-            border-color: var(--dim);
-            transform: translateY(-2px);
-        }
+    .identity::after {
+      bottom: 0;
+    }
 
-        .gate::after {
-            content: "";
-            position: absolute;
-            left: 50%;
-            bottom: -7px;
-            width: 0;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(242, 240, 235, 0.82), transparent);
-            box-shadow: 0 0 16px rgba(91, 20, 23, 0.92);
-            transform: translateX(-50%);
-            transition: width 280ms ease, opacity 280ms ease;
-            opacity: 0;
-        }
+    .sigil {
+      margin: 0 0 26px;
+      color: var(--dim);
+      font-size: 28px;
+      line-height: 1;
+      user-select: none;
+    }
 
-        .gate:hover::after,
-        .gate:focus-visible::after {
-            width: 150%;
-            opacity: 1;
-        }
+    h1 {
+      margin: 0;
+      font-size: clamp(54px, 10vw, 128px);
+      font-weight: 400;
+      line-height: 0.86;
+      letter-spacing: 0;
+    }
 
-        .hint {
-            position: absolute;
-            left: 50%;
-            top: calc(100% + 18px);
-            width: min(72vw, 260px);
-            transform: translate(-50%, 8px);
-            color: var(--dim);
-            font-size: 13px;
-            line-height: 1.7;
-            letter-spacing: 0;
-            text-transform: none;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 260ms ease, transform 260ms ease;
-        }
+    .subtitle {
+      max-width: 360px;
+      margin: 28px 0 0;
+      color: var(--dim);
+      font-size: 14px;
+      line-height: 1.8;
+    }
 
-        .study-gate {
-            position: relative;
-            display: inline-block;
-            margin-top: 24px;
-            color: var(--dim);
-            font-size: 12px;
-            letter-spacing: 0.12em;
-            text-decoration: none;
-            text-transform: uppercase;
-            border-bottom: 1px solid rgba(91, 20, 23, 0.62);
-            transition: color 220ms ease, border-color 220ms ease, transform 220ms ease;
-        }
+    .agent-widget {
+      position: absolute;
+      right: 16px;
+      bottom: 22px;
+      width: 82px;
+      height: 90px;
+      margin: 0;
+      opacity: 0.74;
+      transition: opacity 220ms ease, transform 220ms ease, filter 220ms ease;
+    }
 
-        .study-gate:hover,
-        .study-gate:focus-visible {
-            color: var(--white);
-            border-color: var(--white);
-            transform: translateY(-2px);
-        }
+    .identity:hover .agent-widget,
+    .agent-widget:focus-within {
+      opacity: 0.96;
+      transform: translateY(-4px);
+      filter: drop-shadow(0 0 18px rgba(91, 20, 23, 0.42));
+    }
 
-        .sanctum-gate {
-            position: relative;
-            display: inline-block;
-            margin-top: 18px;
-            color: var(--dim);
-            font-size: 12px;
-            letter-spacing: 0.12em;
-            text-decoration: none;
-            text-transform: uppercase;
-            border-bottom: 1px solid rgba(91, 20, 23, 0.62);
-            transition: color 220ms ease, border-color 220ms ease, transform 220ms ease;
-        }
+    .agent-widget img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      transition: opacity 180ms ease;
+    }
 
-        .sanctum-gate:hover,
-        .sanctum-gate:focus-visible {
-            color: var(--white);
-            border-color: var(--white);
-            transform: translateY(-2px);
-        }
+    .agent-widget .wave {
+      opacity: 0;
+    }
 
-        .study-gate .hint {
-            top: calc(100% + 14px);
-        }
+    .identity:hover .agent-widget .idle,
+    .agent-widget:focus-within .idle {
+      opacity: 0;
+    }
 
-        .sanctum-gate .hint {
-            top: calc(100% + 14px);
-        }
+    .identity:hover .agent-widget .wave,
+    .agent-widget:focus-within .wave {
+      opacity: 1;
+    }
 
-        .study-gate:hover .hint,
-        .study-gate:focus-visible .hint,
-        .sanctum-gate:hover .hint,
-        .sanctum-gate:focus-visible .hint {
-            opacity: 1;
-            transform: translate(-50%, 0);
-        }
+    .nav-panel {
+      display: grid;
+      gap: 12px;
+    }
 
-        .gate:hover .hint,
-        .gate:focus-visible .hint {
-            opacity: 1;
-            transform: translate(-50%, 0);
-        }
+    .panel-label {
+      margin: 0 0 10px;
+      color: rgba(139, 135, 129, 0.9);
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
 
-        .agent-widget {
-            position: fixed;
-            right: 26px;
-            bottom: 22px;
-            width: 82px;
-            height: 90px;
-            margin: 0;
-            opacity: 0.72;
-            transition: opacity 240ms ease, transform 240ms ease;
-        }
+    .route {
+      position: relative;
+      display: grid;
+      grid-template-columns: 48px minmax(0, 1fr) auto;
+      gap: 16px;
+      align-items: center;
+      min-height: 86px;
+      border-top: 1px solid var(--line);
+      padding: 16px 0;
+      color: var(--paper);
+      text-decoration: none;
+      isolation: isolate;
+    }
 
-        main:has(.gate:hover) + .agent-widget,
-        main:has(.gate:focus-visible) + .agent-widget,
-        .agent-widget:hover,
-        .agent-widget:focus-within {
-            opacity: 0.96;
-            transform: translateY(-4px);
-        }
+    .route:last-child {
+      border-bottom: 1px solid var(--line);
+    }
 
-        .agent-widget img {
-            position: absolute;
-            inset: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-            transition: opacity 180ms ease;
-        }
+    .route::before {
+      content: "";
+      position: absolute;
+      inset: 8px -18px;
+      z-index: -1;
+      background:
+        radial-gradient(circle at 18% 50%, color-mix(in srgb, var(--tone) 20%, transparent), transparent 34%),
+        rgba(242, 240, 235, 0.018);
+      opacity: 0;
+      transform: scaleX(0.96);
+      transition: opacity 220ms ease, transform 220ms ease;
+    }
 
-        .agent-widget .wave {
-            opacity: 0;
-        }
+    .route:hover::before,
+    .route:focus-visible::before {
+      opacity: 1;
+      transform: scaleX(1);
+    }
 
-        .agent-widget .run-left,
-        .agent-widget .run-right {
-            opacity: 0;
-        }
+    .route:hover .route-title,
+    .route:focus-visible .route-title {
+      color: var(--paper);
+      transform: translateX(4px);
+    }
 
-        body.door-open .agent-widget .idle,
-        .agent-widget.is-waving .idle,
-        main:has(.gate:hover) + .agent-widget .idle,
-        main:has(.gate:focus-visible) + .agent-widget .idle,
-        .agent-widget:hover .idle,
-        .agent-widget:focus-within .idle {
-            opacity: 0;
-        }
+    .route:hover .route-arrow,
+    .route:focus-visible .route-arrow {
+      color: var(--tone);
+      transform: translateX(3px);
+    }
 
-        body.door-open .agent-widget .wave,
-        .agent-widget.is-waving .wave,
-        main:has(.gate:hover) + .agent-widget .wave,
-        main:has(.gate:focus-visible) + .agent-widget .wave,
-        .agent-widget:hover .wave,
-        .agent-widget:focus-within .wave {
-            opacity: 1;
-        }
+    .route-index {
+      color: var(--tone);
+      font-size: 12px;
+      letter-spacing: 0.14em;
+    }
 
-        .agent-widget.agent-patrol-left {
-            animation: patrol-left 8.2s linear both;
-        }
+    .route-title {
+      display: block;
+      margin: 0;
+      font-size: clamp(24px, 4vw, 42px);
+      font-weight: 400;
+      line-height: 1;
+      transition: color 220ms ease, transform 220ms ease;
+    }
 
-        .agent-widget.agent-patrol-right {
-            animation: patrol-right 8.2s linear both;
-        }
+    .route-note {
+      display: block;
+      margin-top: 8px;
+      color: var(--dim);
+      font-size: 12px;
+      letter-spacing: 0.04em;
+      line-height: 1.5;
+    }
 
-        .agent-widget.agent-patrol-left .idle,
-        .agent-widget.agent-patrol-right .idle,
-        .agent-widget.agent-patrol-left .wave,
-        .agent-widget.agent-patrol-right .wave {
-            opacity: 0;
-        }
+    .route-arrow {
+      color: rgba(242, 240, 235, 0.42);
+      font-size: 22px;
+      transition: color 220ms ease, transform 220ms ease;
+    }
 
-        .agent-widget.agent-patrol-left .run-left,
-        .agent-widget.agent-patrol-right .run-right {
-            opacity: 1;
-        }
+    .fragments { --tone: var(--blood); }
+    .study { --tone: var(--gold); }
+    .sanctum { --tone: var(--blue); }
+    .atlas { --tone: #6d5f83; }
+    .stage { --tone: #8c2631; }
+    .cell { --tone: #5c755f; }
 
-        @keyframes patrol-left {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(calc(-100vw + 132px)); }
-        }
+    @media (max-width: 820px) {
+      main {
+        grid-template-columns: 1fr;
+        align-items: start;
+        padding: 28px 22px 34px;
+      }
 
-        @keyframes patrol-right {
-            0% { transform: translateX(calc(-100vw + 132px)); }
-            100% { transform: translateX(0); }
-        }
+      .identity {
+        min-height: 290px;
+      }
 
-        .hidden-door {
-            position: fixed;
-            left: 50%;
-            bottom: 24px;
-            transform: translate(-50%, 8px);
-            color: var(--dim);
-            font-size: 12px;
-            letter-spacing: 0.08em;
-            text-decoration: none;
-            text-transform: uppercase;
-            border-bottom: 1px solid rgba(91, 20, 23, 0.72);
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 260ms ease, transform 260ms ease, color 220ms ease;
-        }
+      .agent-widget {
+        right: 0;
+        bottom: 18px;
+        width: 64px;
+        height: 70px;
+      }
 
-        body.door-open .hidden-door {
-            opacity: 0.86;
-            pointer-events: auto;
-            transform: translate(-50%, 0);
-        }
-
-        .hidden-door:hover,
-        .hidden-door:focus-visible {
-            color: var(--white);
-        }
-
-        @media (max-width: 600px) {
-            main {
-                padding: 24px;
-            }
-
-            .mark {
-                margin-bottom: 36px;
-                font-size: 24px;
-            }
-
-            .agent-widget {
-                right: 16px;
-                bottom: 14px;
-                width: 64px;
-                height: 70px;
-            }
-        }
-    </style>
+      .route {
+        grid-template-columns: 38px minmax(0, 1fr) auto;
+        min-height: 76px;
+      }
+    }
+  </style>
 </head>
 
 <body>
-<main>
-    <div class="room">
-        <p class="mark" aria-label="Hidden mark">&dagger;</p>
-        <a class="gate" href="/blog/">
-            Fragments
-            <span class="hint">Short writings, kept quiet.</span>
-        </a>
-        <br>
-        <a class="study-gate" href="/study/">
-            Study
-            <span class="hint">Locked notes for law, Japanese, and economics.</span>
-        </a>
-        <br>
-        <a class="sanctum-gate" href="/sanctum/">
-            Sanctum
-            <span class="hint">A visual set for the world behind the rooms.</span>
-        </a>
-    </div>
-</main>
-<figure class="agent-widget" aria-label="Nun Agent">
-    <img class="idle" src="/assets/nun-agent/nun-agent-idle.gif" alt="Nun Agent">
-    <img class="wave" src="/assets/nun-agent/nun-agent-waving.gif" alt="">
-    <img class="run-left" src="/assets/nun-agent/nun-agent-running-left.gif" alt="">
-    <img class="run-right" src="/assets/nun-agent/nun-agent-running-right.gif" alt="">
-</figure>
-<a class="hidden-door" href="/hidden/">Room</a>
-<script src="/assets/site-interactions.js"></script>
+  <main>
+    <section class="identity" aria-label="Ame1via">
+      <p class="sigil" aria-hidden="true">&dagger;</p>
+      <h1>Ame1via</h1>
+      <p class="subtitle">A small index of fragments, study rooms, stage machinery, and the visual archive behind them.</p>
+      <figure class="agent-widget" aria-label="Nun Agent">
+        <img class="idle" src="/assets/nun-agent/nun-agent-idle.gif" alt="Nun Agent">
+        <img class="wave" src="/assets/nun-agent/nun-agent-waving.gif" alt="">
+      </figure>
+    </section>
+
+    <nav class="nav-panel" aria-label="Primary rooms">
+      <p class="panel-label">rooms</p>
+      <a class="route fragments" href="/blog/">
+        <span class="route-index">01</span>
+        <span>
+          <span class="route-title">Fragments</span>
+          <span class="route-note">short writings, ordered by trace</span>
+        </span>
+        <span class="route-arrow" aria-hidden="true">/</span>
+      </a>
+      <a class="route study" href="/study/">
+        <span class="route-index">02</span>
+        <span>
+          <span class="route-title">Study</span>
+          <span class="route-note">law, Japanese, economics, repetition</span>
+        </span>
+        <span class="route-arrow" aria-hidden="true">/</span>
+      </a>
+      <a class="route sanctum" href="/sanctum/">
+        <span class="route-index">03</span>
+        <span>
+          <span class="route-title">Sanctum</span>
+          <span class="route-note">sets, figures, and the room behind the room</span>
+        </span>
+        <span class="route-arrow" aria-hidden="true">/</span>
+      </a>
+      <a class="route atlas" href="/atlas/">
+        <span class="route-index">04</span>
+        <span>
+          <span class="route-title">Atlas</span>
+          <span class="route-note">a map of recurring terms and states</span>
+        </span>
+        <span class="route-arrow" aria-hidden="true">/</span>
+      </a>
+      <a class="route stage" href="/hidden/">
+        <span class="route-index">05</span>
+        <span>
+          <span class="route-title">Stage</span>
+          <span class="route-note">the threshold text, no longer hidden</span>
+        </span>
+        <span class="route-arrow" aria-hidden="true">/</span>
+      </a>
+      <a class="route cell" href="/room/nun-agent/">
+        <span class="route-index">06</span>
+        <span>
+          <span class="route-title">Cell</span>
+          <span class="route-note">Nun Agent and the small interior machine</span>
+        </span>
+        <span class="route-arrow" aria-hidden="true">/</span>
+      </a>
+    </nav>
+  </main>
 </body>
 </html>
