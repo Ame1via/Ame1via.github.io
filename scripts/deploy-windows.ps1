@@ -33,6 +33,11 @@ function Ensure-Command {
 
   Write-Host "Installing $WingetId ..."
   winget install --id $WingetId --exact --accept-package-agreements --accept-source-agreements
+  Refresh-Path
+
+  if (-not (Get-Command $Command -ErrorAction SilentlyContinue)) {
+    throw "$WingetId was installed, but $Command is still not available. Restart PowerShell and run this script again."
+  }
 }
 
 function Refresh-Path {
@@ -46,7 +51,7 @@ New-Item -ItemType Directory -Force -Path $SiteRoot | Out-Null
 
 if (-not $SkipInstall) {
   Ensure-Command -Command "git" -WingetId "Git.Git"
-  Ensure-Command -Command "ruby" -WingetId "RubyInstallerTeam.RubyWithDevKit"
+  Ensure-Command -Command "ruby" -WingetId "RubyInstallerTeam.RubyWithDevKit.3.3"
   Ensure-Command -Command "caddy" -WingetId "CaddyServer.Caddy"
   if (-not $SkipVpn) {
     Ensure-Command -Command "tailscale" -WingetId "Tailscale.Tailscale"
